@@ -1,18 +1,14 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PatrocinantesModule } from './patrocinantes/patrocinantes.module';
 import { ConfigModule } from '@nestjs/config';
+import { PatrocinantesModule } from './modules/patrocinantes/patrocinantes.module';
+import { TipdocsModule } from './tipdocs/tipdocs.module';
 
 @Module({
-  imports: [
-    PatrocinantesModule,
-    ConfigModule.forRoot({
-      envFilePath: ['.local.env'],
-      isGlobal: true,
-    }),
-  ],
+  imports: [ConfigModule.forRoot({}), PatrocinantesModule, TipdocsModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+}
