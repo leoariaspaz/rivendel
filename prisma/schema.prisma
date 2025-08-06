@@ -19,6 +19,7 @@ model TipoDocumento {
   id Int @default(autoincrement()) @id
   sintetico String @unique
   descripcion String
+  partes Parte[]
 }
 
 model Patrocinante {
@@ -28,4 +29,20 @@ model Patrocinante {
   domicilio String?
   localidad String?
   nroCasillero Int?
+  partes Parte[]
+}
+
+model Parte {
+  id Int @id @default(autoincrement())
+  nombre String
+  idTipoDocumento Int
+  tipoDocumento TipoDocumento @relation(fields: [idTipoDocumento], references: [id])
+  nroDocumento String
+  cuil String
+  idPatrocinante Int
+  patrocinante Patrocinante @relation(fields: [idPatrocinante], references: [id])
+  nroWhatsapp String?
+  localidad String?
+
+  @@unique([idTipoDocumento, nroDocumento])
 }
