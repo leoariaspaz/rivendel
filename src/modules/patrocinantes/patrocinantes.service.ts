@@ -1,36 +1,54 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
-import { Patrocinante } from './entities/patrocinante.entity';
+import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class PatrocinantesService {
-  private patrocinantes: Patrocinante[] = [];
+  constructor(private prisma: PrismaService) {}
 
   create(createPatrocinanteDto: CreatePatrocinanteDto) {
-    const patrocinante = new Patrocinante(
-      createPatrocinanteDto.nombre,
-      createPatrocinanteDto.nroMatricula,
-      createPatrocinanteDto.domicilio,
-      createPatrocinanteDto.localidad,
-      createPatrocinanteDto.nroCasillero,
-    );
-    console.log('Creating patrocinante:', patrocinante);
+    return this.prisma.patrocinante.create({
+      data: {
+        nombre: createPatrocinanteDto.nombre,
+        nroMatricula: createPatrocinanteDto.nroMatricula,
+        domicilio: createPatrocinanteDto.domicilio,
+        localidad: createPatrocinanteDto.localidad,
+        nroCasillero: createPatrocinanteDto.nroCasillero,
+      },
+    });
   }
 
   findAll() {
-    return this.patrocinantes;
+    return this.prisma.patrocinante.findMany({
+      orderBy: {
+        nroMatricula: 'asc',
+      },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} patrocinante`;
+    return this.prisma.patrocinante.findUnique({
+      where: { id },
+    });
   }
 
   update(id: number, updatePatrocinanteDto: UpdatePatrocinanteDto) {
-    return `This action updates a #${id} patrocinante ${updatePatrocinanteDto.nombre}`;
+    return this.prisma.patrocinante.update({
+      where: { id },
+      data: {
+        nombre: updatePatrocinanteDto.nombre,
+        nroMatricula: updatePatrocinanteDto.nroMatricula,
+        domicilio: updatePatrocinanteDto.domicilio,
+        localidad: updatePatrocinanteDto.localidad,
+        nroCasillero: updatePatrocinanteDto.nroCasillero,
+      },
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} patrocinante`;
+    return this.prisma.patrocinante.delete({
+      where: { id },
+    });
   }
 }

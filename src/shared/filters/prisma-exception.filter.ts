@@ -27,13 +27,13 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       case 'P2000':
         return 'El valor proporcionado es demasiado largo para la columna de la base de datos.';
       case 'P2002':
-        return 'Falló una restricción de unicidad. El dato ya existe.';
+        return 'Ya existe un registro con los valores únicos proporcionados.';
       case 'P2003':
         return 'Falló una restricción de clave foránea. Los datos relacionados no existen.';
       case 'P2004':
         return 'Falló una restricción de la base de datos.';
       case 'P2025':
-        return 'La operación falló porque depende de uno o más registros requeridos que no se encontraron.';
+        return 'El registro no existe.';
       default:
         return 'Ocurrió un error desconocido en la base de datos.';
     }
