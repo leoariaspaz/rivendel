@@ -1,0 +1,53 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table Reclamos {
+  Id integer [primary key]
+  Rubros text
+  IdResolucion integer [not null, ref: > Resoluciones.Id]
+  FechaHoraInicio datetime
+  HoraFin time
+  SegundaFecha datetime [null]
+  SegFechaHoraInicio datetime [null]
+  SegHoraFin time [null]
+}
+
+Table Partes {
+  Id integer [primary key]
+  Nombre varchar(100)
+  IdTipoDocumento integer [not null, ref: > TiposDocumentos.Id]
+  NroDocumento varchar(15)
+  CUIL varchar(11)
+  Domicilio varchar(255)
+  IdPatrocinante integer [not null, ref: > Patrocinantes.Id]
+  NroWhatsapp varchar(50)
+  Localidad varchar(255)
+}
+
+Table TiposDocumentos {
+  Id integer [primary key]
+  Descripcion varchar(100)
+  Sintetico varchar(5)
+}
+
+Table PartesReclamos {
+  Id integer [primary key]
+  IdReclamo integer [not null, ref: > Reclamos.Id]
+  IdParte integer [not null, ref: > Partes.Id]
+  Rol integer [note: "1: Reclamante, 2: Reclamado"]
+}
+
+Table Patrocinantes {
+  Id integer [primary key]
+  Nombre varchar(100)
+  NroMatricula integer
+  Domicilio varchar(100) [null]
+  Localidad varchar(100) [null]
+  NroCasillero integer [null]
+}
+
+Table Resoluciones {
+  Id integer [primary key]
+  Descripcion varchar(100) [not null]
+  Detalle text [not null]
+}
