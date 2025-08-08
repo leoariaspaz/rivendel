@@ -30,6 +30,21 @@ export class TipdocsService {
     });
   }
 
+  findAllPaginated(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    return this.prisma.tipoDocumento.findMany({
+      skip,
+      take: Number(limit),
+      orderBy: {
+        sintetico: 'asc',
+      },
+    });
+  }
+
+  getTotalCount() {
+    return this.prisma.tipoDocumento.count();
+  }
+
   update(id: number, updateTipdocDto: UpdateTipdocDto) {
     return this.prisma.tipoDocumento.update({
       where: { id },

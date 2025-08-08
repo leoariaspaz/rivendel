@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TipdocsService } from './tipdocs.service';
 import { CreateTipdocDto } from './dto/create-tipdoc.dto';
@@ -20,9 +21,19 @@ export class TipdocsController {
     return this.tipdocsService.create(createTipdocDto);
   }
 
-  @Get()
+  @Get('all')
   findAll() {
     return this.tipdocsService.findAll();
+  }
+
+  @Get()
+  async findAllPaginated(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    const totalRecords = await this.tipdocsService.getTotalCount();
+    const data = await this.tipdocsService.findAllPaginated(page, limit);
+    return { data, totalRecords };
   }
 
   @Get(':id')
