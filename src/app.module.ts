@@ -7,9 +7,13 @@ import { TipdocsModule } from './tipdocs/tipdocs.module';
 import { PartesModule } from './partes/partes.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({}), PatrocinantesModule, TipdocsModule, PartesModule],
+  imports: [
+    ConfigModule.forRoot({}),
+    PatrocinantesModule,
+    TipdocsModule,
+    PartesModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
-}
+export class AppModule {}
