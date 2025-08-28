@@ -17,8 +17,9 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     console.log('Prisma Exception Filter caught an error: ', exception);
 
     response.status(HttpStatus.BAD_REQUEST).json({
-      code: exception.code,
-      message: message,
+      message: [message],
+      error: 'Bad Request',
+      statusCode: HttpStatus.BAD_REQUEST,
     });
   }
 
