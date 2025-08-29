@@ -21,16 +21,14 @@ export class TipdocsController {
     return this.tipdocsService.create(createTipdocDto);
   }
 
-  @Get('all')
-  findAll() {
-    return this.tipdocsService.findAll();
-  }
-
   @Get()
-  async findAllPaginated(
+  async findAll(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
+    if (page === null || limit === null) {
+      return this.tipdocsService.findAll();
+    }
     const totalRecords = await this.tipdocsService.getTotalCount();
     const data = await this.tipdocsService.findAllPaginated(page, limit);
     return { data, totalRecords };
