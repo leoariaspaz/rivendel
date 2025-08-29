@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
@@ -21,8 +22,26 @@ export class PatrocinantesController {
   }
 
   @Get()
-  findAll() {
-    return this.patrocinantesService.findAll();
+  async findAll(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    if (page === null || limit === null) {
+      return this.patrocinantesService.findAll();
+    }
+    const totalRecords = await this.patrocinantesService.getTotalCount();
+    const data = await this.patrocinantesService.findAllPaginated(page, limit);
+    return { data, totalRecords };
+  }
+
+  @Get()
+  async findAllPaginated(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    const totalRecords = await this.patrocinantesService.getTotalCount();
+    const data = await this.patrocinantesService.findAllPaginated(page, limit);
+    return { data, totalRecords };
   }
 
   @Get(':id')

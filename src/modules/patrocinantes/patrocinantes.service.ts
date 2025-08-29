@@ -5,6 +5,20 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class PatrocinantesService {
+  findAllPaginated(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    return this.prisma.patrocinante.findMany({
+      skip,
+      take: Number(limit),
+      orderBy: {
+        nroMatricula: 'asc',
+      },
+    });
+  }
+
+  getTotalCount() {
+    return this.prisma.patrocinante.count();
+  }
   constructor(private prisma: PrismaService) {}
 
   create(createPatrocinanteDto: CreatePatrocinanteDto) {
