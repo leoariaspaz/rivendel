@@ -52,10 +52,10 @@ export class PatrocinantesService {
       where: { id },
       data: {
         nombre: updatePatrocinanteDto.nombre,
-        nroMatricula: updatePatrocinanteDto.nroMatricula,
+        nroMatricula: Number(updatePatrocinanteDto.nroMatricula),
         domicilio: updatePatrocinanteDto.domicilio,
         localidad: updatePatrocinanteDto.localidad,
-        nroCasillero: updatePatrocinanteDto.nroCasillero,
+        nroCasillero: Number(updatePatrocinanteDto.nroCasillero),
       },
     });
   }
