@@ -25,10 +25,10 @@ export class PatrocinantesService {
     return this.prisma.patrocinante.create({
       data: {
         nombre: createPatrocinanteDto.nombre,
-        nroMatricula: createPatrocinanteDto.nroMatricula,
+        nroMatricula: Number(createPatrocinanteDto.nroMatricula),
         domicilio: createPatrocinanteDto.domicilio,
         localidad: createPatrocinanteDto.localidad,
-        nroCasillero: createPatrocinanteDto.nroCasillero,
+        nroCasillero: Number(createPatrocinanteDto.nroCasillero),
       },
     });
   }
