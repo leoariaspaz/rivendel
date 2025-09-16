@@ -5,20 +5,6 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class PatrocinantesService {
-  findAllPaginated(page: number, limit: number) {
-    const skip = (page - 1) * limit;
-    return this.prisma.patrocinante.findMany({
-      skip,
-      take: Number(limit),
-      orderBy: {
-        nroMatricula: 'asc',
-      },
-    });
-  }
-
-  getTotalCount() {
-    return this.prisma.patrocinante.count();
-  }
   constructor(private prisma: PrismaService) {}
 
   create(createPatrocinanteDto: CreatePatrocinanteDto) {
@@ -35,6 +21,17 @@ export class PatrocinantesService {
 
   findAll() {
     return this.prisma.patrocinante.findMany({
+      orderBy: {
+        nroMatricula: 'asc',
+      },
+    });
+  }
+
+  findAllPaginated(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    return this.prisma.patrocinante.findMany({
+      skip,
+      take: Number(limit),
       orderBy: {
         nroMatricula: 'asc',
       },
@@ -63,6 +60,52 @@ export class PatrocinantesService {
   remove(id: number) {
     return this.prisma.patrocinante.delete({
       where: { id },
+    });
+  }
+
+  getTotalCount() {
+    return this.prisma.patrocinante.count();
+  }
+
+  search(term: string) {
+    return this.prisma.patrocinante.findMany({
+      where: {
+        OR: [
+          {
+            nombre: {
+              contains: term,
+            },
+          },
+          {
+            nroMatricula: {
+              equals: isNaN(Number(term)) ? undefined : Number(term),
+            },
+          },
+          {
+            domicilio: {
+              contains: term,
+            },
+          },
+          {
+            localidad: {
+              contains: term,
+            },
+          },
+          {
+            nroCasillero: {
+              equals: isNaN(Number(term)) ? undefined : Number(term),
+            },
+          },
+        ],
+      },
+      orderBy: [
+        {
+          nombre: 'asc',
+        },
+        {
+          nroMatricula: 'asc',
+        },
+      ],
     });
   }
 }

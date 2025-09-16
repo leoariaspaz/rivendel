@@ -23,8 +23,8 @@ export class PatrocinantesController {
 
   @Get()
   async findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('page') page: number | null = null,
+    @Query('limit') limit: number | null = null,
   ) {
     if (page === null || limit === null) {
       return this.patrocinantesService.findAll();
@@ -42,6 +42,11 @@ export class PatrocinantesController {
     const totalRecords = await this.patrocinantesService.getTotalCount();
     const data = await this.patrocinantesService.findAllPaginated(page, limit);
     return { data, totalRecords };
+  }
+
+  @Get('search')
+  search(@Query('term') term: string) {
+    return this.patrocinantesService.search(term);
   }
 
   @Get(':id')

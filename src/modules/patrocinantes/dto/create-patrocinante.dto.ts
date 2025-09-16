@@ -4,4 +4,5 @@ export class CreatePatrocinanteDto {
   domicilio: string;
   localidad: string;
   nroCasillero: number;
+  nroWhatsapp: string;
 }
