@@ -30,6 +30,7 @@ model Patrocinante {
   localidad String?
   nroCasillero Int?
   partes Parte[]
+  nroWhatsapp String?
 }
 
 model Parte {
@@ -39,10 +40,17 @@ model Parte {
   tipoDocumento TipoDocumento @relation(fields: [idTipoDocumento], references: [id])
   nroDocumento String
   cuil String
+  domicilio String?
+  localidad String?
   idPatrocinante Int
   patrocinante Patrocinante @relation(fields: [idPatrocinante], references: [id])
   nroWhatsapp String?
-  localidad String?
 
   @@unique([idTipoDocumento, nroDocumento])
+}
+
+model Resolucion {
+  id Int @id @default(autoincrement())
+  descripcion String
+  detalle String @db.LongText
 }

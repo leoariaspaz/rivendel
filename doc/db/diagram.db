@@ -44,6 +44,7 @@ Table Patrocinantes {
   Domicilio varchar(100) [null]
   Localidad varchar(100) [null]
   NroCasillero integer [null]
+  NroWhatsapp varchar(50)
 }
 
 Table Resoluciones {
