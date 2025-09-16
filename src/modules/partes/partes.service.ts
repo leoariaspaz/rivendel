@@ -2,38 +2,102 @@ import { Injectable } from '@nestjs/common';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { ParteDB } from './dto/parte-db.dto';
+import { FindParteDTO } from './dto/find-parte.dto';
 
 @Injectable()
 export class PartesService {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
-    console.log('Creating parte with data:', createParteDto);
     return this.prisma.parte.create({
       data: {
         nombre: createParteDto.nombre,
-        idTipoDocumento: createParteDto.idTipoDocumento,
+        idTipoDocumento: Number(createParteDto.idTipoDocumento),
         nroDocumento: createParteDto.nroDocumento,
         cuil: createParteDto.cuil,
-        idPatrocinante: createParteDto.idPatrocinante,
+        idPatrocinante: Number(createParteDto.idPatrocinante),
         nroWhatsapp: createParteDto.nroWhatsapp,
+        domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,
       },
     });
   }
 
-  findAll() {
-    return this.prisma.parte.findMany({
+  SELECT_FIELDS = {
+    id: true,
+    nroDocumento: true,
+    cuil: true,
+    nombre: true,
+    domicilio: true,
+    localidad: true,
+    nroWhatsapp: true,
+    idTipoDocumento: true,
+    tipoDocumento: {
+      select: { sintetico: true },
+    },
+    idPatrocinante: true,
+    patrocinante: {
+      select: {
+        nroMatricula: true,
+        nombre: true,
+      },
+    },
+  } as const;
+
+  async findAll() {
+    const data = await this.prisma.parte.findMany({
+      orderBy: { nombre: 'asc' },
+      select: this.SELECT_FIELDS,
+    });
+    return this.selectPartes(data);
+  }
+
+  mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
+    return {
+      id: p.id,
+      nroDocumento: p.nroDocumento,
+      cuil: p.cuil,
+      nombre: p.nombre,
+      domicilio: p.domicilio === null ? '' : p.domicilio,
+      localidad: p.localidad === null ? '' : p.localidad,
+      nroWhatsapp: p.nroWhatsapp === null ? '' : p.nroWhatsapp,
+      idTipoDocumento: p.idTipoDocumento,
+      tipoDocumento: p.tipoDocumento.sintetico,
+      patrocinante: {
+        id: p.idPatrocinante,
+        nombre: p.patrocinante.nombre,
+        nroMatricula: p.patrocinante.nroMatricula,
+      },
+    };
+  }
+
+  selectPartes(data: ParteDB[]): FindParteDTO[] {
+    return data.map((p) => this.mapParteDBToFindParteDTO(p));
+  }
+
+  async findAllPaginated(page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    const data = await this.prisma.parte.findMany({
+      skip,
+      take: Number(limit),
       orderBy: {
         nombre: 'asc',
       },
+      select: this.SELECT_FIELDS,
     });
+
+    return this.selectPartes(data);
   }
 
-  findOne(id: number) {
-    return this.prisma.parte.findUnique({
+  async findOne(id: number) {
+    const p = await this.prisma.parte.findUnique({
       where: { id },
+      select: this.SELECT_FIELDS,
     });
+
+    if (p) return this.mapParteDBToFindParteDTO(p);
+    return null;
   }
 
   update(id: number, updateParteDto: UpdateParteDto) {
@@ -41,11 +105,12 @@ export class PartesService {
       where: { id },
       data: {
         nombre: updateParteDto.nombre,
-        idTipoDocumento: updateParteDto.idTipoDocumento,
+        idTipoDocumento: Number(updateParteDto.idTipoDocumento),
         nroDocumento: updateParteDto.nroDocumento,
         cuil: updateParteDto.cuil,
-        idPatrocinante: updateParteDto.idPatrocinante,
+        idPatrocinante: Number(updateParteDto.idPatrocinante),
         nroWhatsapp: updateParteDto.nroWhatsapp,
+        domicilio: updateParteDto.domicilio,
         localidad: updateParteDto.localidad,
       },
     });
@@ -55,5 +120,9 @@ export class PartesService {
     return this.prisma.parte.delete({
       where: { id },
     });
+  }
+
+  getTotalCount() {
+    return this.prisma.parte.count();
   }
 }

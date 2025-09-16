@@ -3,7 +3,8 @@ export class CreateParteDto {
   idTipoDocumento: number;
   nroDocumento: string;
   cuil: string;
+  domicilio: string;
+  localidad: string;
   idPatrocinante: number;
   nroWhatsapp: string;
-  localidad: string;
 }

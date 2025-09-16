@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PartesService } from './partes.service';
 import { CreateParteDto } from './dto/create-parte.dto';
@@ -21,8 +22,16 @@ export class PartesController {
   }
 
   @Get()
-  findAll() {
-    return this.partesService.findAll();
+  async findAll(
+    @Query('page') page: number | null = null,
+    @Query('limit') limit: number | null = null,
+  ) {
+    if (page === null || limit === null) {
+      return await this.partesService.findAll();
+    }
+    const totalRecords = await this.partesService.getTotalCount();
+    const data = await this.partesService.findAllPaginated(page, limit);
+    return { data, totalRecords };
   }
 
   @Get(':id')
