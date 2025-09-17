@@ -53,4 +53,17 @@ model Resolucion {
   id Int @id @default(autoincrement())
   descripcion String
   detalle String @db.LongText
+  reclamos Reclamos[]
+}
+
+model Reclamos {
+  id Int @id @default(autoincrement())
+  rubros String
+  idResolucion Int
+  resolucion Resolucion @relation(fields: [idResolucion], references: [id])
+  fechaHoraInicio DateTime
+  horaFin DateTime
+  segundaFecha DateTime?
+  segFechaHoraInicio DateTime?
+  segHoraFin DateTime?
 }

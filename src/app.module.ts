@@ -6,6 +6,7 @@ import { PatrocinantesModule } from './modules/patrocinantes/patrocinantes.modul
 import { TipdocsModule } from './modules/tipdocs/tipdocs.module';
 import { PartesModule } from './modules/partes/partes.module';
 import { ResolucionesModule } from './resoluciones/resoluciones.module';
+import { ReclamosModule } from './reclamos/reclamos.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ResolucionesModule } from './resoluciones/resoluciones.module';
     TipdocsModule,
     PartesModule,
     ResolucionesModule,
+    ReclamosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
