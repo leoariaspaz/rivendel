@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { CreateResolucionDto as CreateResolucionDto } from './dto/create-resolucion.dto';
-import { UpdateResolucioneDto } from './dto/update-resolucion.dto';
+import { CreateResolucionDto } from './dto/create-resolucion.dto';
+import { UpdateResolucionDto } from './dto/update-resolucion.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 
 @Injectable()
 export class ResolucionesService {
   constructor(private prisma: PrismaService) {}
 
-  create(createResolucioneDto: CreateResolucionDto) {
+  create(createResolucionDto: CreateResolucionDto) {
     return this.prisma.resolucion.create({
       data: {
-        descripcion: createResolucioneDto.descripcion,
-        detalle: createResolucioneDto.detalle,
+        descripcion: createResolucionDto.descripcion,
+        detalle: createResolucionDto.detalle,
       },
     });
   }
@@ -44,12 +44,12 @@ export class ResolucionesService {
     });
   }
 
-  update(id: number, updateResolucioneDto: UpdateResolucioneDto) {
+  update(id: number, updateResolucionDto: UpdateResolucionDto) {
     return this.prisma.resolucion.update({
       where: { id },
       data: {
-        descripcion: updateResolucioneDto.descripcion,
-        detalle: updateResolucioneDto.detalle,
+        descripcion: updateResolucionDto.descripcion,
+        detalle: updateResolucionDto.detalle,
       },
     });
   }
