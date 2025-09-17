@@ -10,6 +10,7 @@ export class ReclamosService {
   create(createReclamoDto: CreateReclamoDto) {
     return this.prisma.reclamos.create({
       data: {
+        numero: createReclamoDto.numero,
         rubros: createReclamoDto.rubros,
         idResolucion: createReclamoDto.idResolucion,
         fechaHoraInicio: createReclamoDto.fechaHoraInicio,
@@ -53,6 +54,7 @@ export class ReclamosService {
     return this.prisma.reclamos.update({
       where: { id },
       data: {
+        numero: updateReclamoDto.numero,
         rubros: updateReclamoDto.rubros,
         idResolucion: updateReclamoDto.idResolucion,
         fechaHoraInicio: updateReclamoDto.fechaHoraInicio,

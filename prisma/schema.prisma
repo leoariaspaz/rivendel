@@ -58,6 +58,7 @@ model Resolucion {
 
 model Reclamos {
   id Int @id @default(autoincrement())
+  numero Int @unique
   rubros String
   idResolucion Int
   resolucion Resolucion @relation(fields: [idResolucion], references: [id])

@@ -3,6 +3,7 @@
 
 Table Reclamos {
   Id integer [primary key]
+  Numero integer
   Rubros text
   IdResolucion integer [not null, ref: > Resoluciones.Id]
   FechaHoraInicio datetime
