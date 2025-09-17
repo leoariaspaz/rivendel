@@ -10,15 +10,15 @@ import {
 } from '@nestjs/common';
 import { ResolucionesService } from './resoluciones.service';
 import { CreateResolucionDto } from './dto/create-resolucion.dto';
-import { UpdateResolucioneDto } from './dto/update-resolucion.dto';
+import { UpdateResolucionDto } from './dto/update-resolucion.dto';
 
 @Controller('resoluciones')
 export class ResolucionesController {
   constructor(private readonly resolucionesService: ResolucionesService) {}
 
   @Post()
-  create(@Body() createResolucioneDto: CreateResolucionDto) {
-    return this.resolucionesService.create(createResolucioneDto);
+  create(@Body() createResolucionDto: CreateResolucionDto) {
+    return this.resolucionesService.create(createResolucionDto);
   }
 
   @Get()
@@ -27,13 +27,10 @@ export class ResolucionesController {
     @Query('limit') limit: number | null = null,
   ) {
     if (page && limit) {
-      console.log('1 - buscando resoluciones con paginacion', { page, limit });
       const data = await this.resolucionesService.findAll({ page, limit });
       const totalRecords = await this.resolucionesService.getTotalCount();
-      console.log('2 - datos y totalRecords', { data, totalRecords });
       return { data, totalRecords };
     }
-    console.log('1 - buscando todas las resoluciones sin paginacion');
     return await this.resolucionesService.findAll();
   }
 
@@ -45,7 +42,7 @@ export class ResolucionesController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateResolucioneDto: UpdateResolucioneDto,
+    @Body() updateResolucioneDto: UpdateResolucionDto,
   ) {
     return this.resolucionesService.update(+id, updateResolucioneDto);
   }
