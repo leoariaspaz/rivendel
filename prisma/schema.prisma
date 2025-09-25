@@ -45,6 +45,7 @@ model Parte {
   idPatrocinante Int
   patrocinante Patrocinante @relation(fields: [idPatrocinante], references: [id])
   nroWhatsapp String?
+  reclamos PartesReclamos[]
 
   @@unique([idTipoDocumento, nroDocumento])
 }
@@ -67,4 +68,15 @@ model Reclamos {
   segundaFecha DateTime?
   segFechaHoraInicio DateTime?
   segHoraFin DateTime?
+  partes PartesReclamos[]
+}
+
+model PartesReclamos {
+  id Int @id @default(autoincrement())
+  idParte Int
+  parte Parte @relation(fields: [idParte], references: [id])
+  idReclamo Int
+  reclamo Reclamos @relation(fields: [idReclamo], references: [id])
+
+  @@unique([idParte, idReclamo])
 }
