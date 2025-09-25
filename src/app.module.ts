@@ -7,6 +7,7 @@ import { TipdocsModule } from './modules/tipdocs/tipdocs.module';
 import { PartesModule } from './modules/partes/partes.module';
 import { ResolucionesModule } from './resoluciones/resoluciones.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
+import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ReclamosModule } from './reclamos/reclamos.module';
     PartesModule,
     ResolucionesModule,
     ReclamosModule,
+    PartesReclamosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
