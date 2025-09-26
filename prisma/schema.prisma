@@ -77,6 +77,7 @@ model PartesReclamos {
   parte Parte @relation(fields: [idParte], references: [id])
   idReclamo Int
   reclamo Reclamos @relation(fields: [idReclamo], references: [id])
+  rol Int // 1=reclamante, 2=reclamado
 
   @@unique([idParte, idReclamo])
 }
