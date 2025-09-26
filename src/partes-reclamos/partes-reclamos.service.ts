@@ -8,12 +8,12 @@ export class PartesReclamosService {
   constructor(private prisma: PrismaService) {}
 
   create(createPartesReclamoDto: CreatePartesReclamoDto) {
-    return this.prisma.partesReclamos.create({
-      data: {
-        idParte: Number(createPartesReclamoDto.idParte),
-        idReclamo: Number(createPartesReclamoDto.idReclamo),
-      },
-    });
+    // return this.prisma.partesReclamos.create({
+    //   data: {
+    //     idParte: Number(createPartesReclamoDto.idParte),
+    //     idReclamo: Number(createPartesReclamoDto.idReclamo),
+    //   },
+    // });
   }
 
   findAll() {

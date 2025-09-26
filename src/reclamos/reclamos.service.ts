@@ -2,12 +2,36 @@ import { Injectable } from '@nestjs/common';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 
 @Injectable()
 export class ReclamosService {
   constructor(private prisma: PrismaService) {}
 
   create(createReclamoDto: CreateReclamoDto) {
+    const partes = Array<{ idParte: number; rol: number }>();
+
+    if (
+      createReclamoDto.reclamantes &&
+      createReclamoDto.reclamantes.length > 0
+    ) {
+      createReclamoDto.reclamantes.forEach((idParte) =>
+        partes.push({
+          idParte: idParte,
+          rol: RECLAMANTE,
+        }),
+      );
+    }
+
+    if (createReclamoDto.reclamados && createReclamoDto.reclamados.length > 0) {
+      createReclamoDto.reclamados.forEach((idParte) =>
+        partes.push({
+          idParte: idParte,
+          rol: RECLAMADO,
+        }),
+      );
+    }
+
     return this.prisma.reclamos.create({
       data: {
         numero: createReclamoDto.numero,
@@ -18,6 +42,9 @@ export class ReclamosService {
         segundaFecha: createReclamoDto.segundaFecha,
         segFechaHoraInicio: createReclamoDto.segFechaHoraInicio,
         segHoraFin: createReclamoDto.segHoraFin,
+        partes: {
+          create: partes,
+        },
       },
     });
   }
