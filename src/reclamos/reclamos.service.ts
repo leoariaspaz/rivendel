@@ -3,6 +3,7 @@ import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
+import { PartesReclamos } from '@prisma/client';
 
 @Injectable()
 export class ReclamosService {
@@ -58,11 +59,17 @@ export class ReclamosService {
         orderBy: {
           fechaHoraInicio: 'asc',
         },
+        include: { 
+          partes: true 
+        },
       });
     }
     return this.prisma.reclamos.findMany({
       orderBy: {
         fechaHoraInicio: 'asc',
+      },
+      include: { 
+        partes: true 
       },
     });
   }
@@ -77,7 +84,52 @@ export class ReclamosService {
     return this.prisma.reclamos.count();
   }
 
-  update(id: number, updateReclamoDto: UpdateReclamoDto) {
+  async update(id: number, updateReclamoDto: UpdateReclamoDto) {
+    const reclamo = await this.prisma.reclamos.findUnique({
+      where: { id: id },
+      include: {
+        partes: true,
+      },
+    });
+
+    if (!reclamo) {
+      throw new Error(`Reclamo con ID ${id} no encontrado.`);
+    }
+
+    const partes = Array<{ idParte: number; rol: number }>();
+    if (
+      updateReclamoDto.reclamantes &&
+      updateReclamoDto.reclamantes.length > 0
+    ) {
+      updateReclamoDto.reclamantes.forEach((idParte) =>
+        partes.push({
+          idParte: idParte,
+          rol: RECLAMANTE,
+        }),
+      );
+    }
+
+    if (updateReclamoDto.reclamados && updateReclamoDto.reclamados.length > 0) {
+      updateReclamoDto.reclamados.forEach((idParte) =>
+        partes.push({
+          idParte: idParte,
+          rol: RECLAMADO,
+        }),
+      );
+    }
+
+    const partesToDelete = reclamo.partes
+      .map((parte) => {
+        if (
+          !partes.find(
+            (p) => p.idParte === parte.idParte && p.rol === parte.rol,
+          )
+        ) {
+          return parte;
+        }
+      })
+      .filter((parte) => parte !== undefined);
+
     return this.prisma.reclamos.update({
       where: { id },
       data: {
@@ -89,6 +141,13 @@ export class ReclamosService {
         segundaFecha: updateReclamoDto.segundaFecha,
         segFechaHoraInicio: updateReclamoDto.segFechaHoraInicio,
         segHoraFin: updateReclamoDto.segHoraFin,
+        partes: {
+          deleteMany: partesToDelete,
+          create: partes,
+        },
+      },
+      include: {
+        partes: true,
       },
     });
   }
