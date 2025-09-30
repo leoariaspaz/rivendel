@@ -64,7 +64,7 @@ model Reclamos {
   idResolucion Int
   resolucion Resolucion @relation(fields: [idResolucion], references: [id])
   fechaHoraInicio DateTime
-  horaFin DateTime
+  horaFin DateTime?
   segundaFecha DateTime?
   segFechaHoraInicio DateTime?
   segHoraFin DateTime?
