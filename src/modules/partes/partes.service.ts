@@ -10,13 +10,14 @@ export class PartesService {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
+    const idPatrocinante = createParteDto.idPatrocinante? Number(createParteDto.idPatrocinante) : null;
     return this.prisma.parte.create({
       data: {
         nombre: createParteDto.nombre,
         idTipoDocumento: Number(createParteDto.idTipoDocumento),
         nroDocumento: createParteDto.nroDocumento,
-        cuil: createParteDto.cuil,
-        idPatrocinante: Number(createParteDto.idPatrocinante),
+        cuil: String(createParteDto.cuil),
+        idPatrocinante: idPatrocinante,
         nroWhatsapp: createParteDto.nroWhatsapp,
         domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,
