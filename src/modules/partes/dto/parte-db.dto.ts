@@ -10,9 +10,9 @@ export interface ParteDB {
   tipoDocumento: {
     sintetico: string;
   };
-  idPatrocinante: number;
+  idPatrocinante: number | null;
   patrocinante: {
     nroMatricula: number;
     nombre: string;
-  };
+  } | null;
 }

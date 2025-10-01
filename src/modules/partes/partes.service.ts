@@ -55,7 +55,7 @@ export class PartesService {
   }
 
   mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
-    return {
+    const result = {
       id: p.id,
       nroDocumento: p.nroDocumento,
       cuil: p.cuil,
@@ -65,12 +65,17 @@ export class PartesService {
       nroWhatsapp: p.nroWhatsapp === null ? '' : p.nroWhatsapp,
       idTipoDocumento: p.idTipoDocumento,
       tipoDocumento: p.tipoDocumento.sintetico,
-      patrocinante: {
-        id: p.idPatrocinante,
+    } as FindParteDTO;
+    
+    if (p.patrocinante) {
+      result.patrocinante = {
+        id: p.idPatrocinante || 0,
         nombre: p.patrocinante.nombre,
         nroMatricula: p.patrocinante.nroMatricula,
-      },
-    };
+      }
+    }
+
+    return result;
   }
 
   selectPartes(data: ParteDB[]): FindParteDTO[] {

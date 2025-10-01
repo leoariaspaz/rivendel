@@ -42,8 +42,8 @@ model Parte {
   cuil String
   domicilio String?
   localidad String?
-  idPatrocinante Int
-  patrocinante Patrocinante @relation(fields: [idPatrocinante], references: [id])
+  idPatrocinante Int?
+  patrocinante Patrocinante? @relation(fields: [idPatrocinante], references: [id])
   nroWhatsapp String?
   reclamos PartesReclamos[]
 
