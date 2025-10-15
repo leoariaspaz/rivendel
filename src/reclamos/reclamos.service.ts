@@ -77,6 +77,30 @@ export class ReclamosService {
   findOne(id: number) {
     return this.prisma.reclamos.findUnique({
       where: { id },
+      select: {
+        id: true,
+        numero: true,
+        rubros: true,
+        idResolucion: true,
+        fechaHoraInicio: true,
+        horaFin: true,
+        segundaFecha: true,
+        segFechaHoraInicio: true,
+        segHoraFin: true,
+        partes: {
+          select: {
+            idParte: true,
+            rol: true,
+            parte: {
+              select: {
+                id: true,
+                nombre: true,
+                cuil: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -103,7 +127,7 @@ export class ReclamosService {
     ) {
       updateReclamoDto.reclamantes.forEach((idParte) =>
         partes.push({
-          idParte: idParte,
+          idParte: Number(idParte),
           rol: RECLAMANTE,
         }),
       );
@@ -112,7 +136,7 @@ export class ReclamosService {
     if (updateReclamoDto.reclamados && updateReclamoDto.reclamados.length > 0) {
       updateReclamoDto.reclamados.forEach((idParte) =>
         partes.push({
-          idParte: idParte,
+          idParte: Number(idParte),
           rol: RECLAMADO,
         }),
       );
