@@ -11,6 +11,7 @@ import {
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
+import { RECLAMANTE } from 'src/shared/utils/constants';
 
 @Controller('reclamos')
 export class ReclamosController {
@@ -35,8 +36,17 @@ export class ReclamosController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.reclamosService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const reclamo = await this.reclamosService.findOne(+id);
+    const result = {
+      id: reclamo?.id,
+      numero: reclamo?.numero,
+      rubros: reclamo?.rubros,
+      reclamantes: reclamo?.partes
+        .filter((p) => p.rol === RECLAMANTE)
+        .map((p) => p.parte),
+    }
+    return result;
   }
 
   @Patch(':id')
