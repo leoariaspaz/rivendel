@@ -34,6 +34,17 @@ export class PartesController {
     return { data, totalRecords };
   }
 
+  @Get('search')
+  async search(
+    @Query('q') term: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    const totalRecords = await this.partesService.getFilteredTotalCount(term);
+    const data = await this.partesService.search(term, page, limit);    
+    return { data, totalRecords };
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.partesService.findOne(+id);

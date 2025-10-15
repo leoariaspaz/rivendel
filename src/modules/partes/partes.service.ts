@@ -10,7 +10,9 @@ export class PartesService {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
-    const idPatrocinante = createParteDto.idPatrocinante? Number(createParteDto.idPatrocinante) : null;
+    const idPatrocinante = createParteDto.idPatrocinante
+      ? Number(createParteDto.idPatrocinante)
+      : null;
     return this.prisma.parte.create({
       data: {
         nombre: createParteDto.nombre,
@@ -66,13 +68,13 @@ export class PartesService {
       idTipoDocumento: p.idTipoDocumento,
       tipoDocumento: p.tipoDocumento.sintetico,
     } as FindParteDTO;
-    
+
     if (p.patrocinante) {
       result.patrocinante = {
         id: p.idPatrocinante || 0,
         nombre: p.patrocinante.nombre,
         nroMatricula: p.patrocinante.nroMatricula,
-      }
+      };
     }
 
     return result;
@@ -130,5 +132,54 @@ export class PartesService {
 
   getTotalCount() {
     return this.prisma.parte.count();
+  }
+
+  getFilteredTotalCount(term: string) {
+    if (term) {
+      return this.prisma.parte.count({
+        where: {
+          OR: [
+            {
+              nombre: {
+                contains: term,
+              },
+            },
+            {
+              cuil: {
+                contains: term,
+              },
+            },
+          ],
+        },
+      });
+    }
+  }
+
+  search(term: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
+    return this.prisma.parte
+      .findMany({
+        where: {
+          OR: [
+            {
+              nombre: {
+                contains: term,
+              },
+            },
+            {
+              cuil: {
+                contains: term,
+              },
+            },
+          ],
+        },
+        orderBy: {
+          nombre: 'asc',
+        },
+        select: this.SELECT_FIELDS,
+        skip,
+        take: Number(limit),
+      })
+      .then((data) => this.selectPartes(data));
   }
 }
