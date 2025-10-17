@@ -14,6 +14,7 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
   @IsInt({ message: 'El número debe ser un valor entero.' })
   @Min(1, { message: 'El número debe ser un valor positivo.' })
+  @Type(() => Number)
   numero: number;
 
   rubros: string;

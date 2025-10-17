@@ -3,7 +3,7 @@ import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
-import { PartesReclamos } from '@prisma/client';
+import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 
 @Injectable()
 export class ReclamosService {
@@ -111,6 +111,8 @@ export class ReclamosService {
   }
 
   async update(id: number, updateReclamoDto: UpdateReclamoDto) {
+    console.log('UpdateReclamoDto:', updateReclamoDto, updateReclamoDto.numero);
+
     const reclamo = await this.prisma.reclamos.findUnique({
       where: { id: id },
       include: {

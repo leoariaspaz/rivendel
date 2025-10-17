@@ -11,7 +11,7 @@ import {
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
-import { RECLAMANTE } from 'src/shared/utils/constants';
+import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 
 @Controller('reclamos')
 export class ReclamosController {
@@ -44,6 +44,9 @@ export class ReclamosController {
       rubros: reclamo?.rubros,
       reclamantes: reclamo?.partes
         .filter((p) => p.rol === RECLAMANTE)
+        .map((p) => p.parte),
+      reclamados: reclamo?.partes
+        .filter((p) => p.rol === RECLAMADO)
         .map((p) => p.parte),
     }
     return result;

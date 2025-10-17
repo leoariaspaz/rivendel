@@ -1,4 +1,4 @@
-interface PartesReclamoDTO {
+export interface PartesReclamoDTO {
   idParte: number;
   rol: number;
 }
