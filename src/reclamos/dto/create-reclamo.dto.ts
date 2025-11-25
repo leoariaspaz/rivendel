@@ -6,7 +6,10 @@ import {
   IsOptional,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { 
+  Type,
+  Transform
+} from 'class-transformer';
 
 export class CreateReclamoDto {
   id: number;
@@ -27,20 +30,9 @@ export class CreateReclamoDto {
   fechaHoraInicio: Date;
 
   @IsOptional()
-  @IsDate({ message: 'La hora de fin no es válida.' })
+  @Type(() => Date)
+  @IsNotEmpty({ message: 'La hora de fin no es válida.' })
   horaFin?: Date;
-
-  @IsOptional()
-  @IsDate({ message: 'La segunda fecha no es válida.' })
-  segundaFecha?: Date;
-
-  @IsOptional()
-  @IsDate({ message: 'La segunda fecha y hora de inicio no es válida.' })
-  segFechaHoraInicio?: Date;
-
-  @IsOptional()
-  @IsDate({ message: 'La segunda hora de fin no es válida.' })
-  segHoraFin?: Date;
 
   @ArrayUnique((o) => Number(o), {
     message: 'No se pueden repetir reclamantes en un mismo reclamo.',

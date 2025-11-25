@@ -42,6 +42,9 @@ export class ReclamosController {
       id: reclamo?.id,
       numero: reclamo?.numero,
       rubros: reclamo?.rubros,
+      idResolucion: reclamo?.idResolucion,
+      fechaHoraInicio: reclamo?.fechaHoraInicio,
+      horaFin: reclamo?.horaFin,
       reclamantes: reclamo?.partes
         .filter((p) => p.rol === RECLAMANTE)
         .map((p) => p.parte),

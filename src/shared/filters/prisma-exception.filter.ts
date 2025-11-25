@@ -26,7 +26,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   mapPrismaErrorToMessage(error: PrismaClientKnownRequestError): string {
     switch (error.code) {
       case 'P2000':
-        return 'El valor proporcionado es demasiado largo para la columna de la base de datos.';
+        return `La columna ${error.meta?.column_name} de datos es demasiado larga para el valor proporcionado.`;
       case 'P2002':
         return 'Ya existe un registro con los valores únicos proporcionados.';
       case 'P2003':

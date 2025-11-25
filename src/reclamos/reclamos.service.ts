@@ -40,9 +40,6 @@ export class ReclamosService {
         idResolucion: createReclamoDto.idResolucion,
         fechaHoraInicio: createReclamoDto.fechaHoraInicio,
         horaFin: createReclamoDto.horaFin,
-        segundaFecha: createReclamoDto.segundaFecha,
-        segFechaHoraInicio: createReclamoDto.segFechaHoraInicio,
-        segHoraFin: createReclamoDto.segHoraFin,
         partes: {
           create: partes,
         },
@@ -60,8 +57,30 @@ export class ReclamosService {
           { numero: 'asc' },
           { fechaHoraInicio: 'asc' },
         ],
-        include: { 
-          partes: true 
+        select: {
+          id: true,
+          numero: true,
+          rubros: true,
+          resolucion: {
+            select: {
+              id: true,
+              descripcion: true,
+            },
+          },
+          fechaHoraInicio: true,
+          horaFin: true,
+          partes: {
+            select: {
+              rol: true,
+              parte: {
+                select: {
+                  id: true,
+                  nombre: true,
+                  cuil: true,
+                },
+              },
+            },
+          },
         },
       });
     }
@@ -70,8 +89,34 @@ export class ReclamosService {
         { numero: 'asc' },
         { fechaHoraInicio: 'asc' },
       ],
-      include: { 
-        partes: true 
+      // include: { 
+      //   resolucion: true,
+      //   partes: true 
+      // },
+      select: {
+        id: true,
+        numero: true,
+        rubros: true,
+        resolucion: {
+          select: {
+            id: true,
+            descripcion: true,
+          },
+        },
+        fechaHoraInicio: true,
+        horaFin: true,
+        partes: {
+          select: {
+            rol: true,
+            parte: {
+              select: {
+                id: true,
+                nombre: true,
+                cuil: true,
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -86,9 +131,6 @@ export class ReclamosService {
         idResolucion: true,
         fechaHoraInicio: true,
         horaFin: true,
-        segundaFecha: true,
-        segFechaHoraInicio: true,
-        segHoraFin: true,
         partes: {
           select: {
             idParte: true,
@@ -111,7 +153,7 @@ export class ReclamosService {
   }
 
   async update(id: number, updateReclamoDto: UpdateReclamoDto) {
-    console.log('UpdateReclamoDto:', updateReclamoDto, updateReclamoDto.numero);
+    console.log('UpdateReclamoDto:', id, updateReclamoDto, updateReclamoDto.numero);
 
     const reclamo = await this.prisma.reclamos.findUnique({
       where: { id: id },
@@ -174,9 +216,6 @@ export class ReclamosService {
         idResolucion: updateReclamoDto.idResolucion,
         fechaHoraInicio: updateReclamoDto.fechaHoraInicio,
         horaFin: updateReclamoDto.horaFin,
-        segundaFecha: updateReclamoDto.segundaFecha,
-        segFechaHoraInicio: updateReclamoDto.segFechaHoraInicio,
-        segHoraFin: updateReclamoDto.segHoraFin,
         partes: {
           deleteMany: partesToDelete,
           create: partesToCreate,
