@@ -1,11 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -14,70 +8,71 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model TipoDocumento {
-  id Int @default(autoincrement()) @id
-  sintetico String @unique
+  id          Int     @id @default(autoincrement())
+  sintetico   String  @unique
   descripcion String
-  partes Parte[]
+  partes      Parte[]
 }
 
 model Patrocinante {
-  id Int @id @default(autoincrement())
-  nombre String
-  nroMatricula Int @unique
-  domicilio String?
-  localidad String?
+  id           Int     @id @default(autoincrement())
+  nombre       String
+  nroMatricula Int     @unique
+  domicilio    String?
+  localidad    String?
   nroCasillero Int?
-  partes Parte[]
-  nroWhatsapp String?
+  nroWhatsapp  String?
+  partes       Parte[]
 }
 
 model Parte {
-  id Int @id @default(autoincrement())
-  nombre String
+  id              Int              @id @default(autoincrement())
+  nombre          String
   idTipoDocumento Int
-  tipoDocumento TipoDocumento @relation(fields: [idTipoDocumento], references: [id])
-  nroDocumento String
-  cuil String
-  domicilio String?
-  localidad String?
-  idPatrocinante Int?
-  patrocinante Patrocinante? @relation(fields: [idPatrocinante], references: [id])
-  nroWhatsapp String?
-  reclamos PartesReclamos[]
+  nroDocumento    String
+  cuil            String
+  idPatrocinante  Int?
+  nroWhatsapp     String?
+  localidad       String?
+  domicilio       String?
+  patrocinante    Patrocinante?    @relation(fields: [idPatrocinante], references: [id])
+  tipoDocumento   TipoDocumento    @relation(fields: [idTipoDocumento], references: [id])
+  reclamos        PartesReclamos[]
 
   @@unique([idTipoDocumento, nroDocumento])
+  @@index([idPatrocinante], map: "Parte_idPatrocinante_fkey")
 }
 
 model Resolucion {
-  id Int @id @default(autoincrement())
+  id          Int        @id @default(autoincrement())
   descripcion String
-  detalle String @db.LongText
-  reclamos Reclamos[]
+  detalle     String     @db.Text
+  reclamos    Reclamos[]
 }
 
 model Reclamos {
-  id Int @id @default(autoincrement())
-  numero Int @unique
-  rubros String
-  idResolucion Int
-  resolucion Resolucion @relation(fields: [idResolucion], references: [id])
+  id              Int              @id @default(autoincrement())
+  rubros          String           @db.Text
+  idResolucion    Int
   fechaHoraInicio DateTime
-  horaFin DateTime?
-  segundaFecha DateTime?
-  segFechaHoraInicio DateTime?
-  segHoraFin DateTime?
-  partes PartesReclamos[]
+  horaFin         DateTime?
+  numero          Int
+  partes          PartesReclamos[]
+  resolucion      Resolucion       @relation(fields: [idResolucion], references: [id])
+
+  @@unique([numero, fechaHoraInicio])
+  @@index([idResolucion], map: "Reclamos_idResolucion_fkey")
 }
 
 model PartesReclamos {
-  id Int @id @default(autoincrement())
-  idParte Int
-  parte Parte @relation(fields: [idParte], references: [id])
+  id        Int      @id @default(autoincrement())
+  idParte   Int
   idReclamo Int
-  reclamo Reclamos @relation(fields: [idReclamo], references: [id])
-  rol Int // 1=reclamante, 2=reclamado
+  rol       Int
+  parte     Parte    @relation(fields: [idParte], references: [id])
+  reclamo   Reclamos @relation(fields: [idReclamo], references: [id])
 
   @@unique([idParte, idReclamo])
+  @@index([idReclamo], map: "PartesReclamos_idReclamo_fkey")
 }
