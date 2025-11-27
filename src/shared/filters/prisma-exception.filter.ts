@@ -4,12 +4,13 @@ import {
   ExceptionFilter,
   HttpStatus,
 } from '@nestjs/common';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+//import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import { Response } from 'express';
 
-@Catch(PrismaClientKnownRequestError)
+@Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaExceptionFilter implements ExceptionFilter {
-  catch(exception: PrismaClientKnownRequestError, host: ArgumentsHost) {
+  catch(exception: Prisma.PrismaClientKnownRequestError, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const message = this.mapPrismaErrorToMessage(exception);
@@ -23,7 +24,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     });
   }
 
-  mapPrismaErrorToMessage(error: PrismaClientKnownRequestError): string {
+  mapPrismaErrorToMessage(error: Prisma.PrismaClientKnownRequestError): string {
     switch (error.code) {
       case 'P2000':
         return `La columna ${error.meta?.column_name} de datos es demasiado larga para el valor proporcionado.`;

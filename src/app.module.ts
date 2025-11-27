@@ -11,7 +11,6 @@ import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({}),
     PatrocinantesModule,
     TipdocsModule,
     PartesModule,
