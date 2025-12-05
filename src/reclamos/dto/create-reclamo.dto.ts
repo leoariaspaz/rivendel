@@ -34,15 +34,19 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'La hora de fin no es válida.' })
   horaFin?: Date;
 
-  @ArrayUnique((o) => Number(o), {
+  @ArrayUnique((r) => Number(r), {
     message: 'No se pueden repetir reclamantes en un mismo reclamo.',
   })
   @IsOptional()
+  @Transform(({ value }) => Array.isArray(value) ? value.map(Number) : [])
+  @Type(() => Array<Number>)
   reclamantes?: number[];
 
-  @ArrayUnique((o) => Number(o), {
+  @ArrayUnique((r) => Number(r), {
     message: 'No se pueden repetir reclamados en un mismo reclamo.',
   })
   @IsOptional()
+  @Transform(({ value }) => Array.isArray(value) ? value.map(Number) : [])
+  @Type(() => Array<Number>)
   reclamados?: number[];
 }
