@@ -14,5 +14,7 @@ export interface ParteDB {
   patrocinante: {
     nroMatricula: number;
     nombre: string;
+    domicilio: string | null;
+    localidad: string | null;
   } | null;
 }

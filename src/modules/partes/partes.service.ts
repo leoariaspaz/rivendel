@@ -44,6 +44,8 @@ export class PartesService {
       select: {
         nroMatricula: true,
         nombre: true,
+        domicilio: true,
+        localidad: true
       },
     },
   } as const;
@@ -74,6 +76,8 @@ export class PartesService {
         id: p.idPatrocinante || 0,
         nombre: p.patrocinante.nombre,
         nroMatricula: p.patrocinante.nroMatricula,
+        domicilio: p.patrocinante.domicilio,
+        localidad: p.patrocinante.localidad
       };
     }
 
@@ -84,7 +88,7 @@ export class PartesService {
     return data.map((p) => this.mapParteDBToFindParteDTO(p));
   }
 
-  async findAllPaginated(page: number, limit: number) {
+  async findAllPaginated(page: number, limit: number): Promise<FindParteDTO[]> {
     const skip = (page - 1) * limit;
     const data = await this.prisma.parte.findMany({
       skip,
