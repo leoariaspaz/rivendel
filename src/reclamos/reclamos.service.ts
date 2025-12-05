@@ -128,7 +128,11 @@ export class ReclamosService {
         id: true,
         numero: true,
         rubros: true,
-        idResolucion: true,
+        resolucion: {
+          select: {
+            detalle: true,
+          },
+        },
         fechaHoraInicio: true,
         horaFin: true,
         partes: {
@@ -139,7 +143,25 @@ export class ReclamosService {
               select: {
                 id: true,
                 nombre: true,
+                nroDocumento: true,
                 cuil: true,
+                domicilio: true,
+                localidad: true,
+                nroWhatsapp: true,
+                tipoDocumento: {
+                  select: {
+                    sintetico: true,
+                  },
+                },
+                patrocinante: {
+                  select: {
+                    nroMatricula: true,
+                    nombre: true,
+                    domicilio: true,
+                    localidad: true,
+                    nroCasillero: true,
+                  },
+                }
               },
             },
           },

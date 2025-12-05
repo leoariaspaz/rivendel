@@ -42,7 +42,7 @@ export class ReclamosController {
       id: reclamo?.id,
       numero: reclamo?.numero,
       rubros: reclamo?.rubros,
-      idResolucion: reclamo?.idResolucion,
+      resolucion: reclamo?.resolucion.detalle,
       fechaHoraInicio: reclamo?.fechaHoraInicio,
       horaFin: reclamo?.horaFin,
       reclamantes: reclamo?.partes
