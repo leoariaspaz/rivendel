@@ -128,6 +128,7 @@ export class ReclamosService {
         id: true,
         numero: true,
         rubros: true,
+        idResolucion: true,
         resolucion: {
           select: {
             detalle: true,
@@ -160,6 +161,7 @@ export class ReclamosService {
                     domicilio: true,
                     localidad: true,
                     nroCasillero: true,
+                    nroWhatsapp: true
                   },
                 }
               },
