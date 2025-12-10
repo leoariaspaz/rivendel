@@ -3,14 +3,11 @@
 
 Table Reclamos {
   Id integer [primary key]
-  Numero integer
   Rubros text
   IdResolucion integer [not null, ref: > Resoluciones.Id]
   FechaHoraInicio datetime
   HoraFin time
-  SegundaFecha datetime [null]
-  SegFechaHoraInicio datetime [null]
-  SegHoraFin time [null]
+  Numero integar
 }
 
 Table Partes {
@@ -36,6 +33,8 @@ Table PartesReclamos {
   IdReclamo integer [not null, ref: > Reclamos.Id]
   IdParte integer [not null, ref: > Partes.Id]
   Rol integer [note: "1: Reclamante, 2: Reclamado"]
+  NroWhatsappParte varchar(50)
+  NroWhatsappPatrocinante varchar(50)
 }
 
 Table Patrocinantes {

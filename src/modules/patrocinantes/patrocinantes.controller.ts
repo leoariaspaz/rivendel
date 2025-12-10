@@ -45,7 +45,7 @@ export class PatrocinantesController {
   }
 
   @Get('search')
-  search(@Query('term') term: string) {
+  search(@Query('q') term: string) {
     return this.patrocinantesService.search(term);
   }
 

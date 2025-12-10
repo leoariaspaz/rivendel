@@ -82,16 +82,6 @@ export class PatrocinantesService {
             },
           },
           {
-            domicilio: {
-              contains: term,
-            },
-          },
-          {
-            localidad: {
-              contains: term,
-            },
-          },
-          {
             nroCasillero: {
               equals: isNaN(Number(term)) ? undefined : Number(term),
             },

@@ -31,7 +31,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
       case 'P2002':
         return 'Ya existe un registro con los valores únicos proporcionados.';
       case 'P2003':
-        return 'Falló una restricción de clave foránea. Los datos relacionados no existen.';
+        return 'Falló una restricción de clave foránea. Los datos relacionados no existen. ' + error.message;
       case 'P2004':
         return 'Falló una restricción de la base de datos.';
       case 'P2025':

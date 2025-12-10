@@ -69,6 +69,8 @@ model PartesReclamos {
   idParte   Int
   idReclamo Int
   rol       Int
+  nroWhatsappParte        String?
+  nroWhatsappPatrocinante String?
   parte     Parte    @relation(fields: [idParte], references: [id])
   reclamo   Reclamos @relation(fields: [idReclamo], references: [id])
 
