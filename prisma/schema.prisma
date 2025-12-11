@@ -1,6 +1,6 @@
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider = "prisma-client"
+  output = "../generated/prisma"
 }
 
 datasource db {
@@ -65,14 +65,14 @@ model Reclamos {
 }
 
 model PartesReclamos {
-  id        Int      @id @default(autoincrement())
-  idParte   Int
-  idReclamo Int
-  rol       Int
+  id                      Int      @id @default(autoincrement())
+  idParte                 Int
+  idReclamo               Int
+  rol                     Int
   nroWhatsappParte        String?
   nroWhatsappPatrocinante String?
-  parte     Parte    @relation(fields: [idParte], references: [id])
-  reclamo   Reclamos @relation(fields: [idReclamo], references: [id])
+  parte                   Parte    @relation(fields: [idParte], references: [id])
+  reclamo                 Reclamos @relation(fields: [idReclamo], references: [id])
 
   @@unique([idParte, idReclamo])
   @@index([idReclamo], map: "PartesReclamos_idReclamo_fkey")
