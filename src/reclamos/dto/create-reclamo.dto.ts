@@ -1,6 +1,5 @@
 import {
   ArrayUnique,
-  IsDate,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -8,8 +7,8 @@ import {
 } from 'class-validator';
 import { 
   Type,
-  Transform
 } from 'class-transformer';
+import { PartesReclamoDTO } from './partes-reclamo.dto';
 
 export class CreateReclamoDto {
   id: number;
@@ -34,19 +33,17 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'La hora de fin no es válida.' })
   horaFin?: Date;
 
-  @ArrayUnique((r) => Number(r), {
+  @ArrayUnique((p) => p.idParte, {
     message: 'No se pueden repetir reclamantes en un mismo reclamo.',
   })
   @IsOptional()
-  @Transform(({ value }) => Array.isArray(value) ? value.map(Number) : [])
-  @Type(() => Array<Number>)
-  reclamantes?: number[];
+  @Type(() => Array<PartesReclamoDTO>)
+  reclamantes?: PartesReclamoDTO[];
 
-  @ArrayUnique((r) => Number(r), {
+  @ArrayUnique((p) => p.idParte, {
     message: 'No se pueden repetir reclamados en un mismo reclamo.',
   })
   @IsOptional()
-  @Transform(({ value }) => Array.isArray(value) ? value.map(Number) : [])
-  @Type(() => Array<Number>)
-  reclamados?: number[];
+  @Type(() => Array<PartesReclamoDTO>)
+  reclamados?: PartesReclamoDTO[];
 }

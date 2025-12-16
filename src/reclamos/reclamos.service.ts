@@ -10,25 +10,29 @@ export class ReclamosService {
   constructor(private prisma: PrismaService) {}
 
   create(createReclamoDto: CreateReclamoDto) {
-    const partes = Array<{ idParte: number; rol: number }>();
+    const partes = Array<PartesReclamoDTO>();
 
     if (
       createReclamoDto.reclamantes &&
       createReclamoDto.reclamantes.length > 0
     ) {
-      createReclamoDto.reclamantes.forEach((idParte) =>
+      createReclamoDto.reclamantes.forEach((parte) =>
         partes.push({
-          idParte: idParte,
+          idParte: parte.idParte,
           rol: RECLAMANTE,
+          nroWhatsappParte: parte.nroWhatsappParte,
+          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
         }),
       );
     }
 
     if (createReclamoDto.reclamados && createReclamoDto.reclamados.length > 0) {
-      createReclamoDto.reclamados.forEach((idParte) =>
+      createReclamoDto.reclamados.forEach((parte) =>
         partes.push({
-          idParte: idParte,
+          idParte: parte.idParte,
           rol: RECLAMADO,
+          nroWhatsappParte: parte.nroWhatsappParte,
+          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
         }),
       );
     }
@@ -140,6 +144,8 @@ export class ReclamosService {
           select: {
             idParte: true,
             rol: true,
+            nroWhatsappParte: true,
+            nroWhatsappPatrocinante: true,
             parte: {
               select: {
                 id: true,
@@ -207,30 +213,30 @@ export class ReclamosService {
       }));
     }
 
-    exclude(updateReclamoDto.reclamados, reclamo.partes, partesToCreate, RECLAMADO);
-    exclude(updateReclamoDto.reclamantes, reclamo.partes, partesToCreate, RECLAMANTE);
+    // exclude(updateReclamoDto.reclamados, reclamo.partes, partesToCreate, RECLAMADO);
+    // exclude(updateReclamoDto.reclamantes, reclamo.partes, partesToCreate, RECLAMANTE);
    
     const getPartesReclamosByRol = (rol: number) => 
       reclamo.partes?.filter((p) => p.rol === rol).map(p => p.idParte)
 
-    const getWhereByRol = (rol: number) => {
-      const where = Array<PartesReclamoDTO>();
-      if (rol === RECLAMADO && updateReclamoDto.reclamados) {
-        where.push(...updateReclamoDto.reclamados.map(p => { 
-            return { idParte: p, rol: rol}
-        }))
-      }
-      if (rol === RECLAMANTE && updateReclamoDto.reclamantes) {
-        where.push(...updateReclamoDto.reclamantes.map(p => { 
-            return { idParte: p, rol: rol}
-        }))
-      }
+    // const getWhereByRol = (rol: number) => {
+    //   const where = Array<PartesReclamoDTO>();
+    //   if (rol === RECLAMADO && updateReclamoDto.reclamados) {
+    //     where.push(...updateReclamoDto.reclamados.map(p => { 
+    //         return { idParte: p, rol: rol}
+    //     }))
+    //   }
+    //   if (rol === RECLAMANTE && updateReclamoDto.reclamantes) {
+    //     where.push(...updateReclamoDto.reclamantes.map(p => { 
+    //         return { idParte: p, rol: rol}
+    //     }))
+    //   }
 
-      return where
-    }
+    //   return where
+    // }
 
-    exclude(getPartesReclamosByRol(RECLAMADO), getWhereByRol(RECLAMADO), partesToDelete, RECLAMADO);
-    exclude(getPartesReclamosByRol(RECLAMANTE), getWhereByRol(RECLAMANTE), partesToDelete, RECLAMANTE);
+    // exclude(getPartesReclamosByRol(RECLAMADO), getWhereByRol(RECLAMADO), partesToDelete, RECLAMADO);
+    // exclude(getPartesReclamosByRol(RECLAMANTE), getWhereByRol(RECLAMANTE), partesToDelete, RECLAMANTE);
 
     return this.prisma.reclamos.update({
       where: { id },
