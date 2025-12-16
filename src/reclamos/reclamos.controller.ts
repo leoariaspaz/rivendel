@@ -37,6 +37,14 @@ export class ReclamosController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
+    const getResult = (p) => {
+      p.parte.nroWhatsapp = p.nroWhatsappParte;
+      const pat = p.parte.patrocinante;
+      if (pat) {
+        pat.nroWhatsapp = p.nroWhatsappPatrocinante;
+      }
+      return { ...p.parte, patrocinante: pat }
+    }
     const reclamo = await this.reclamosService.findOne(+id);
     const result = {
       id: reclamo?.id,
@@ -48,10 +56,10 @@ export class ReclamosController {
       idResolucion: reclamo?.idResolucion,
       reclamantes: reclamo?.partes
         .filter((p) => p.rol === RECLAMANTE)
-        .map((p) => p.parte),
+        .map(getResult),
       reclamados: reclamo?.partes
         .filter((p) => p.rol === RECLAMADO)
-        .map((p) => p.parte),
+        .map(getResult),
     }
     return result;
   }
