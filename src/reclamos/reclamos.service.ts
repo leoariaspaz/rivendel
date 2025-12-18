@@ -156,7 +156,6 @@ export class ReclamosService {
                 cuil: true,
                 domicilio: true,
                 localidad: true,
-                nroWhatsapp: true,
                 tipoDocumento: {
                   select: {
                     sintetico: true,
@@ -169,7 +168,6 @@ export class ReclamosService {
                     domicilio: true,
                     localidad: true,
                     nroCasillero: true,
-                    nroWhatsapp: true
                   },
                 }
               },

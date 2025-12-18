@@ -14,13 +14,12 @@ export class PartesService {
       ? Number(createParteDto.idPatrocinante)
       : null;
     return this.prisma.parte.create({
-      data: {
+      data: {        
         nombre: createParteDto.nombre,
         idTipoDocumento: Number(createParteDto.idTipoDocumento),
         nroDocumento: createParteDto.nroDocumento,
         cuil: String(createParteDto.cuil),
         idPatrocinante: idPatrocinante,
-        nroWhatsapp: createParteDto.nroWhatsapp,
         domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,
       },
@@ -34,7 +33,6 @@ export class PartesService {
     nombre: true,
     domicilio: true,
     localidad: true,
-    nroWhatsapp: true,
     idTipoDocumento: true,
     tipoDocumento: {
       select: { sintetico: true },
@@ -66,7 +64,6 @@ export class PartesService {
       nombre: p.nombre,
       domicilio: p.domicilio === null ? '' : p.domicilio,
       localidad: p.localidad === null ? '' : p.localidad,
-      nroWhatsapp: p.nroWhatsapp === null ? '' : p.nroWhatsapp,
       idTipoDocumento: p.idTipoDocumento,
       tipoDocumento: p.tipoDocumento.sintetico,
     } as FindParteDTO;
@@ -113,6 +110,9 @@ export class PartesService {
   }
 
   update(id: number, updateParteDto: UpdateParteDto) {
+    const idPatrocinante = updateParteDto.idPatrocinante
+      ? Number(updateParteDto.idPatrocinante)
+      : null;
     return this.prisma.parte.update({
       where: { id },
       data: {
@@ -120,8 +120,7 @@ export class PartesService {
         idTipoDocumento: Number(updateParteDto.idTipoDocumento),
         nroDocumento: updateParteDto.nroDocumento,
         cuil: updateParteDto.cuil,
-        idPatrocinante: Number(updateParteDto.idPatrocinante),
-        nroWhatsapp: updateParteDto.nroWhatsapp,
+        idPatrocinante: idPatrocinante,
         domicilio: updateParteDto.domicilio,
         localidad: updateParteDto.localidad,
       },

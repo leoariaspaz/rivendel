@@ -21,7 +21,6 @@ model Patrocinante {
   domicilio    String?
   localidad    String?
   nroCasillero Int?
-  nroWhatsapp  String?
   partes       Parte[]
 }
 
@@ -32,7 +31,6 @@ model Parte {
   nroDocumento    String
   cuil            String
   idPatrocinante  Int?
-  nroWhatsapp     String?
   localidad       String?
   domicilio       String?
   patrocinante    Patrocinante?    @relation(fields: [idPatrocinante], references: [id])

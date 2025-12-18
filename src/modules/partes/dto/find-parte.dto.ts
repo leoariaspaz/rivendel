@@ -13,7 +13,6 @@ export interface FindParteDTO {
   nombre: string;
   domicilio: string;
   localidad: string;
-  nroWhatsapp: string;
   idTipoDocumento: number;
   tipoDocumento: string;
   patrocinante: PatrocinanteDTO;

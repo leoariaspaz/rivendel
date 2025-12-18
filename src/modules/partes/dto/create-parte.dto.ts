@@ -6,5 +6,4 @@ export class CreateParteDto {
   domicilio: string;
   localidad: string;
   idPatrocinante: number;
-  nroWhatsapp: string;
 }

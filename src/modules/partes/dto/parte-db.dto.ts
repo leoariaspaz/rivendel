@@ -5,7 +5,6 @@ export interface ParteDB {
   nombre: string;
   domicilio: string | null;
   localidad: string | null;
-  nroWhatsapp: string | null;
   idTipoDocumento: number;
   tipoDocumento: {
     sintetico: string;
