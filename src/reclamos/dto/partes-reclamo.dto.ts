@@ -1,6 +1,6 @@
 export interface PartesReclamoDTO {
   idParte: number;
   rol: number;
-  nroWhatsappParte?: string;
-  nroWhatsappPatrocinante?: string;
+  nroWhatsappParte?: string | null;
+  nroWhatsappPatrocinante?: string | null;
 }

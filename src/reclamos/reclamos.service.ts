@@ -4,6 +4,8 @@ import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
+import { PartesReclamos } from 'src/generated/prisma/client';
+import { Reclamo } from './entities/reclamo.entity';
 
 @Injectable()
 export class ReclamosService {
@@ -183,8 +185,6 @@ export class ReclamosService {
   }
 
   async update(id: number, updateReclamoDto: UpdateReclamoDto) {
-    console.log('UpdateReclamoDto:', id, updateReclamoDto, updateReclamoDto.numero);
-
     const reclamo = await this.prisma.reclamos.findUnique({
       where: { id: id },
       include: {
@@ -196,49 +196,83 @@ export class ReclamosService {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);
     }
 
-    const partesToCreate = Array<PartesReclamoDTO>();
-    const partesToDelete = Array<PartesReclamoDTO>();
-
-    const exclude = (from: number[] | undefined, where: Array<PartesReclamoDTO>, 
-      to: Array<PartesReclamoDTO>, tipoRol: number) => {
-      from?.filter(
-        (idParte) =>
-          !where.find(
-            (p) => p.idParte === idParte && p.rol === tipoRol,
-          ),
-      )
-      .forEach((idParte) => to.push({
-        idParte: Number(idParte),
-        rol: tipoRol,
-      }));
+    const restarPartes = (tipoRol: number, A: PartesReclamoDTO[] | undefined, 
+      B: Array<PartesReclamos>): PartesReclamoDTO[] => {
+        return A?.
+                filter((parte) => !B.find((p) => p.idParte === parte.idParte && p.rol === tipoRol)).
+                map((parte) => {
+                  return {
+                    idParte: parte.idParte,
+                    rol: tipoRol,
+                    nroWhatsappParte: parte.nroWhatsappParte,
+                    nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
+                  }
+                }) || [];
     }
 
-    // exclude(updateReclamoDto.reclamados, reclamo.partes, partesToCreate, RECLAMADO);
-    // exclude(updateReclamoDto.reclamantes, reclamo.partes, partesToCreate, RECLAMANTE);
+    console.log("restarPartes partesToCreate ==============================================");
+    console.log("updateReclamoDto.reclamados", updateReclamoDto.reclamados)
+    console.log("reclamo.reclamados", reclamo.partes.filter((p) => p.rol === RECLAMADO));
+    console.log("restarPartes RECLAMADO", restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes));
+    console.log("==============================================");
+    console.log("updateReclamoDto.reclamantes", updateReclamoDto.reclamantes)
+    console.log("reclamo.reclamantes", reclamo.partes.filter((p) => p.rol === RECLAMANTE));
+    console.log("restarPartes RECLAMANTE", restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes));
+    console.log("==============================================");
+
+    const partesToCreate = restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes)
+                      .concat(restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes));
    
-    const getPartesReclamosByRol = (rol: number) => 
-      reclamo.partes?.filter((p) => p.rol === rol).map(p => p.idParte)
+    const mapParteToPartesReclamos = (rol: number, partes: PartesReclamoDTO[] | undefined): PartesReclamos[] => {
+      return partes?.map(p => { 
+          return { 
+            id: 0,
+            idParte: p.idParte,
+            idReclamo: 0,
+            rol: rol,
+            nroWhatsappParte: p.nroWhatsappParte || null,
+            nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null
+          }
+      }) || [];
+    }
 
-    // const getWhereByRol = (rol: number) => {
-    //   const where = Array<PartesReclamoDTO>();
-    //   if (rol === RECLAMADO && updateReclamoDto.reclamados) {
-    //     where.push(...updateReclamoDto.reclamados.map(p => { 
-    //         return { idParte: p, rol: rol}
-    //     }))
-    //   }
-    //   if (rol === RECLAMANTE && updateReclamoDto.reclamantes) {
-    //     where.push(...updateReclamoDto.reclamantes.map(p => { 
-    //         return { idParte: p, rol: rol}
-    //     }))
-    //   }
+    const partesToUpdate = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados)
+                          .concat(mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes))
+                          .filter(p => reclamo.partes.some(rp => rp.idParte === p.idParte && rp.rol === p.rol))
+                          .map(p => {
+                            return {
+                              id: reclamo.partes.find(rp => rp.idParte === p.idParte && rp.rol === p.rol)?.id || 0,
+                              idParte: p.idParte,
+                              rol: p.rol,
+                              nroWhatsappParte: p.nroWhatsappParte || null,
+                              nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null
+                            }
+                          });
 
-    //   return where
-    // }
+    const reclamadosEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMADO)
+    const reclamantesEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMANTE)
+    const reclamadosAGrabar = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados);
+    const reclamantesAGrabar = mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes);
 
-    // exclude(getPartesReclamosByRol(RECLAMADO), getWhereByRol(RECLAMADO), partesToDelete, RECLAMADO);
-    // exclude(getPartesReclamosByRol(RECLAMANTE), getWhereByRol(RECLAMANTE), partesToDelete, RECLAMANTE);
+    console.log("restarPartes partesToDelete ==============================================");
+    console.log('Reclamados en DB:', reclamadosEnDB);
+    console.log('Reclamados a grabar:', reclamadosAGrabar);
+    console.log('restarPartes RECLAMADO:', restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar));
+    console.log("==============================================");
+    console.log('Reclamantes en DB:', reclamantesEnDB);
+    console.log('Reclamantes a grabar:', reclamantesAGrabar);
+    console.log('restarPartes RECLAMANTE:', restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
+    console.log("==============================================");
 
-    return this.prisma.reclamos.update({
+    const partesToDelete = restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
+                      .concat(restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
+
+    console.log('Partes a crear:', partesToCreate);
+    console.log('Partes a eliminar:', partesToDelete);
+    
+    this.prisma.$transaction([]);
+
+    const deleteCreate = this.prisma.reclamos.update({
       where: { id },
       data: {
         numero: updateReclamoDto.numero,
@@ -248,13 +282,29 @@ export class ReclamosService {
         horaFin: updateReclamoDto.horaFin,
         partes: {
           deleteMany: partesToDelete,
-          create: partesToCreate,
+          createMany: { data: partesToCreate },
         },
       },
       include: {
         partes: true,
       },
     });
+
+    let update: any[] = [];
+    for (const parte of partesToUpdate) {
+      update.push(
+        this.prisma.partesReclamos.update({
+          where: { id: parte.id },
+          data: {
+            rol: parte.rol,
+            nroWhatsappParte: parte.nroWhatsappParte,
+            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
+          }
+        })
+      );
+    }
+
+    return this.prisma.$transaction([deleteCreate, ...update]);
   }
 
   remove(id: number) {
