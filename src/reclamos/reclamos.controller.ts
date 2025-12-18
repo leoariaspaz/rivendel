@@ -38,12 +38,11 @@ export class ReclamosController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const getResult = (p) => {
-      p.parte.nroWhatsapp = p.nroWhatsappParte;
-      const pat = p.parte.patrocinante;
-      if (pat) {
-        pat.nroWhatsapp = p.nroWhatsappPatrocinante;
-      }
-      return { ...p.parte, patrocinante: pat }
+      return { 
+        ...p.parte, 
+        nroWhatsappParte: p.nroWhatsappParte, 
+        nroWhatsappPatrocinante: p.nroWhatsappPatrocinante 
+      };
     }
     const reclamo = await this.reclamosService.findOne(+id);
     const result = {
