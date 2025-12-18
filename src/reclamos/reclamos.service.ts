@@ -210,16 +210,6 @@ export class ReclamosService {
                 }) || [];
     }
 
-    console.log("restarPartes partesToCreate ==============================================");
-    console.log("updateReclamoDto.reclamados", updateReclamoDto.reclamados)
-    console.log("reclamo.reclamados", reclamo.partes.filter((p) => p.rol === RECLAMADO));
-    console.log("restarPartes RECLAMADO", restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes));
-    console.log("==============================================");
-    console.log("updateReclamoDto.reclamantes", updateReclamoDto.reclamantes)
-    console.log("reclamo.reclamantes", reclamo.partes.filter((p) => p.rol === RECLAMANTE));
-    console.log("restarPartes RECLAMANTE", restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes));
-    console.log("==============================================");
-
     const partesToCreate = restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes)
                       .concat(restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes));
    
@@ -253,26 +243,10 @@ export class ReclamosService {
     const reclamantesEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMANTE)
     const reclamadosAGrabar = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados);
     const reclamantesAGrabar = mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes);
-
-    console.log("restarPartes partesToDelete ==============================================");
-    console.log('Reclamados en DB:', reclamadosEnDB);
-    console.log('Reclamados a grabar:', reclamadosAGrabar);
-    console.log('restarPartes RECLAMADO:', restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar));
-    console.log("==============================================");
-    console.log('Reclamantes en DB:', reclamantesEnDB);
-    console.log('Reclamantes a grabar:', reclamantesAGrabar);
-    console.log('restarPartes RECLAMANTE:', restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
-    console.log("==============================================");
-
     const partesToDelete = restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
                       .concat(restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
 
-    console.log('Partes a crear:', partesToCreate);
-    console.log('Partes a eliminar:', partesToDelete);
-    
-    this.prisma.$transaction([]);
-
-    const deleteCreate = this.prisma.reclamos.update({
+    const deleteOrCreate = this.prisma.reclamos.update({
       where: { id },
       data: {
         numero: updateReclamoDto.numero,
@@ -290,9 +264,9 @@ export class ReclamosService {
       },
     });
 
-    let update: any[] = [];
+    let updateMany: any[] = [];
     for (const parte of partesToUpdate) {
-      update.push(
+      updateMany.push(
         this.prisma.partesReclamos.update({
           where: { id: parte.id },
           data: {
@@ -304,7 +278,7 @@ export class ReclamosService {
       );
     }
 
-    return this.prisma.$transaction([deleteCreate, ...update]);
+    return this.prisma.$transaction([deleteOrCreate, ...updateMany]);
   }
 
   remove(id: number) {
