@@ -23,30 +23,13 @@ export class PatrocinantesController {
 
   @Get()
   async findAll(
+    @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
     @Query('limit') limit: number | null = null,
   ) {
-    if (page === null || limit === null) {
-      return this.patrocinantesService.findAll();
-    }
-    const totalRecords = await this.patrocinantesService.getTotalCount();
-    const data = await this.patrocinantesService.findAllPaginated(page, limit);
+    const totalRecords = await this.patrocinantesService.getTotalCount(query);
+    const data = await this.patrocinantesService.findAll(query, page, limit);
     return { data, totalRecords };
-  }
-
-  @Get()
-  async findAllPaginated(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ) {
-    const totalRecords = await this.patrocinantesService.getTotalCount();
-    const data = await this.patrocinantesService.findAllPaginated(page, limit);
-    return { data, totalRecords };
-  }
-
-  @Get('search')
-  search(@Query('q') term: string) {
-    return this.patrocinantesService.search(term);
   }
 
   @Get(':id')

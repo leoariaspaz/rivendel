@@ -19,21 +19,43 @@ export class PatrocinantesService {
     });
   }
 
-  findAll() {
+  findAll(query: string | null, page: number | null, limit: number | null) {
+    let skip: number | undefined, l: number | undefined;
+    if (page && limit) {
+      l = Number(limit);
+      skip = (page - 1) * limit;
+    } else {
+      l = undefined;
+      skip = undefined;
+    }
+    let filter = {}
+    if (query) {
+      filter = {
+        OR: [
+          {
+            nombre: {
+              contains: (query === null)? undefined : query,
+            },
+          },
+          {
+            nroMatricula: {
+              equals: isNaN(Number(query)) ? undefined : Number(query),
+            },
+          },
+          {
+            nroCasillero: {
+              equals: isNaN(Number(query)) ? undefined : Number(query),
+            },
+          },
+        ],
+      }
+    }
     return this.prisma.patrocinante.findMany({
+      where: filter,
+      skip: skip,
+      take: l,
       orderBy: {
-        nroMatricula: 'asc',
-      },
-    });
-  }
-
-  findAllPaginated(page: number, limit: number) {
-    const skip = (page - 1) * limit;
-    return this.prisma.patrocinante.findMany({
-      skip,
-      take: Number(limit),
-      orderBy: {
-        nroMatricula: 'asc',
+        nombre: 'asc',
       },
     });
   }
@@ -63,39 +85,29 @@ export class PatrocinantesService {
     });
   }
 
-  getTotalCount() {
-    return this.prisma.patrocinante.count();
-  }
-
-  search(term: string) {
-    return this.prisma.patrocinante.findMany({
-      where: {
+  getTotalCount(query: string | null) {
+    let filter = {}
+    if (query) {
+      filter = {
         OR: [
           {
             nombre: {
-              contains: term,
+              contains: (query === null)? undefined : query,
             },
           },
           {
             nroMatricula: {
-              equals: isNaN(Number(term)) ? undefined : Number(term),
+              equals: isNaN(Number(query)) ? undefined : Number(query),
             },
           },
           {
             nroCasillero: {
-              equals: isNaN(Number(term)) ? undefined : Number(term),
+              equals: isNaN(Number(query)) ? undefined : Number(query),
             },
           },
         ],
-      },
-      orderBy: [
-        {
-          nombre: 'asc',
-        },
-        {
-          nroMatricula: 'asc',
-        },
-      ],
-    });
+      }
+    }
+    return this.prisma.patrocinante.count({ where: filter });
   }
 }
