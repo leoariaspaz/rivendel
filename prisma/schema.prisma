@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client"
-  output = "../src/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -33,7 +33,7 @@ model Parte {
   idPatrocinante  Int?
   localidad       String?
   domicilio       String?
-  patrocinante    Patrocinante?    @relation(fields: [idPatrocinante], references: [id])
+  patrocinante    Patrocinante?    @relation(fields: [idPatrocinante], references: [id], onDelete: Restrict)
   tipoDocumento   TipoDocumento    @relation(fields: [idTipoDocumento], references: [id])
   reclamos        PartesReclamos[]
 
