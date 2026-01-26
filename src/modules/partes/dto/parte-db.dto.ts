@@ -16,4 +16,5 @@ export interface ParteDB {
     domicilio: string | null;
     localidad: string | null;
   } | null;
+  esApoderado: boolean;
 }

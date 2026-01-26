@@ -34,6 +34,7 @@ model Parte {
   localidad       String?
   domicilio       String?
   patrocinante    Patrocinante?    @relation(fields: [idPatrocinante], references: [id], onDelete: Restrict)
+  esApoderado     Boolean          @default(false)
   tipoDocumento   TipoDocumento    @relation(fields: [idTipoDocumento], references: [id])
   reclamos        PartesReclamos[]
 

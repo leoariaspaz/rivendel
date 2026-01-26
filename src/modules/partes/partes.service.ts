@@ -20,6 +20,7 @@ export class PartesService {
         nroDocumento: createParteDto.nroDocumento,
         cuil: String(createParteDto.cuil),
         idPatrocinante: idPatrocinante,
+        esApoderado: createParteDto.esApoderado,
         domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,
       },
@@ -46,6 +47,7 @@ export class PartesService {
         localidad: true
       },
     },
+    esApoderado: true
   } as const;
 
   async findAll() {
@@ -66,6 +68,7 @@ export class PartesService {
       localidad: p.localidad === null ? '' : p.localidad,
       idTipoDocumento: p.idTipoDocumento,
       tipoDocumento: p.tipoDocumento.sintetico,
+      esApoderado: p.esApoderado,
     } as FindParteDTO;
 
     if (p.patrocinante) {
@@ -82,7 +85,7 @@ export class PartesService {
   }
 
   selectPartes(data: ParteDB[]): FindParteDTO[] {
-    return data.map((p) => this.mapParteDBToFindParteDTO(p));
+    return data.map(this.mapParteDBToFindParteDTO);
   }
 
   async findAllPaginated(page: number, limit: number): Promise<FindParteDTO[]> {
@@ -121,6 +124,7 @@ export class PartesService {
         nroDocumento: updateParteDto.nroDocumento,
         cuil: updateParteDto.cuil,
         idPatrocinante: idPatrocinante,
+        esApoderado: updateParteDto.esApoderado,
         domicilio: updateParteDto.domicilio,
         localidad: updateParteDto.localidad,
       },

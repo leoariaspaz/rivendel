@@ -6,4 +6,5 @@ export class CreateParteDto {
   domicilio: string;
   localidad: string;
   idPatrocinante: number;
+  esApoderado: boolean;
 }

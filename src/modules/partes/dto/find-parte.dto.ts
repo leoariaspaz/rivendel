@@ -16,4 +16,5 @@ export interface FindParteDTO {
   idTipoDocumento: number;
   tipoDocumento: string;
   patrocinante: PatrocinanteDTO;
+  esApoderado: boolean;
 }
