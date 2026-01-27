@@ -169,7 +169,8 @@ export class ReclamosService {
                     localidad: true,
                     nroCasillero: true,
                   },
-                }
+                },
+                esApoderado: true
               },
             },
           },
