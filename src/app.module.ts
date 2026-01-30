@@ -8,6 +8,10 @@ import { PartesModule } from './modules/partes/partes.module';
 import { ResolucionesModule } from './resoluciones/resoluciones.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
 import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -17,8 +21,16 @@ import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
     ResolucionesModule,
     ReclamosModule,
     PartesReclamosModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
