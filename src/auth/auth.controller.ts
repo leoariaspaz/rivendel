@@ -29,8 +29,6 @@ export class AuthController {
     @Req() req: { user: { id: number; email: string } },
     @Res({ passthrough: true }) res: Response,
   ) {
-		console.log('Login attempt for user: ' + req.user.email);
-
     const tokens = await this.authService.login(req.user);
 
 		res.cookie('refresh_token', tokens.refreshToken, REFRESH_COOKIE_OPTIONS);
@@ -42,8 +40,6 @@ export class AuthController {
 	@SkipJwt()
   @UseGuards(JwtRefreshGuard)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
-		console.log('Refresh token attempt for user ID: ' + req.user.userId);
-
     const tokens = await this.authService.refreshTokens(
       req.user.userId,
       req.cookies.refresh_token,
@@ -57,8 +53,6 @@ export class AuthController {
   @Post('logout')
   @UseGuards(JwtGuard)
   async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
-		console.log('Logout attempt for user ID: ' + req.user.userId);
-
     await this.authService.logout(req.user.userId);
     res.clearCookie('refresh_token');
     return { ok: true };

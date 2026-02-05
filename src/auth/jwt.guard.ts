@@ -8,14 +8,10 @@ import { SKIP_JWT_KEY } from "./skip-jwt.decorator";
 export class JwtGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
     super();
-    console.log('JwtGuard initialized');
   }
 
   canActivate(context: ExecutionContext) {
-    console.log('JwtGuard canActivate called', context.getHandler().name);
-
     if (this.hasAnyDeactivator(context)) {
-      console.log('JwtGuard: Skipping JWT validation due to deactivator');
       return true;
     }
 

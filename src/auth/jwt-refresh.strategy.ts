@@ -11,21 +11,9 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
       jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.refresh_token]),
       secretOrKey: config.get<string>('JWT_REFRESH_SECRET') as string,
     });
-
-    console.log('RefreshJwtStrategy initialized');
   }
 
-  // constructor(config: ConfigService) {
-  //   super({
-  //     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  //     secretOrKey: config.get<string>('JWT_REFRESH_SECRET'),
-  //     passReqToCallback: true, // Esto es clave para obtener el token puro
-  //   });
-  // }
-
   validate(payload: any) {
-    console.log('Validating Refresh JWT payload:', payload);
-
     return { userId: payload.sub };
   }
 }
