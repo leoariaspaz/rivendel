@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrismaExceptionFilter } from './shared/filters/prisma-exception.filter';
 import { ValidationPipe } from '@nestjs/common';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   console.log('Starting application in ' + process.env.NODE_ENV + ' at port ' + (process.env.PORT ?? 3000));
@@ -14,6 +15,7 @@ async function bootstrap() {
     credentials: true, // Si necesitas enviar cookies o cabeceras de autorización
   });
   app.getHttpAdapter().getInstance().set('etag', false); // Deshabilitar ETag
+  app.use(cookieParser());  // Middleware para parsear cookies
   await app.listen(process.env.PORT ?? 3000);
 }
 

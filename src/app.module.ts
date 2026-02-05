@@ -11,7 +11,10 @@ import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
-import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { JwtGuard } from './auth/jwt.guard';
+import * as Joi from 'joi';
+
+const env = process.env.NODE_ENV || 'local';
 
 @Module({
   imports: [
@@ -23,13 +26,32 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
     PartesReclamosModule,
     AuthModule,
     UsersModule,
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: [`.env.${env}`, '.env'],
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test', 'local')
+          .default('local'),
+        PORT: Joi.number().default(3000),
+        DATABASE_URL: Joi.string().optional(),
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().default(3306),
+        DB_USER: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
+        DB_SSL: Joi.boolean().default(false),
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: JwtGuard,
     },
   ],
 })

@@ -76,3 +76,12 @@ model PartesReclamos {
   @@unique([idParte, idReclamo])
   @@index([idReclamo], map: "PartesReclamos_idReclamo_fkey")
 }
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  refreshToken  String?  // HASHED refresh token
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}

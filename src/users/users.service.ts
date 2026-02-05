@@ -1,25 +1,36 @@
 import { Injectable } from '@nestjs/common';
-
-// This should be a real class/interface representing a user entity
-export type User = any;
+import { PrismaService } from 'src/shared/services/prisma.service';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
-  private readonly users = [
-    {
-      userId: 1,
-      username: 'john',
-      password: 'changeme',
-    },
-    {
-      userId: 2,
-      username: 'maria',
-      password: 'guess',
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    console.log(username, this.users)
-    return this.users.find(user => user.username === username);
+  async create(email: string, password: string) {
+    return this.prisma.user.create({
+      data: { email, password },
+    });
+  }
+
+  findByEmail(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  findById(id: number) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async saveRefreshToken(userId: number, token: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: token },
+    });
+  }
+
+  async clearRefreshToken(userId: number) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: null },
+    });
   }
 }
