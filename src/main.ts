@@ -6,12 +6,13 @@ import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
+  console.log(`Starting application in ${process.env.NODE_ENV}...`);
+
   const app = await NestFactory.create(AppModule);
   
   const configService = app.get(ConfigService);
   const env = configService.get<string>('NODE_ENV');
   const port = configService.get<number>('PORT') as number;
-  console.log(`Starting application in ${env}...`);
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.useGlobalFilters(new PrismaExceptionFilter());
