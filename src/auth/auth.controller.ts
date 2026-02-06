@@ -42,14 +42,14 @@ export class AuthController {
 	@SkipJwt()
   @UseGuards(JwtRefreshGuard)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const tokens = await this.authService.refreshTokens(
+    const { accessToken, refreshToken } = await this.authService.refreshTokens(
       req.user.userId,
       req.cookies.refresh_token,
     );
 
-    res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
+    res.cookie('refresh_token', refreshToken, this.authConfig.refreshCookieOptions);
 
-		return tokens;
+		return accessToken;
   }
 
   @Post('logout')
