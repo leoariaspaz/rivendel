@@ -5,11 +5,6 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      envFilePath: '/.env.local',
-    }),
-  ],
   controllers: [TipdocsController],
   providers: [PrismaService, TipdocsService],
 })

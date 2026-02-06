@@ -1,28 +1,37 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from 'src/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import "dotenv/config";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class PrismaService extends PrismaClient {
-  constructor() {
-    console.log('Connecting to database ' + process.env.DB_NAME + ' at ' + 
-      process.env.DB_HOST + ':' + process.env.DB_PORT + ' with user ' + process.env.DB_USER + 
-      ' (SSL: ' + PrismaService.envToBool(process.env.USE_SSL) + ')');
+export class PrismaService extends PrismaClient 
+  implements OnModuleInit, OnModuleDestroy
+{
+  constructor(private readonly config: ConfigService) {
+    const dbHost = config.get<string>('DB_HOST');
+    const dbPort = config.get<number>('DB_PORT');
+    const dbUser = config.get<string>('DB_USER');
+    const dbPassword = config.get<string>('DB_PASSWORD');
+    const dbName = config.get<string>('DB_NAME');
+    const useSsl = config.get<boolean>('DB_SSL');
+
+    console.log(`Connecting to database ${dbName} at ${dbHost}:${dbPort} with user ${dbUser} (SSL: ${useSsl})`);
     const adapter = new PrismaMariaDb({
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: PrismaService.envToBool(process.env.USE_SSL),
+      host: dbHost,
+      port: dbPort,
+      user: dbUser,
+      password: dbPassword,
+      database: dbName,
+      ssl: useSsl,
     });
     super({ adapter });
   }
 
-  static envToBool(value?: string, defaultValue = false): boolean {
-    if (value === undefined) return defaultValue;
+  async onModuleInit() {
+    await this.$connect();
+  }
 
-    return ['true', '1', 'yes', 'y'].includes(value.toLowerCase());
-  }  
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
 }

@@ -13,6 +13,7 @@ import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import * as Joi from 'joi';
+import { authConfig } from './auth/auth.config';
 
 const env = process.env.NODE_ENV || 'local';
 
@@ -42,8 +43,12 @@ const env = process.env.NODE_ENV || 'local';
         DB_USER: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
-        DB_SSL: Joi.boolean().default(false),
+        DB_SSL: Joi.boolean()
+                  .truthy('true', '1', 'yes', 'y')
+                  .falsy('false', '0', 'no', 'n')
+                  .default(false),
       }),
+      load: [authConfig],
     }),
   ],
   controllers: [AppController],

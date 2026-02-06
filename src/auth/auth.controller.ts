@@ -1,17 +1,19 @@
-import { Body, Controller, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
-import { REFRESH_COOKIE_OPTIONS } from './auth.constants';
 import { JwtGuard } from './jwt.guard';
 import { JwtRefreshGuard } from './jwt-refresh.guard';
 import { LocalGuard } from './local.guard';
 import { Public } from './public.decorator';
 import { SkipJwt } from './skip-jwt.decorator';
+import { authConfig, type AuthConfig } from './auth.config';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
+    @Inject(authConfig.KEY)
+    private readonly authConfig: AuthConfig
   ) {}
 
   @Post('register')
@@ -31,7 +33,7 @@ export class AuthController {
   ) {
     const tokens = await this.authService.login(req.user);
 
-		res.cookie('refresh_token', tokens.refreshToken, REFRESH_COOKIE_OPTIONS);
+		res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
 
     return { accessToken: tokens.accessToken };
   }
@@ -45,7 +47,7 @@ export class AuthController {
       req.cookies.refresh_token,
     );
 
-    res.cookie('refresh_token', tokens.refreshToken, REFRESH_COOKIE_OPTIONS);
+    res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
 
 		return tokens;
   }
