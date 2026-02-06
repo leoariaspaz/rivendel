@@ -6,7 +6,7 @@ import { JwtRefreshGuard } from './jwt-refresh.guard';
 import { LocalGuard } from './local.guard';
 import { Public } from './public.decorator';
 import { SkipJwt } from './skip-jwt.decorator';
-import { authConfig, type AuthConfig } from './auth.config';
+import { authConfig, type AuthConfig } from '../config/auth.config';
 
 @Controller('auth')
 export class AuthController {

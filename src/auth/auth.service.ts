@@ -1,16 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { type JwtConfig, jwtConfig } from 'src/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private configService: ConfigService,
+    @Inject(jwtConfig.KEY)
+    private authConfig: JwtConfig
   ) {}
 
   async register(email: string, password: string) {
@@ -22,8 +23,8 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id };
 
     const refreshTokenOptions: JwtSignOptions = {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      expiresIn: '7d',
+      secret: this.authConfig.refresh.secret,
+      expiresIn: this.authConfig.refresh.expiresIn,
     } as JwtSignOptions;
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -42,10 +43,7 @@ export class AuthService {
   }
 
   async refreshTokens(userId: number, refreshToken: string) {
-    const isValid = await this.validateRefreshToken(
-      userId,
-      refreshToken,
-    );
+    const isValid = await this.validateRefreshToken(userId, refreshToken);
 
     if (!isValid) {
       await this.usersService.clearRefreshToken(userId);

@@ -13,7 +13,8 @@ import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import * as Joi from 'joi';
-import { authConfig } from './auth/auth.config';
+import { authConfig } from './config/auth.config';
+import { databaseConfig, jwtConfig } from './config';
 
 const env = process.env.NODE_ENV || 'local';
 
@@ -36,8 +37,6 @@ const env = process.env.NODE_ENV || 'local';
           .default('local'),
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().optional(),
-        JWT_ACCESS_SECRET: Joi.string().required(),
-        JWT_REFRESH_SECRET: Joi.string().required(),
         DB_HOST: Joi.string().required(),
         DB_PORT: Joi.number().default(3306),
         DB_USER: Joi.string().required(),
@@ -47,8 +46,17 @@ const env = process.env.NODE_ENV || 'local';
                   .truthy('true', '1', 'yes', 'y')
                   .falsy('false', '0', 'no', 'n')
                   .default(false),
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
+        JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
+        FRONTEND_URL: Joi.string().uri().required(),
       }),
-      load: [authConfig],
+      load: [
+        authConfig,
+        databaseConfig,
+        jwtConfig,        
+      ],
     }),
   ],
   controllers: [AppController],

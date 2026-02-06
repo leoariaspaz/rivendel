@@ -1,9 +1,5 @@
 import { ConfigType, registerAs } from '@nestjs/config';
-
-const envToBool = (value?: string, defaultValue = false): boolean => {
-  if (value === undefined) return defaultValue;
-  return ['true', '1', 'yes', 'y'].includes(value.toLowerCase());
-};
+import { envToBool } from './utils';
 
 export const authConfig = registerAs('auth', () => ({
   refreshCookieOptions: {
