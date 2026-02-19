@@ -8,6 +8,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
 import { RefreshJwtStrategy } from './jwt-refresh.strategy';
 import { jwtConfig, type JwtConfig } from 'src/config';
+import { UsersService } from 'src/users/users.service';
 
 @Module({
   imports: [

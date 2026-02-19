@@ -14,9 +14,9 @@ export class AuthService {
     private authConfig: JwtConfig
   ) {}
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, name: string) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    return this.usersService.create(email, hashedPassword);
+    return this.usersService.create(email, hashedPassword, name);
   }
 
   async login(user: { id: number; email: string }) {

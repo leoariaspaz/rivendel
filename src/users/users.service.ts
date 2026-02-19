@@ -6,9 +6,9 @@ import * as bcrypt from 'bcryptjs';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(email: string, password: string) {
+  async create(email: string, password: string, name: string) {
     return this.prisma.user.create({
-      data: { email, password },
+      data: { email, password, nombre: name },
     });
   }
 

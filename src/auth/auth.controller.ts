@@ -7,19 +7,21 @@ import { LocalGuard } from './local.guard';
 import { Public } from './public.decorator';
 import { SkipJwt } from './skip-jwt.decorator';
 import { authConfig, type AuthConfig } from '../config/auth.config';
+import { UsersService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
+    private userService: UsersService,
     @Inject(authConfig.KEY)
     private readonly authConfig: AuthConfig
   ) {}
 
   @Post('register')
 	@Public()
-  async register(@Body() dto: { email: string; password: string }) {
-    const user = this.authService.register(dto.email, dto.password);
+  async register(@Body() dto: { email: string; password: string, name: string }) {
+    const user = this.authService.register(dto.email, dto.password, dto.name);
 		const { password, ...safeUser } = await user;
 		return safeUser;
   }
@@ -35,7 +37,9 @@ export class AuthController {
 
 		res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
 
-    return { accessToken: tokens.accessToken };
+    const userName = await this.userService.findById(req.user.id).then(user => user?.nombre || '[Usuario sin nombre]');
+
+    return { accessToken: tokens.accessToken, userName };
   }
 
   @Post('refresh')
@@ -49,7 +53,9 @@ export class AuthController {
 
     res.cookie('refresh_token', refreshToken, this.authConfig.refreshCookieOptions);
 
-		return accessToken;
+    const userName = await this.userService.findById(req.user.userId).then(user => user?.nombre || '[Usuario sin nombre]');
+
+		return { accessToken, userName };
   }
 
   @Post('logout')
