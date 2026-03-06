@@ -4,6 +4,7 @@ import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
+import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
 
 @Injectable()
 export class PartesService {
@@ -50,14 +51,6 @@ export class PartesService {
     esApoderado: true
   } as const;
 
-  async findAll() {
-    const data = await this.prisma.parte.findMany({
-      orderBy: { nombre: 'asc' },
-      select: this.SELECT_FIELDS,
-    });
-    return this.selectPartes(data);
-  }
-
   mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
     const result = {
       id: p.id,
@@ -86,20 +79,6 @@ export class PartesService {
 
   selectPartes(data: ParteDB[]): FindParteDTO[] {
     return data.map(this.mapParteDBToFindParteDTO);
-  }
-
-  async findAllPaginated(page: number, limit: number): Promise<FindParteDTO[]> {
-    const skip = (page - 1) * limit;
-    const data = await this.prisma.parte.findMany({
-      skip,
-      take: Number(limit),
-      orderBy: {
-        nombre: 'asc',
-      },
-      select: this.SELECT_FIELDS,
-    });
-
-    return this.selectPartes(data);
   }
 
   async findOne(id: number) {
@@ -137,8 +116,27 @@ export class PartesService {
     });
   }
 
-  getTotalCount() {
-    return this.prisma.parte.count();
+  getTotalCount(query: string | null) {
+    let filter = {} as ParteCountArgs
+    if (query) {
+      filter = { 
+        where: {
+          OR: [
+            {
+              nombre: {
+                contains: query,
+              },
+            },
+            {
+              cuil: {
+                contains: query,
+              },
+            },
+          ],
+        },
+      }
+    }
+    return this.prisma.parte.count(filter);
   }
 
   getFilteredTotalCount(term: string) {
@@ -162,31 +160,40 @@ export class PartesService {
     }
   }
 
-  search(term: string, page: number, limit: number) {
-    const skip = (page - 1) * limit;
-    return this.prisma.parte
-      .findMany({
-        where: {
-          OR: [
-            {
-              nombre: {
-                contains: term,
-              },
-            },
-            {
-              cuil: {
-                contains: term,
-              },
-            },
-          ],
-        },
+  findAll(query: string | null, page: number | null, limit: number | null) {
+    let filters: ParteFindManyArgs = {
         orderBy: {
           nombre: 'asc',
         },
         select: this.SELECT_FIELDS,
-        skip,
-        take: Number(limit),
-      })
+      }
+
+    if (page && limit && page > 0) {
+      const skip = (page - 1) * limit;
+      filters = { ...filters, skip, take: Number(limit) } as ParteFindManyArgs
+    }
+
+    if (query) {
+      filters = { ...filters,         
+        where: {
+          OR: [
+            {
+              nombre: {
+                contains: query,
+              },
+            },
+            {
+              cuil: {
+                contains: query,
+              },
+            },
+          ],
+        },
+      } as ParteFindManyArgs
+    }
+    
+    return this.prisma.parte
+      .findMany(filters)
       .then((data) => this.selectPartes(data));
   }
 }

@@ -23,25 +23,12 @@ export class PartesController {
 
   @Get()
   async findAll(
+    @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
     @Query('limit') limit: number | null = null,
   ) {
-    if (page === null || limit === null) {
-      return await this.partesService.findAll();
-    }
-    const totalRecords = await this.partesService.getTotalCount();
-    const data = await this.partesService.findAllPaginated(page, limit);
-    return { data, totalRecords };
-  }
-
-  @Get('search')
-  async search(
-    @Query('q') term: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ) {
-    const totalRecords = await this.partesService.getFilteredTotalCount(term);
-    const data = await this.partesService.search(term, page, limit);    
+    const totalRecords = await this.partesService.getTotalCount(query);
+    const data = await this.partesService.findAll(query, page, limit)
     return { data, totalRecords };
   }
 
