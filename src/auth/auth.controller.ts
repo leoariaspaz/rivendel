@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Inject, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtGuard } from './jwt.guard';
@@ -13,7 +13,7 @@ import { UsersService } from 'src/users/users.service';
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private userService: UsersService,
+    private usersService: UsersService,
     @Inject(authConfig.KEY)
     private readonly authConfig: AuthConfig
   ) {}
@@ -37,7 +37,7 @@ export class AuthController {
 
 		res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
 
-    const userName = await this.userService.findById(req.user.id).then(user => user?.nombre || '[Usuario sin nombre]');
+    const userName = await this.usersService.findById(req.user.id).then(user => user?.nombre || '[Usuario sin nombre]');
 
     return { accessToken: tokens.accessToken, userName };
   }
@@ -53,7 +53,7 @@ export class AuthController {
 
     res.cookie('refresh_token', refreshToken, this.authConfig.refreshCookieOptions);
 
-    const userName = await this.userService.findById(req.user.userId).then(user => user?.nombre || '[Usuario sin nombre]');
+    const userName = await this.usersService.findById(req.user.userId).then(user => user?.nombre || '[Usuario sin nombre]');
 
 		return { accessToken, userName };
   }

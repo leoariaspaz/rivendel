@@ -15,7 +15,7 @@ export class AuthService {
   ) {}
 
   async register(email: string, password: string, name: string) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await this.hashPasword(password);
     return this.usersService.create(email, hashedPassword, name);
   }
 
@@ -62,5 +62,13 @@ export class AuthService {
     if (!user || !user.refreshToken) return false;
 
     return bcrypt.compare(token, user.refreshToken);
+  }
+
+  async validateUserPassword(password: string, hash: string) {
+    return await bcrypt.compare(password, hash);
+  }
+
+  async hashPasword(password: string) {
+    return await bcrypt.hash(password, 10);
   }
 }

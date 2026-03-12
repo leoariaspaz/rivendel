@@ -15,7 +15,7 @@ async function bootstrap() {
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.useGlobalFilters(new PrismaExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
 
   console.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
   app.enableCors({

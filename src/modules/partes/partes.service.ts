@@ -5,17 +5,16 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
 import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
+import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class PartesService {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
-    const idPatrocinante = createParteDto.idPatrocinante
-      ? Number(createParteDto.idPatrocinante)
-      : null;
+    const idPatrocinante = createParteDto.idPatrocinante ? Number(createParteDto.idPatrocinante) : null;
     return this.prisma.parte.create({
-      data: {        
+      data: {
         nombre: createParteDto.nombre,
         idTipoDocumento: Number(createParteDto.idTipoDocumento),
         nroDocumento: createParteDto.nroDocumento,
@@ -45,10 +44,10 @@ export class PartesService {
         nroMatricula: true,
         nombre: true,
         domicilio: true,
-        localidad: true
+        localidad: true,
       },
     },
-    esApoderado: true
+    esApoderado: true,
   } as const;
 
   mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
@@ -70,7 +69,7 @@ export class PartesService {
         nombre: p.patrocinante.nombre,
         nroMatricula: p.patrocinante.nroMatricula,
         domicilio: p.patrocinante.domicilio,
-        localidad: p.patrocinante.localidad
+        localidad: p.patrocinante.localidad,
       };
     }
 
@@ -92,9 +91,7 @@ export class PartesService {
   }
 
   update(id: number, updateParteDto: UpdateParteDto) {
-    const idPatrocinante = updateParteDto.idPatrocinante
-      ? Number(updateParteDto.idPatrocinante)
-      : null;
+    const idPatrocinante = updateParteDto.idPatrocinante ? Number(updateParteDto.idPatrocinante) : null;
     return this.prisma.parte.update({
       where: { id },
       data: {
@@ -117,9 +114,9 @@ export class PartesService {
   }
 
   getTotalCount(query: string | null) {
-    let filter = {} as ParteCountArgs
+    let filter = {} as ParteCountArgs;
     if (query) {
-      filter = { 
+      filter = {
         where: {
           OR: [
             {
@@ -134,7 +131,7 @@ export class PartesService {
             },
           ],
         },
-      }
+      };
     }
     return this.prisma.parte.count(filter);
   }
@@ -161,20 +158,16 @@ export class PartesService {
   }
 
   findAll(query: string | null, page: number | null, limit: number | null) {
-    let filters: ParteFindManyArgs = {
-        orderBy: {
-          nombre: 'asc',
-        },
-        select: this.SELECT_FIELDS,
-      }
+    let filters: ParteFindManyArgs = {};
 
     if (page && limit && page > 0) {
       const skip = (page - 1) * limit;
-      filters = { ...filters, skip, take: Number(limit) } as ParteFindManyArgs
+      filters = { ...filters, skip, take: Number(limit) } as ParteFindManyArgs;
     }
 
     if (query) {
-      filters = { ...filters,         
+      filters = {
+        ...filters,
         where: {
           OR: [
             {
@@ -189,11 +182,14 @@ export class PartesService {
             },
           ],
         },
-      } as ParteFindManyArgs
+      };
     }
-    
+
     return this.prisma.parte
-      .findMany(filters)
+      .findMany({
+        ...filters,
+        select: this.SELECT_FIELDS,
+      })
       .then((data) => this.selectPartes(data));
   }
 }
