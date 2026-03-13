@@ -1,4 +1,4 @@
 export class CreateResolucionDto {
-  descripcion: string;
-  detalle: string;
+  descripcion!: string;
+  detalle!: string;
 }

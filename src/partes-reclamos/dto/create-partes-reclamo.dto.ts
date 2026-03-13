@@ -1,4 +1,4 @@
 export class CreatePartesReclamoDto {
-  idParte: number;
-  idReclamo: number;
+  idParte!: number;
+  idReclamo!: number;
 }

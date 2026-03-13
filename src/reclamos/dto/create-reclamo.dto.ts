@@ -11,22 +11,22 @@ import {
 import { PartesReclamoDTO } from './partes-reclamo.dto';
 
 export class CreateReclamoDto {
-  id: number;
+  id!: number;
 
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
   @IsInt({ message: 'El número debe ser un valor entero.' })
   @Min(1, { message: 'El número debe ser un valor positivo.' })
   @Type(() => Number)
-  numero: number;
+  numero!: number;
 
-  rubros: string;
+  rubros!: string;
 
   @Min(0, { message: 'Debe ingresar una resolución.' })
-  idResolucion: number;
+  idResolucion!: number;
 
   @Type(() => Date)
   @IsNotEmpty({ message: 'Debe ingresar la fecha y hora de inicio.' })
-  fechaHoraInicio: Date;
+  fechaHoraInicio!: Date;
 
   @IsOptional()
   @Type(() => Date)

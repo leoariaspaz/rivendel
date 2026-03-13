@@ -6,9 +6,9 @@ export class CreateTipdocDto {
   @MaxLength(50, {
     message: 'El sintético no debe exceder los 50 caracteres.',
   })
-  sintetico: string;
+  sintetico!: string;
 
   @IsString({ message: 'La descripción debe ser una cadena de texto.' })
   @IsNotEmpty({ message: 'Debe ingresar una descripción.' })
-  descripcion: string;
+  descripcion!: string;
 }
