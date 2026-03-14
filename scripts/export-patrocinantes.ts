@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
 
+//npx ts-node scripts/export-db.ts 
 async function main() {
   dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
