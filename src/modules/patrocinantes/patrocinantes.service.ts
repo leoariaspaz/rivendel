@@ -112,6 +112,10 @@ export class PatrocinantesService {
   }
 
   async exists(id: number) {
-    return (await this.prisma.patrocinante.findFirst({ where: { id: id } })) !== null;
+    return (await this.prisma.patrocinante.findFirst({ where: { id } })) !== null;
+  }
+
+  async existsNroMatricula(nroMatricula: number) {
+    return (await this.prisma.patrocinante.findFirst({ where: { nroMatricula } })) !== null;
   }
 }

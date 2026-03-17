@@ -13,8 +13,8 @@ import { MustExistPatrocinante } from 'src/validators/MustExistPatrocinante';
 import { MustExistTipoDocumento } from 'src/validators/MustExistTipoDocumento';
 
 export class CreateParteDto {
-  @IsString({ message: 'El nombre debe ser una cadena de texto.' })
-  @MinLength(2, { message: 'El nombre es demasiado corto.' })
+  @IsString({ message: 'El nombre es incorrecto.' })
+  @MinLength(4, { message: 'El nombre es demasiado corto.' })
   @IsNotEmpty({ message: 'Debe ingresar un nombre.' })
   nombre!: string;
 

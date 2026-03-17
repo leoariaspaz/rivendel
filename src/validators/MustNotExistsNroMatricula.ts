@@ -6,30 +6,30 @@ import {
 	ValidatorConstraint,
 	ValidatorConstraintInterface,
 } from 'class-validator';
-import { TipdocsService } from 'src/modules/tipdocs/tipdocs.service';
+import { PatrocinantesService } from 'src/modules/patrocinantes/patrocinantes.service';
 
 @ValidatorConstraint({ async: true })
 @Injectable()
-export class MustExistTipoDocumentoConstraint implements ValidatorConstraintInterface {
-	constructor(private readonly tipoDocumentoService: TipdocsService) {}
+export class MustNotExistsNroMatriculaConstraint implements ValidatorConstraintInterface {
+	constructor(private readonly patrocinantesService: PatrocinantesService) {}
 
 	validate(value: number, validationArguments?: ValidationArguments): Promise<boolean> | boolean {
-		return this.tipoDocumentoService.exists(value);
+		return !this.patrocinantesService.exists(value);
 	}
 
 	defaultMessage?(validationArguments?: ValidationArguments): string {
-		return 'No existe el tipo de documento.';
+		return 'Ya existe el número de matrícula.';
 	}
 }
 
-export function MustExistTipoDocumento(validationOptions?: ValidationOptions) {
+export function MustNotExistsNroMatricula(validationOptions?: ValidationOptions) {
 	return function (object: Object, propertyName: string) {
 		registerDecorator({
 			target: object.constructor,
 			propertyName: propertyName,
 			options: validationOptions,
 			constraints: [],
-			validator: MustExistTipoDocumentoConstraint,
+			validator: MustNotExistsNroMatriculaConstraint,
 		});
 	};
 }
