@@ -28,13 +28,13 @@ export class PatrocinantesService {
       l = undefined;
       skip = undefined;
     }
-    let filter = {}
+    let filter = {};
     if (query) {
       filter = {
         OR: [
           {
             nombre: {
-              contains: (query === null)? undefined : query,
+              contains: query === null ? undefined : query,
             },
           },
           {
@@ -48,7 +48,7 @@ export class PatrocinantesService {
             },
           },
         ],
-      }
+      };
     }
     return this.prisma.patrocinante.findMany({
       where: filter,
@@ -86,13 +86,13 @@ export class PatrocinantesService {
   }
 
   getTotalCount(query: string | null) {
-    let filter = {}
+    let filter = {};
     if (query) {
       filter = {
         OR: [
           {
             nombre: {
-              contains: (query === null)? undefined : query,
+              contains: query === null ? undefined : query,
             },
           },
           {
@@ -106,8 +106,12 @@ export class PatrocinantesService {
             },
           },
         ],
-      }
+      };
     }
     return this.prisma.patrocinante.count({ where: filter });
+  }
+
+  async exists(id: number) {
+    return (await this.prisma.patrocinante.findFirst({ where: { id: id } })) !== null;
   }
 }

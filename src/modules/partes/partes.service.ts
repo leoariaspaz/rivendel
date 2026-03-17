@@ -5,21 +5,19 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
 import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
-import { Prisma } from 'src/generated/prisma/client';
 
 @Injectable()
 export class PartesService {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
-    const idPatrocinante = createParteDto.idPatrocinante ? Number(createParteDto.idPatrocinante) : null;
     return this.prisma.parte.create({
       data: {
         nombre: createParteDto.nombre,
-        idTipoDocumento: Number(createParteDto.idTipoDocumento),
+        idTipoDocumento: createParteDto.idTipoDocumento,
         nroDocumento: createParteDto.nroDocumento,
-        cuil: String(createParteDto.cuil),
-        idPatrocinante: idPatrocinante,
+        cuil: createParteDto.cuil ?? '',
+        idPatrocinante: createParteDto.idPatrocinante ?? null,
         esApoderado: createParteDto.esApoderado,
         domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,

@@ -60,4 +60,8 @@ export class TipdocsService {
       where: { id },
     });
   }
+
+  async exists(id: number) {
+    return (await this.prisma.tipoDocumento.findFirst({ where: { id: id } })) !== null;
+  }
 }

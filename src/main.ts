@@ -4,6 +4,7 @@ import { PrismaExceptionFilter } from './shared/filters/prisma-exception.filter'
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   console.log(`Starting application in ${process.env.NODE_ENV}...`);
@@ -15,7 +16,9 @@ async function bootstrap() {
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.useGlobalFilters(new PrismaExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({ transform: true, stopAtFirstError: true }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
   console.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
   app.enableCors({

@@ -15,6 +15,7 @@ import { JwtGuard } from './auth/jwt.guard';
 import * as Joi from 'joi';
 import { authConfig } from './config/auth.config';
 import { databaseConfig, jwtConfig } from './config';
+import { ValidatorsModule } from './validators/validators.module';
 
 const env = process.env.NODE_ENV || 'local';
 
@@ -28,6 +29,7 @@ const env = process.env.NODE_ENV || 'local';
     PartesReclamosModule,
     AuthModule,
     UsersModule,
+    ValidatorsModule,
     ConfigModule.forRoot({ 
       isGlobal: true,
       envFilePath: [`.env.${env}`, '.env'],

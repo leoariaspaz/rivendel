@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { PartesService } from './partes.service';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
@@ -25,10 +16,10 @@ export class PartesController {
   async findAll(
     @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
-    @Query('limit') limit: number | null = null,
+    @Query('limit') limit: number | null = null
   ) {
     const totalRecords = await this.partesService.getTotalCount(query);
-    const data = await this.partesService.findAll(query, page, limit)
+    const data = await this.partesService.findAll(query, page, limit);
     return { data, totalRecords };
   }
 
