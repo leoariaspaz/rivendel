@@ -190,4 +190,8 @@ export class PartesService {
       })
       .then((data) => this.selectPartes(data));
   }
+
+  async exists(id: number): Promise<boolean> {
+    return (await this.prisma.parte.findFirst({ where: { id }}) !== null);
+  }
 }

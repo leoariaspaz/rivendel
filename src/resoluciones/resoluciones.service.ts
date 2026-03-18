@@ -59,4 +59,8 @@ export class ResolucionesService {
       where: { id },
     });
   }
+
+	async exists(id: number): Promise<boolean> {
+		return (await this.prisma.resolucion.findFirst({ where: { id }}) !== null);
+	}
 }

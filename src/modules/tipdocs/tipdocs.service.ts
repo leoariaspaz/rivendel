@@ -61,7 +61,7 @@ export class TipdocsService {
     });
   }
 
-  async exists(id: number) {
+  async exists(id: number): Promise<boolean> {
     return (await this.prisma.tipoDocumento.findFirst({ where: { id: id } })) !== null;
   }
 }

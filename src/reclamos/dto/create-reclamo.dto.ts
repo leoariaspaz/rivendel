@@ -1,27 +1,21 @@
-import {
-  ArrayUnique,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  Min,
-} from 'class-validator';
-import { 
-  Type,
-} from 'class-transformer';
+import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min, ValidateIf } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PartesReclamoDTO } from './partes-reclamo.dto';
+import { MustExistResolucion } from 'src/validators/MustExistResolucion';
 
 export class CreateReclamoDto {
-  id!: number;
-
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
   @IsInt({ message: 'El número debe ser un valor entero.' })
   @Min(1, { message: 'El número debe ser un valor positivo.' })
   @Type(() => Number)
   numero!: number;
 
+  @ValidateIf(r => r.rubros)
+  @IsString({ message: 'Los rubros ingresados son incorrectos.' })
   rubros!: string;
 
   @Min(0, { message: 'Debe ingresar una resolución.' })
+  @MustExistResolucion()
   idResolucion!: number;
 
   @Type(() => Date)

@@ -5,7 +5,6 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { Reclamo } from './entities/reclamo.entity';
 
 @Injectable()
 export class ReclamosService {
