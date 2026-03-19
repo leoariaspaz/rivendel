@@ -1,7 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  BadRequestException,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { PartesService } from './partes.service';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
+import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 
 @Controller('partes')
 export class PartesController {
@@ -34,7 +46,7 @@ export class PartesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.partesService.remove(+id);
+  remove(@Param('id', ValidateIntRelationPipe(PartesService)) id: number) {
+    return this.partesService.remove(id);
   }
 }

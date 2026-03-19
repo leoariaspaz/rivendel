@@ -10,13 +10,13 @@ async function bootstrap() {
   console.log(`Starting application in ${process.env.NODE_ENV}...`);
 
   const app = await NestFactory.create(AppModule);
-  
+
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') as number;
 
   const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.useGlobalFilters(new PrismaExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
@@ -27,7 +27,7 @@ async function bootstrap() {
     credentials: true, // Si necesitas enviar cookies o cabeceras de autorización
   });
   app.getHttpAdapter().getInstance().set('etag', false); // Deshabilitar ETag
-  app.use(cookieParser());  // Middleware para parsear cookies
+  app.use(cookieParser()); // Middleware para parsear cookies
   await app.listen(port);
 }
 

@@ -5,9 +5,10 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
 import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
+import { RelationshipValidation, RelationshipValidationResult } from '../../pipes/interfaces/relationship-validation.interface';
 
 @Injectable()
-export class PartesService {
+export class PartesService implements RelationshipValidation {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
@@ -192,6 +193,16 @@ export class PartesService {
   }
 
   async exists(id: number): Promise<boolean> {
-    return (await this.prisma.parte.findFirst({ where: { id }}) !== null);
+    return (await this.prisma.parte.findFirst({ where: { id } })) !== null;
+  }
+
+  async validate(value: number): Promise<RelationshipValidationResult> {
+    const parte = await this.prisma.parte.findFirst({ where: { id: value }, select: { reclamos: true } });
+    const cantReclamos = parte?.reclamos?.length ?? 0;
+    if (cantReclamos > 0) {
+      return { isValid: false, message: 'Hay reclamos relacionados.' };
+    } else {
+      return { isValid: false, message: '' };
+    }
   }
 }
