@@ -11,6 +11,7 @@ import {
 import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
+import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 
 @Controller('patrocinantes')
 export class PatrocinantesController {
@@ -46,7 +47,7 @@ export class PatrocinantesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.patrocinantesService.remove(+id);
+  remove(@Param('id', ValidateIntRelationPipe(PatrocinantesService)) id: number) {
+    return this.patrocinantesService.remove(id);
   }
 }

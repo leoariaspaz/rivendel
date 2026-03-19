@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { RelationshipValidation, RelationshipValidationResult } from 'src/pipes/interfaces/relationship-validation.interface';
 
 @Injectable()
-export class PatrocinantesService {
+export class PatrocinantesService implements RelationshipValidation {
   constructor(private prisma: PrismaService) {}
 
   create(createPatrocinanteDto: CreatePatrocinanteDto) {
@@ -117,5 +118,15 @@ export class PatrocinantesService {
 
   async existsNroMatricula(nroMatricula: number) {
     return (await this.prisma.patrocinante.findFirst({ where: { nroMatricula } })) !== null;
+  }
+
+  async validate(value: number): Promise<RelationshipValidationResult> {
+    const p = await this.prisma.patrocinante.findFirst({ where: { id: value }, select: { partes: true } });
+    const cantPartes = p?.partes?.length ?? 0;
+    if (cantPartes > 0) {
+      return { isValid: false, message: 'Hay partes relacionadas.' };
+    } else {
+      return { isValid: false, message: '' };
+    }    
   }
 }
