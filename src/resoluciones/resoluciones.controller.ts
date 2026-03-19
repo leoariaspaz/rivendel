@@ -11,6 +11,7 @@ import {
 import { ResolucionesService } from './resoluciones.service';
 import { CreateResolucionDto } from './dto/create-resolucion.dto';
 import { UpdateResolucionDto } from './dto/update-resolucion.dto';
+import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 
 @Controller('resoluciones')
 export class ResolucionesController {
@@ -48,7 +49,7 @@ export class ResolucionesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.resolucionesService.remove(+id);
+  remove(@Param('id', ValidateIntRelationPipe(ResolucionesService)) id: number) {
+    return this.resolucionesService.remove(id);
   }
 }

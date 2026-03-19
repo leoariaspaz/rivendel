@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateResolucionDto } from './dto/create-resolucion.dto';
 import { UpdateResolucionDto } from './dto/update-resolucion.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { RelationshipValidation, RelationshipValidationResult } from 'src/pipes/interfaces/relationship-validation.interface';
 
 @Injectable()
-export class ResolucionesService {
+export class ResolucionesService implements RelationshipValidation {
   constructor(private prisma: PrismaService) {}
-
   create(createResolucionDto: CreateResolucionDto) {
     return this.prisma.resolucion.create({
       data: {
@@ -63,4 +63,14 @@ export class ResolucionesService {
 	async exists(id: number): Promise<boolean> {
 		return (await this.prisma.resolucion.findFirst({ where: { id }}) !== null);
 	}
+
+  async validate(value: number): Promise<RelationshipValidationResult> {
+    const parte = await this.prisma.resolucion.findFirst({ where: { id: value }, select: { reclamos: true } });
+    const cantReclamos = parte?.reclamos?.length ?? 0;
+    if (cantReclamos > 0) {
+      return { isValid: false, message: 'Hay reclamos relacionados.' };
+    } else {
+      return { isValid: false, message: '' };
+    }    
+  }
 }

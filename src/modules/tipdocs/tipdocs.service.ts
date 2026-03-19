@@ -68,7 +68,7 @@ export class TipdocsService implements RelationshipValidation {
     return (await this.prisma.tipoDocumento.findFirst({ where: { id: id } })) !== null;
   }
 
-  async validate(value: any): Promise<RelationshipValidationResult> {
+  async validate(value: number): Promise<RelationshipValidationResult> {
     const parte = await this.prisma.tipoDocumento.findFirst({ where: { id: value }, select: { partes: true } });
     const cantPartes = parte?.partes?.length ?? 0;
     if (cantPartes > 0) {

@@ -46,7 +46,7 @@ export class TipdocsController {
   }
 
   @Delete(':id')
-  remove(@Param('id', ValidateIntRelationPipe(TipdocsService)) id: string) {
-    return this.tipdocsService.remove(+id);
+  remove(@Param('id', ValidateIntRelationPipe(TipdocsService)) id: number) {
+    return this.tipdocsService.remove(id);
   }
 }
