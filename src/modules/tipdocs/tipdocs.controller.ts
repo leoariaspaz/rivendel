@@ -11,6 +11,7 @@ import {
 import { TipdocsService } from './tipdocs.service';
 import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
+import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 
 @Controller('tipdocs')
 export class TipdocsController {
@@ -45,7 +46,7 @@ export class TipdocsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ValidateIntRelationPipe(TipdocsService)) id: string) {
     return this.tipdocsService.remove(+id);
   }
 }
