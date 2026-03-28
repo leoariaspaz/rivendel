@@ -125,13 +125,9 @@ export class PatrocinantesService implements RelationshipValidation, ShouldExist
     return (await this.prisma.patrocinante.findFirst({ where: { nroMatricula } })) !== null;
   }
 
-  async validate(value: number): Promise<RelationshipValidationResult> {
+  async isRelated(value: number): Promise<RelationshipValidationResult> {
     const p = await this.prisma.patrocinante.findFirst({ where: { id: value }, select: { partes: true } });
     const cantPartes = p?.partes?.length ?? 0;
-    if (cantPartes > 0) {
-      return { isValid: false, message: 'Hay partes relacionadas.' };
-    } else {
-      return { isValid: false, message: '' };
-    }
+    return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 }

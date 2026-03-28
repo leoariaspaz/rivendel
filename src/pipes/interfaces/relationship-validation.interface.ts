@@ -1,8 +1,8 @@
 export interface RelationshipValidation {
-	validate(value: any): RelationshipValidationResult | Promise<RelationshipValidationResult>;
+	isRelated(value: any): RelationshipValidationResult | Promise<RelationshipValidationResult>;
 }
 
 export interface RelationshipValidationResult {
-	isValid: boolean;
+	hasRelations: boolean;
 	message: string | undefined;
 }

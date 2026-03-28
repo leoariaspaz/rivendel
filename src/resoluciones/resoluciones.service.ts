@@ -69,13 +69,9 @@ export class ResolucionesService implements RelationshipValidation, ShouldExistR
     return { isValid: exist, message: exist ? '' : 'No existe la resolución.' };
   }
 
-  async validate(value: number): Promise<RelationshipValidationResult> {
+  async isRelated(value: number): Promise<RelationshipValidationResult> {
     const parte = await this.prisma.resolucion.findFirst({ where: { id: value }, select: { reclamos: true } });
     const cantReclamos = parte?.reclamos?.length ?? 0;
-    if (cantReclamos > 0) {
-      return { isValid: false, message: 'Hay reclamos relacionados.' };
-    } else {
-      return { isValid: false, message: '' };
-    }
+    return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
 }

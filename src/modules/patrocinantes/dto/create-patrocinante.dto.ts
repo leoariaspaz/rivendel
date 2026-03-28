@@ -1,5 +1,4 @@
 import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
-import { MustNotExistsNroMatricula } from "src/validators/MustNotExistsNroMatricula";
 
 export class CreatePatrocinanteDto {
   @IsString({ message: "El nombre es incorrecto." })
@@ -10,7 +9,6 @@ export class CreatePatrocinanteDto {
   @IsNotEmpty({ message: "Debe ingresar un número de matrícula." })
   @IsInt({ message: 'El número de matrícula es incorrecto.' })
   @IsPositive({ message: 'El número de matrícula debe ser positivo.' })
-  @MustNotExistsNroMatricula()
   nroMatricula!: number;
 
   @IsOptional()

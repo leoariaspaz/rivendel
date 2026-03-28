@@ -5,7 +5,6 @@ import { RelationshipValidation } from './interfaces/relationship-validation.int
 export function ValidateIntRelationPipe(validatorClass: Type<RelationshipValidation>): Type<PipeTransform> {
   @Injectable()
   class MixinRelationshipValidationPipe implements PipeTransform {
-    // Usamos ModuleRef para obtener la instancia del servicio desde el contenedor de Nest
     constructor(private moduleRef: ModuleRef) {}
 
     async transform(value: any, metadata: ArgumentMetadata): Promise<number> {
@@ -20,9 +19,9 @@ export function ValidateIntRelationPipe(validatorClass: Type<RelationshipValidat
 				throw new BadRequestException(['El valor del parámetro es incorrecto.']);
 			}
 
-      const result = await validator.validate(intValue);
+      const result = await validator.isRelated(intValue);
 
-      if (!result.isValid) {
+      if (result.hasRelations) {
         throw new BadRequestException([result.message || 'Hay datos relacionados.']);
       }
 

@@ -70,13 +70,9 @@ export class TipdocsService implements RelationshipValidation, ShouldExistRelati
     return { isValid: exist, message: exist ? '' : 'No existe el tipo de documento.' };
   }
 
-  async validate(value: number): Promise<RelationshipValidationResult> {
+  async isRelated(value: number): Promise<RelationshipValidationResult> {
     const parte = await this.prisma.tipoDocumento.findFirst({ where: { id: value }, select: { partes: true } });
     const cantPartes = parte?.partes?.length ?? 0;
-    if (cantPartes > 0) {
-      return { isValid: false, message: 'Hay partes relacionadas.' };
-    } else {
-      return { isValid: false, message: '' };
-    }
+    return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 }
