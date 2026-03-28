@@ -6,7 +6,7 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(email: string, password: string, name: string) {
-    const exist = (await this.prisma.user.count({ where: { OR: [{ email }, { name }] } })) > 0;
+    const exist = (await this.prisma.user.count({ where: { OR: [{ email }, { nombre: name }] } })) > 0;
     if (exist) {
       throw new Error('Ese nombre de usuario o email ya están en uso. Prueba con otro.');
     }
