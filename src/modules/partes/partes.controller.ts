@@ -10,7 +10,7 @@ export class PartesController {
 
   @Post()
   async create(@Body() createParteDto: CreateParteDto) {
-    if (await this.partesService.findByNroDocumento({ nroDocumento: createParteDto.nroDocumento })) {
+    if (await this.partesService.isUnique({ nroDocumento: createParteDto.nroDocumento })) {
       throw new BadRequestException(['Ya existe una parte con este número de documento.']);
     }
     return this.partesService.create(createParteDto);
@@ -34,7 +34,7 @@ export class PartesController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateParteDto: UpdateParteDto) {
-    if (await this.partesService.findByNroDocumento({ id, nroDocumento: updateParteDto.nroDocumento })) {
+    if (await this.partesService.isUnique({ id, nroDocumento: updateParteDto.nroDocumento })) {
       throw new BadRequestException(['Ya existe una parte con este número de documento.']);
     }
     return this.partesService.update(+id, updateParteDto);

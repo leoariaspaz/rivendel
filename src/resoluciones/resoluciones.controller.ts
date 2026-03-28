@@ -10,7 +10,7 @@ export class ResolucionesController {
 
   @Post()
   async create(@Body() createResolucionDto: CreateResolucionDto) {
-    if (await this.resolucionesService.findByDescripcion({ descripcion: createResolucionDto.descripcion })) {
+    if (await this.resolucionesService.isUnique({ descripcion: createResolucionDto.descripcion })) {
       throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
     }
     return this.resolucionesService.create(createResolucionDto);
@@ -33,7 +33,7 @@ export class ResolucionesController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateResolucioneDto: UpdateResolucionDto) {
-    if (await this.resolucionesService.findByDescripcion({ id, descripcion: updateResolucioneDto.descripcion })) {
+    if (await this.resolucionesService.isUnique({ id, descripcion: updateResolucioneDto.descripcion })) {
       throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
     }
     return this.resolucionesService.update(+id, updateResolucioneDto);

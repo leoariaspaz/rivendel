@@ -77,11 +77,11 @@ export class TipdocsService implements RelationshipValidation, ShouldExistRelati
     return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 
-  async findBySintetico(filter: { id?: number; sintetico: string }): Promise<Boolean> {
+  async isUnique(filter: { id?: number; sintetico: string }): Promise<Boolean> {
     let args = { sintetico: filter.sintetico } as TipoDocumentoWhereInput;
     if (filter.id) {
-      args = { ...args, id: filter.id };
+      args = { ...args, id: { not: filter.id } };
     }
-    return (await this.prisma.tipoDocumento.count({ where: args })) > 0;
+    return (await this.prisma.tipoDocumento.count({ where: args })) === 0;
   }
 }

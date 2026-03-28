@@ -76,11 +76,11 @@ export class ResolucionesService implements RelationshipValidation, ShouldExistR
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
 
-  async findByDescripcion(filter: { id?: number; descripcion: string | undefined }): Promise<Boolean> {
+  async isUnique(filter: { id?: number; descripcion: string | undefined }): Promise<Boolean> {
     let args = { descripcion: filter.descripcion } as ResolucionWhereInput;
     if (filter.id) {
-      args = { ...args, id: filter.id };
+      args = { ...args, id: { not: filter.id } };
     }
-    return (await this.prisma.resolucion.count({ where: args })) > 0;
+    return (await this.prisma.resolucion.count({ where: args })) === 0;
   }
 }

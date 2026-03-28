@@ -10,7 +10,7 @@ export class TipdocsController {
 
   @Post()
   async create(@Body() createTipdocDto: CreateTipdocDto) {
-    if (await this.tipdocsService.findBySintetico({ sintetico: createTipdocDto.sintetico })) {
+    if (await this.tipdocsService.isUnique({ sintetico: createTipdocDto.sintetico })) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
     }
     return this.tipdocsService.create(createTipdocDto);
@@ -33,7 +33,7 @@ export class TipdocsController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateTipdocDto: UpdateTipdocDto) {
-    if (await this.tipdocsService.findBySintetico({ id, sintetico: updateTipdocDto.sintetico })) {
+    if (await this.tipdocsService.isUnique({ id, sintetico: updateTipdocDto.sintetico })) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
     }
     return this.tipdocsService.update(+id, updateTipdocDto);

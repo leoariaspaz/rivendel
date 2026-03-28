@@ -132,11 +132,11 @@ export class PatrocinantesService implements RelationshipValidation, ShouldExist
     return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 
-  async findByNroMatricula(filter: { id?: number | undefined, nroMatricula: number | undefined }): Promise<Boolean> {
+  async isUnique(filter: { id?: number | undefined, nroMatricula: number | undefined }): Promise<Boolean> {
     let args = { nroMatricula: filter.nroMatricula } as PatrocinanteWhereInput;
     if (filter.id) {
-      args = { ...args, id: filter.id };
+      args = { ...args, id: { not: filter.id } };
     }
-    return await this.prisma.patrocinante.count({ where: args }) > 0;
+    return await this.prisma.patrocinante.count({ where: args }) === 0;
   }
 }

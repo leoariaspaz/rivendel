@@ -10,7 +10,7 @@ export class PatrocinantesController {
 
   @Post()
   async create(@Body() createPatrocinanteDto: CreatePatrocinanteDto) {
-    if (await this.patrocinantesService.findByNroMatricula({ nroMatricula: createPatrocinanteDto.nroMatricula })) {
+    if (await this.patrocinantesService.isUnique({ nroMatricula: createPatrocinanteDto.nroMatricula })) {
       throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
     }
     return this.patrocinantesService.create(createPatrocinanteDto);
@@ -34,7 +34,7 @@ export class PatrocinantesController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updatePatrocinanteDto: UpdatePatrocinanteDto) {
-    if (await this.patrocinantesService.findByNroMatricula({ id,  nroMatricula: updatePatrocinanteDto.nroMatricula })) {
+    if (await this.patrocinantesService.isUnique({ id,  nroMatricula: updatePatrocinanteDto.nroMatricula })) {
       throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
     }
     return this.patrocinantesService.update(+id, updatePatrocinanteDto);

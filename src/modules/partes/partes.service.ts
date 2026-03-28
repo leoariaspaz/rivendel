@@ -207,11 +207,11 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
 
-  async findByNroDocumento(filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
+  async isUnique(filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
     let args = { nroMatricula: filter.nroDocumento } as ParteWhereInput;
     if (filter.id) {
-      args = { ...args, id: filter.id };
+      args = { ...args, id: { not: filter.id } };
     }
-    return (await this.prisma.parte.count({ where: args })) > 0;
+    return (await this.prisma.parte.count({ where: args })) === 0;
   }
 }
