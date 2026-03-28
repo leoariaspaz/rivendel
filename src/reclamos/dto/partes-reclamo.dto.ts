@@ -1,11 +1,12 @@
 import { IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator/types';
+import { PartesService } from 'src/modules/partes/partes.service';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { MustExistParte } from 'src/validators/MustExistParte';
+import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 
 export class PartesReclamoDTO {
   @IsInt({ message: 'Una parte es incorrecta.' })
   @IsPositive({ message: 'El valor de una parte es incorrecta.' })
-  @MustExistParte()
+  @ValidateRelation(PartesService)
   idParte!: number;
 
   @IsInt({ message: 'Un tipo de rol es incorrecto.' })

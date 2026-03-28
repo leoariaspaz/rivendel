@@ -1,7 +1,8 @@
 import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min, ValidateIf } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartesReclamoDTO } from './partes-reclamo.dto';
-import { MustExistResolucion } from 'src/validators/MustExistResolucion';
+import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
+import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 
 export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
@@ -15,7 +16,7 @@ export class CreateReclamoDto {
   rubros!: string;
 
   @Min(0, { message: 'Debe ingresar una resolución.' })
-  @MustExistResolucion()
+  @ValidateRelation(ResolucionesService)
   idResolucion!: number;
 
   @Type(() => Date)

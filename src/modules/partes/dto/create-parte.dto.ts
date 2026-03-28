@@ -9,8 +9,9 @@ import {
   MinLength,
   ValidateIf,
 } from 'class-validator';
-import { MustExistPatrocinante } from 'src/validators/MustExistPatrocinante';
-import { MustExistTipoDocumento } from 'src/validators/MustExistTipoDocumento';
+import { PatrocinantesService } from 'src/modules/patrocinantes/patrocinantes.service';
+import { TipdocsService } from 'src/modules/tipdocs/tipdocs.service';
+import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 
 export class CreateParteDto {
   @IsString({ message: 'El nombre es incorrecto.' })
@@ -21,7 +22,7 @@ export class CreateParteDto {
   @IsInt({ message: 'El tipo de documento es incorrecto.' })
   @IsPositive({ message: 'El signo del tipo de documento es incorrecto.' })
   @IsNotEmpty({ message: 'Ingrese un tipo de documento.' })
-  @MustExistTipoDocumento()
+  @ValidateRelation(TipdocsService)
   idTipoDocumento!: number;
 
   @IsNotEmpty({ message: 'Debe ingresar un número de documento.' })
@@ -44,7 +45,7 @@ export class CreateParteDto {
   @IsOptional()
   @IsInt({ message: 'El patrocinante es incorrecto.' })
   @IsPositive()
-  @MustExistPatrocinante()
+  @ValidateRelation(PatrocinantesService)
   idPatrocinante?: number;
 
   @IsBoolean({ message: 'Debe indicar si es apoderado.' })

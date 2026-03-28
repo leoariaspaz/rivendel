@@ -6,9 +6,10 @@ import {
   RelationshipValidation,
   RelationshipValidationResult,
 } from 'src/pipes/interfaces/relationship-validation.interface';
+import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
 
 @Injectable()
-export class TipdocsService implements RelationshipValidation {
+export class TipdocsService implements RelationshipValidation, ShouldExistRelationValidation {
   constructor(private prisma: PrismaService) {}
   create(createTipdocDto: CreateTipdocDto) {
     return this.prisma.tipoDocumento.create({
@@ -64,8 +65,9 @@ export class TipdocsService implements RelationshipValidation {
     });
   }
 
-  async exists(id: number): Promise<boolean> {
-    return (await this.prisma.tipoDocumento.findFirst({ where: { id: id } })) !== null;
+  async exists(id: number): Promise<ValidateRelationResult> {
+    const exist = (await this.prisma.tipoDocumento.count({ where: { id: id } })) > 0;
+    return { isValid: exist, message: exist ? '' : 'No existe el tipo de documento.' };
   }
 
   async validate(value: number): Promise<RelationshipValidationResult> {

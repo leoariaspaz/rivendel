@@ -5,10 +5,14 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
 import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
-import { RelationshipValidation, RelationshipValidationResult } from '../../pipes/interfaces/relationship-validation.interface';
+import {
+  RelationshipValidation,
+  RelationshipValidationResult,
+} from '../../pipes/interfaces/relationship-validation.interface';
+import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
 
 @Injectable()
-export class PartesService implements RelationshipValidation {
+export class PartesService implements RelationshipValidation, ShouldExistRelationValidation {
   constructor(private prisma: PrismaService) {}
 
   create(createParteDto: CreateParteDto) {
@@ -192,8 +196,9 @@ export class PartesService implements RelationshipValidation {
       .then((data) => this.selectPartes(data));
   }
 
-  async exists(id: number): Promise<boolean> {
-    return (await this.prisma.parte.findFirst({ where: { id } })) !== null;
+  async exists(id: number): Promise<ValidateRelationResult> {
+    const exist = (await this.prisma.parte.count({ where: { id } })) > 0;
+    return { isValid: exist, message: exist ? '' : 'No existe la parte.' };
   }
 
   async validate(value: number): Promise<RelationshipValidationResult> {

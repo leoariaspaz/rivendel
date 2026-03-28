@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { RelationshipValidation, RelationshipValidationResult } from 'src/pipes/interfaces/relationship-validation.interface';
+import {
+  RelationshipValidation,
+  RelationshipValidationResult,
+} from 'src/pipes/interfaces/relationship-validation.interface';
+import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
 
 @Injectable()
-export class PatrocinantesService implements RelationshipValidation {
+export class PatrocinantesService implements RelationshipValidation, ShouldExistRelationValidation {
   constructor(private prisma: PrismaService) {}
 
   create(createPatrocinanteDto: CreatePatrocinanteDto) {
@@ -112,8 +116,9 @@ export class PatrocinantesService implements RelationshipValidation {
     return this.prisma.patrocinante.count({ where: filter });
   }
 
-  async exists(id: number) {
-    return (await this.prisma.patrocinante.findFirst({ where: { id } })) !== null;
+  async exists(id: number): Promise<ValidateRelationResult> {
+    const exist = (await this.prisma.patrocinante.count({ where: { id } })) > 0;
+    return { isValid: exist, message: exist ? '' : 'No existe el patrocinante.' };
   }
 
   async existsNroMatricula(nroMatricula: number) {
@@ -127,6 +132,6 @@ export class PatrocinantesService implements RelationshipValidation {
       return { isValid: false, message: 'Hay partes relacionadas.' };
     } else {
       return { isValid: false, message: '' };
-    }    
+    }
   }
 }

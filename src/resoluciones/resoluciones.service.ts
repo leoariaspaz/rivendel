@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { CreateResolucionDto } from './dto/create-resolucion.dto';
 import { UpdateResolucionDto } from './dto/update-resolucion.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { RelationshipValidation, RelationshipValidationResult } from 'src/pipes/interfaces/relationship-validation.interface';
+import {
+  RelationshipValidation,
+  RelationshipValidationResult,
+} from 'src/pipes/interfaces/relationship-validation.interface';
+import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
 
 @Injectable()
-export class ResolucionesService implements RelationshipValidation {
+export class ResolucionesService implements RelationshipValidation, ShouldExistRelationValidation {
   constructor(private prisma: PrismaService) {}
   create(createResolucionDto: CreateResolucionDto) {
     return this.prisma.resolucion.create({
@@ -60,9 +64,10 @@ export class ResolucionesService implements RelationshipValidation {
     });
   }
 
-	async exists(id: number): Promise<boolean> {
-		return (await this.prisma.resolucion.findFirst({ where: { id }}) !== null);
-	}
+  async exists(id: number): Promise<ValidateRelationResult> {
+    const exist = (await this.prisma.resolucion.count({ where: { id } })) > 0;
+    return { isValid: exist, message: exist ? '' : 'No existe la resolución.' };
+  }
 
   async validate(value: number): Promise<RelationshipValidationResult> {
     const parte = await this.prisma.resolucion.findFirst({ where: { id: value }, select: { reclamos: true } });
@@ -71,6 +76,6 @@ export class ResolucionesService implements RelationshipValidation {
       return { isValid: false, message: 'Hay reclamos relacionados.' };
     } else {
       return { isValid: false, message: '' };
-    }    
+    }
   }
 }
