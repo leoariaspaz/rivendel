@@ -5,6 +5,7 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
+import { ReclamosWhereInput } from 'src/generated/prisma/models';
 
 @Injectable()
 export class ReclamosService {
@@ -13,17 +14,14 @@ export class ReclamosService {
   create(createReclamoDto: CreateReclamoDto) {
     const partes = Array<PartesReclamoDTO>();
 
-    if (
-      createReclamoDto.reclamantes &&
-      createReclamoDto.reclamantes.length > 0
-    ) {
+    if (createReclamoDto.reclamantes && createReclamoDto.reclamantes.length > 0) {
       createReclamoDto.reclamantes.forEach((parte) =>
         partes.push({
           idParte: parte.idParte,
           rol: RECLAMANTE,
           nroWhatsappParte: parte.nroWhatsappParte,
-          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
-        }),
+          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+        })
       );
     }
 
@@ -33,8 +31,8 @@ export class ReclamosService {
           idParte: parte.idParte,
           rol: RECLAMADO,
           nroWhatsappParte: parte.nroWhatsappParte,
-          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
-        }),
+          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+        })
       );
     }
 
@@ -58,10 +56,7 @@ export class ReclamosService {
       return this.prisma.reclamos.findMany({
         skip,
         take: Number(limit),
-        orderBy: [
-          { numero: 'asc' },
-          { fechaHoraInicio: 'asc' },
-        ],
+        orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
         select: {
           id: true,
           numero: true,
@@ -90,13 +85,10 @@ export class ReclamosService {
       });
     }
     return this.prisma.reclamos.findMany({
-      orderBy: [
-        { numero: 'asc' },
-        { fechaHoraInicio: 'asc' },
-      ],
-      // include: { 
+      orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
+      // include: {
       //   resolucion: true,
-      //   partes: true 
+      //   partes: true
       // },
       select: {
         id: true,
@@ -169,7 +161,7 @@ export class ReclamosService {
                     nroCasillero: true,
                   },
                 },
-                esApoderado: true
+                esApoderado: true,
               },
             },
           },
@@ -194,55 +186,62 @@ export class ReclamosService {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);
     }
 
-    const restarPartes = (tipoRol: number, A: PartesReclamoDTO[] | undefined, 
-      B: Array<PartesReclamos>): PartesReclamoDTO[] => {
-        return A?.
-                filter((parte) => !B.find((p) => p.idParte === parte.idParte && p.rol === tipoRol)).
-                map((parte) => {
-                  return {
-                    idParte: parte.idParte,
-                    rol: tipoRol,
-                    nroWhatsappParte: parte.nroWhatsappParte,
-                    nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
-                  }
-                }) || [];
-    }
+    const restarPartes = (
+      tipoRol: number,
+      A: PartesReclamoDTO[] | undefined,
+      B: Array<PartesReclamos>
+    ): PartesReclamoDTO[] => {
+      return (
+        A?.filter((parte) => !B.find((p) => p.idParte === parte.idParte && p.rol === tipoRol)).map((parte) => {
+          return {
+            idParte: parte.idParte,
+            rol: tipoRol,
+            nroWhatsappParte: parte.nroWhatsappParte,
+            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+          };
+        }) || []
+      );
+    };
 
-    const partesToCreate = restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes)
-                      .concat(restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes));
-   
+    const partesToCreate = restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes).concat(
+      restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes)
+    );
+
     const mapParteToPartesReclamos = (rol: number, partes: PartesReclamoDTO[] | undefined): PartesReclamos[] => {
-      return partes?.map(p => { 
-          return { 
+      return (
+        partes?.map((p) => {
+          return {
             id: 0,
             idParte: p.idParte,
             idReclamo: 0,
             rol: rol,
             nroWhatsappParte: p.nroWhatsappParte || null,
-            nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null
-          }
-      }) || [];
-    }
+            nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
+          };
+        }) || []
+      );
+    };
 
     const partesToUpdate = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados)
-                          .concat(mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes))
-                          .filter(p => reclamo.partes.some(rp => rp.idParte === p.idParte && rp.rol === p.rol))
-                          .map(p => {
-                            return {
-                              id: reclamo.partes.find(rp => rp.idParte === p.idParte && rp.rol === p.rol)?.id || 0,
-                              idParte: p.idParte,
-                              rol: p.rol,
-                              nroWhatsappParte: p.nroWhatsappParte || null,
-                              nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null
-                            }
-                          });
+      .concat(mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes))
+      .filter((p) => reclamo.partes.some((rp) => rp.idParte === p.idParte && rp.rol === p.rol))
+      .map((p) => {
+        return {
+          id: reclamo.partes.find((rp) => rp.idParte === p.idParte && rp.rol === p.rol)?.id || 0,
+          idParte: p.idParte,
+          rol: p.rol,
+          nroWhatsappParte: p.nroWhatsappParte || null,
+          nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
+        };
+      });
 
-    const reclamadosEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMADO)
-    const reclamantesEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMANTE)
+    const reclamadosEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMADO);
+    const reclamantesEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMANTE);
     const reclamadosAGrabar = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados);
     const reclamantesAGrabar = mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes);
-    const partesToDelete = restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
-                      .concat(restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
+    const partesToDelete = restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar).concat(
+      restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar)
+    );
 
     const deleteOrCreate = this.prisma.reclamos.update({
       where: { id },
@@ -270,8 +269,8 @@ export class ReclamosService {
           data: {
             rol: parte.rol,
             nroWhatsappParte: parte.nroWhatsappParte,
-            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante
-          }
+            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+          },
         })
       );
     }
@@ -283,5 +282,27 @@ export class ReclamosService {
     return this.prisma.reclamos.delete({
       where: { id },
     });
+  }
+
+  async isUnique(filter: { id?: number; numero: number | undefined; fecha: Date | undefined }): Promise<Boolean> {
+    const inicioDia = new Date(filter.fecha ?? '');
+    inicioDia.setHours(0, 0, 0, 0);
+
+    const finDia = new Date(filter.fecha ?? '');
+    finDia.setHours(23, 59, 59, 999);
+
+    let args = {
+      numero: filter.numero,
+      fechaHoraInicio: {
+        gte: inicioDia,
+        lte: finDia,
+      },
+    } as ReclamosWhereInput;
+
+    if (filter.id) {
+      args = { ...args, id: { not: filter.id } };
+    }
+
+    return (await this.prisma.reclamos.count({ where: args })) === 0;
   }
 }
