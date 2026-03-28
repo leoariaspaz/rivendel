@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { ResolucionesService } from './resoluciones.service';
 import { CreateResolucionDto } from './dto/create-resolucion.dto';
 import { UpdateResolucionDto } from './dto/update-resolucion.dto';
@@ -18,15 +9,15 @@ export class ResolucionesController {
   constructor(private readonly resolucionesService: ResolucionesService) {}
 
   @Post()
-  create(@Body() createResolucionDto: CreateResolucionDto) {
+  async create(@Body() createResolucionDto: CreateResolucionDto) {
+    if (await this.resolucionesService.findByDescripcion({ descripcion: createResolucionDto.descripcion })) {
+      throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
+    }
     return this.resolucionesService.create(createResolucionDto);
   }
 
   @Get()
-  async findAll(
-    @Query('page') page: number | null = null,
-    @Query('limit') limit: number | null = null,
-  ) {
+  async findAll(@Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
     if (page && limit) {
       const data = await this.resolucionesService.findAll({ page, limit });
       const totalRecords = await this.resolucionesService.getTotalCount();
@@ -41,10 +32,10 @@ export class ResolucionesController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateResolucioneDto: UpdateResolucionDto,
-  ) {
+  async update(@Param('id') id: number, @Body() updateResolucioneDto: UpdateResolucionDto) {
+    if (await this.resolucionesService.findByDescripcion({ id, descripcion: updateResolucioneDto.descripcion })) {
+      throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
+    }
     return this.resolucionesService.update(+id, updateResolucioneDto);
   }
 

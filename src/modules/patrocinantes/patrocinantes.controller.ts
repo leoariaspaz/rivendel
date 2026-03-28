@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
@@ -18,7 +9,10 @@ export class PatrocinantesController {
   constructor(private readonly patrocinantesService: PatrocinantesService) {}
 
   @Post()
-  create(@Body() createPatrocinanteDto: CreatePatrocinanteDto) {
+  async create(@Body() createPatrocinanteDto: CreatePatrocinanteDto) {
+    if (await this.patrocinantesService.findByNroMatricula({ nroMatricula: createPatrocinanteDto.nroMatricula })) {
+      throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
+    }
     return this.patrocinantesService.create(createPatrocinanteDto);
   }
 
@@ -26,7 +20,7 @@ export class PatrocinantesController {
   async findAll(
     @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
-    @Query('limit') limit: number | null = null,
+    @Query('limit') limit: number | null = null
   ) {
     const totalRecords = await this.patrocinantesService.getTotalCount(query);
     const data = await this.patrocinantesService.findAll(query, page, limit);
@@ -39,10 +33,10 @@ export class PatrocinantesController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updatePatrocinanteDto: UpdatePatrocinanteDto,
-  ) {
+  async update(@Param('id') id: number, @Body() updatePatrocinanteDto: UpdatePatrocinanteDto) {
+    if (await this.patrocinantesService.findByNroMatricula({ id,  nroMatricula: updatePatrocinanteDto.nroMatricula })) {
+      throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
+    }
     return this.patrocinantesService.update(+id, updatePatrocinanteDto);
   }
 

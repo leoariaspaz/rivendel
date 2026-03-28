@@ -4,7 +4,7 @@ import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
-import { ParteCountArgs, ParteFindManyArgs } from 'src/generated/prisma/models';
+import { ParteCountArgs, ParteFindManyArgs, ParteWhereInput } from 'src/generated/prisma/models';
 import {
   RelationshipValidation,
   RelationshipValidationResult,
@@ -205,5 +205,13 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     const parte = await this.prisma.parte.findFirst({ where: { id: value }, select: { reclamos: true } });
     const cantReclamos = parte?.reclamos?.length ?? 0;
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
+  }
+
+  async findByNroDocumento(filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
+    let args = { nroMatricula: filter.nroDocumento } as ParteWhereInput;
+    if (filter.id) {
+      args = { ...args, id: filter.id };
+    }
+    return (await this.prisma.parte.count({ where: args })) > 0;
   }
 }

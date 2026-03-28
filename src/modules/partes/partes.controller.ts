@@ -1,15 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  BadRequestException,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { PartesService } from './partes.service';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
@@ -20,7 +9,10 @@ export class PartesController {
   constructor(private readonly partesService: PartesService) {}
 
   @Post()
-  create(@Body() createParteDto: CreateParteDto) {
+  async create(@Body() createParteDto: CreateParteDto) {
+    if (await this.partesService.findByNroDocumento({ nroDocumento: createParteDto.nroDocumento })) {
+      throw new BadRequestException(['Ya existe una parte con este número de documento.']);
+    }
     return this.partesService.create(createParteDto);
   }
 
@@ -41,7 +33,10 @@ export class PartesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateParteDto: UpdateParteDto) {
+  async update(@Param('id') id: number, @Body() updateParteDto: UpdateParteDto) {
+    if (await this.partesService.findByNroDocumento({ id, nroDocumento: updateParteDto.nroDocumento })) {
+      throw new BadRequestException(['Ya existe una parte con este número de documento.']);
+    }
     return this.partesService.update(+id, updateParteDto);
   }
 

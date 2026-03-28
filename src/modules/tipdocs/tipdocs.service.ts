@@ -7,6 +7,7 @@ import {
   RelationshipValidationResult,
 } from 'src/pipes/interfaces/relationship-validation.interface';
 import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
+import { TipoDocumentoWhereInput } from 'src/generated/prisma/models/TipoDocumento';
 
 @Injectable()
 export class TipdocsService implements RelationshipValidation, ShouldExistRelationValidation {
@@ -74,5 +75,13 @@ export class TipdocsService implements RelationshipValidation, ShouldExistRelati
     const parte = await this.prisma.tipoDocumento.findFirst({ where: { id: value }, select: { partes: true } });
     const cantPartes = parte?.partes?.length ?? 0;
     return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
+  }
+
+  async findBySintetico(filter: { id?: number; sintetico: string }): Promise<Boolean> {
+    let args = { sintetico: filter.sintetico } as TipoDocumentoWhereInput;
+    if (filter.id) {
+      args = { ...args, id: filter.id };
+    }
+    return (await this.prisma.tipoDocumento.count({ where: args })) > 0;
   }
 }

@@ -7,6 +7,7 @@ import {
   RelationshipValidationResult,
 } from 'src/pipes/interfaces/relationship-validation.interface';
 import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
+import { ResolucionWhereInput } from 'src/generated/prisma/models';
 
 @Injectable()
 export class ResolucionesService implements RelationshipValidation, ShouldExistRelationValidation {
@@ -73,5 +74,13 @@ export class ResolucionesService implements RelationshipValidation, ShouldExistR
     const parte = await this.prisma.resolucion.findFirst({ where: { id: value }, select: { reclamos: true } });
     const cantReclamos = parte?.reclamos?.length ?? 0;
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
+  }
+
+  async findByDescripcion(filter: { id?: number; descripcion: string | undefined }): Promise<Boolean> {
+    let args = { descripcion: filter.descripcion } as ResolucionWhereInput;
+    if (filter.id) {
+      args = { ...args, id: filter.id };
+    }
+    return (await this.prisma.resolucion.count({ where: args })) > 0;
   }
 }

@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import { TipdocsService } from './tipdocs.service';
 import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
@@ -19,14 +10,14 @@ export class TipdocsController {
 
   @Post()
   async create(@Body() createTipdocDto: CreateTipdocDto) {
+    if (await this.tipdocsService.findBySintetico({ sintetico: createTipdocDto.sintetico })) {
+      throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
+    }
     return this.tipdocsService.create(createTipdocDto);
   }
 
   @Get()
-  async findAll(
-    @Query('page') page: number | null = null,
-    @Query('limit') limit: number | null = null,
-  ) {
+  async findAll(@Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
     if (page === null || limit === null) {
       return this.tipdocsService.findAll();
     }
@@ -41,7 +32,10 @@ export class TipdocsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTipdocDto: UpdateTipdocDto) {
+  async update(@Param('id') id: number, @Body() updateTipdocDto: UpdateTipdocDto) {
+    if (await this.tipdocsService.findBySintetico({ id, sintetico: updateTipdocDto.sintetico })) {
+      throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
+    }
     return this.tipdocsService.update(+id, updateTipdocDto);
   }
 
