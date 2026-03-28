@@ -6,6 +6,11 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   async create(email: string, password: string, name: string) {
+    const exist = (await this.prisma.user.count({ where: { OR: [{ email }, { name }] } })) > 0;
+    if (exist) {
+      throw new Error('Ese nombre de usuario o email ya están en uso. Prueba con otro.');
+    }
+
     return this.prisma.user.create({
       data: { email, password, nombre: name },
     });
@@ -33,14 +38,13 @@ export class UsersService {
     });
   }
 
-  async update(userId: number, nombre: string,  newPassword: string) {
+  async update(userId: number, nombre: string, newPassword: string) {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { 
+      data: {
         nombre: nombre,
-        password: newPassword 
-      }
+        password: newPassword,
+      },
     });
   }
-
 }
