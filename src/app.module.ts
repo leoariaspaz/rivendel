@@ -7,7 +7,6 @@ import { TipdocsModule } from './modules/tipdocs/tipdocs.module';
 import { PartesModule } from './modules/partes/partes.module';
 import { ResolucionesModule } from './resoluciones/resoluciones.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
-import { PartesReclamosModule } from './partes-reclamos/partes-reclamos.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { APP_GUARD } from '@nestjs/core';
@@ -26,7 +25,6 @@ const env = process.env.NODE_ENV || 'local';
     PartesModule,
     ResolucionesModule,
     ReclamosModule,
-    PartesReclamosModule,
     AuthModule,
     UsersModule,
     ValidatorsModule,
