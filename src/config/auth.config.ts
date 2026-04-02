@@ -6,7 +6,7 @@ export const authConfig = registerAs('auth', () => ({
     httpOnly: true,
     sameSite: 'strict' as const,
     secure: envToBool(process.env.USE_SECURE_COOKIES),
-    path: '/auth/refresh',
+    path: process.env.PATH_REFRESH_TOKEN || '/',
     maxAge: parseInt(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE || '0', 10),
   },
 }));

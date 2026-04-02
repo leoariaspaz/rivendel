@@ -1,10 +1,9 @@
-import { Body, Controller, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtGuard } from './jwt.guard';
 import { JwtRefreshGuard } from './jwt-refresh.guard';
 import { LocalGuard } from './local.guard';
-//import { Public } from './public.decorator';
 import { SkipJwt } from './skip-jwt.decorator';
 import { authConfig, type AuthConfig } from '../config/auth.config';
 import { UsersService } from 'src/users/users.service';
@@ -18,44 +17,37 @@ export class AuthController {
     private readonly authConfig: AuthConfig
   ) {}
 
-  // @Post('register')
-	// @Public()
-  // async register(@Body() dto: { email: string; password: string, name: string }) {
-  //   const user = this.authService.register(dto.email, dto.password, dto.name);
-	// 	const { password, ...safeUser } = await user;
-	// 	return safeUser;
-  // }
-
   @Post('login')
-	@SkipJwt()
+  @SkipJwt()
   @UseGuards(LocalGuard)
-  async login(
-    @Req() req: { user: { id: number; email: string } },
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Req() req: { user: { id: number; email: string } }, @Res({ passthrough: true }) res: Response) {
     const tokens = await this.authService.login(req.user);
 
-		res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
+    res.cookie('refresh_token', tokens.refreshToken, this.authConfig.refreshCookieOptions);
 
-    const userName = await this.usersService.findById(req.user.id).then(user => user?.nombre || '[Usuario sin nombre]');
+    const userName = await this.usersService
+      .findById(req.user.id)
+      .then((user) => user?.nombre || '[Usuario sin nombre]');
 
     return { accessToken: tokens.accessToken, userName };
   }
 
   @Post('refresh')
-	@SkipJwt()
+  @SkipJwt()
   @UseGuards(JwtRefreshGuard)
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       req.user.userId,
-      req.cookies.refresh_token,
+      req.cookies.refresh_token
     );
 
     res.cookie('refresh_token', refreshToken, this.authConfig.refreshCookieOptions);
 
-    const userName = await this.usersService.findById(req.user.userId).then(user => user?.nombre || '[Usuario sin nombre]');
+    const userName = await this.usersService
+      .findById(req.user.userId)
+      .then((user) => user?.nombre || '[Usuario sin nombre]');
 
-		return { accessToken, userName };
+    return { accessToken, userName };
   }
 
   @Post('logout')
