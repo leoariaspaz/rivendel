@@ -1,4 +1,5 @@
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MinLength } from "class-validator";
+import { Type } from 'class-transformer';
 
 export class CreatePatrocinanteDto {
   @IsString({ message: "El nombre es incorrecto." })
@@ -24,6 +25,7 @@ export class CreatePatrocinanteDto {
   localidad?: string;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt({ message: 'El número de casillero es incorrecto.' })
   @IsPositive({ message: 'El número de casillero debe ser positivo.' })
   nroCasillero?: number;
