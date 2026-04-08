@@ -33,7 +33,7 @@ export class ResolucionesController {
 
   @Patch(':id')
   async update(@Param('id') id: number, @Body() updateResolucioneDto: UpdateResolucionDto) {
-    if (await this.resolucionesService.isUnique({ id, descripcion: updateResolucioneDto.descripcion })) {
+    if (!await this.resolucionesService.isUnique({ id, descripcion: updateResolucioneDto.descripcion })) {
       throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
     }
     return this.resolucionesService.update(+id, updateResolucioneDto);

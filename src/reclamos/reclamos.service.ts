@@ -86,10 +86,6 @@ export class ReclamosService {
     }
     return this.prisma.reclamos.findMany({
       orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
-      // include: {
-      //   resolucion: true,
-      //   partes: true
-      // },
       select: {
         id: true,
         numero: true,
@@ -175,12 +171,7 @@ export class ReclamosService {
   }
 
   async update(id: number, updateReclamoDto: UpdateReclamoDto) {
-    const reclamo = await this.prisma.reclamos.findUnique({
-      where: { id: id },
-      include: {
-        partes: true,
-      },
-    });
+    const reclamo = await this.prisma.reclamos.findUnique({ where: { id }, include: { partes: true } });
 
     if (!reclamo) {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);

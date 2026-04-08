@@ -8,6 +8,7 @@ import { TipdocsService } from 'src/modules/tipdocs/tipdocs.service';
 import { ResolucionesModule } from 'src/resoluciones/resoluciones.module';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { PartesService } from 'src/modules/partes/partes.service';
+import { ValidateRelationConstraint } from './ValidateRelationConstraint';
 
 @Module({
   imports: [PatrocinantesModule, PrismaModule, TipdocsModule, ResolucionesModule],
@@ -17,6 +18,8 @@ import { PartesService } from 'src/modules/partes/partes.service';
     PrismaService,
     ResolucionesService,
 		PartesService,
+    ValidateRelationConstraint,
   ],
+  exports: [ValidateRelationConstraint],
 })
 export class ValidatorsModule {}
