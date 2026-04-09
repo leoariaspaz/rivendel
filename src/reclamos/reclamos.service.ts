@@ -21,6 +21,7 @@ export class ReclamosService {
           rol: RECLAMANTE,
           nroWhatsappParte: parte.nroWhatsappParte,
           nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+          postergo: parte.postergo,
         })
       );
     }
@@ -32,6 +33,7 @@ export class ReclamosService {
           rol: RECLAMADO,
           nroWhatsappParte: parte.nroWhatsappParte,
           nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+          postergo: parte.postergo,
         })
       );
     }
@@ -135,6 +137,7 @@ export class ReclamosService {
             rol: true,
             nroWhatsappParte: true,
             nroWhatsappPatrocinante: true,
+            postergo: true,
             parte: {
               select: {
                 id: true,
@@ -208,6 +211,7 @@ export class ReclamosService {
             rol: rol,
             nroWhatsappParte: p.nroWhatsappParte || null,
             nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
+            postergo: p.postergo || false,
           };
         }) || []
       );
@@ -223,6 +227,7 @@ export class ReclamosService {
           rol: p.rol,
           nroWhatsappParte: p.nroWhatsappParte || null,
           nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
+          postergo: p.postergo,
         };
       });
 
@@ -252,6 +257,10 @@ export class ReclamosService {
       },
     });
 
+    console.log('Partes a eliminar:', partesToDelete);
+    console.log('Partes a crear:', partesToCreate);
+    console.log('Partes a actualizar:', partesToUpdate);
+
     let updateMany: any[] = [];
     for (const parte of partesToUpdate) {
       updateMany.push(
@@ -261,6 +270,7 @@ export class ReclamosService {
             rol: parte.rol,
             nroWhatsappParte: parte.nroWhatsappParte,
             nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+            postergo: parte.postergo,
           },
         })
       );

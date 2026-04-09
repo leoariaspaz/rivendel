@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator/types';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator/types';
 import { PartesService } from 'src/modules/partes/partes.service';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
@@ -21,4 +21,8 @@ export class PartesReclamoDTO {
   @IsOptional()
   @IsString({ message: 'El número de whatsapp de una parte es incorrecto.' })
   nroWhatsappPatrocinante?: string | null;
+
+  @IsOptional()
+  @IsBoolean({ message: 'El valor de postergo debe ser verdadero o falso.' })
+  postergo?: boolean;
 }

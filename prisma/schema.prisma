@@ -70,6 +70,7 @@ model PartesReclamos {
   rol                     Int
   nroWhatsappParte        String?
   nroWhatsappPatrocinante String?
+  postergo                Boolean  @default(false)
   parte                   Parte    @relation(fields: [idParte], references: [id])
   reclamo                 Reclamos @relation(fields: [idReclamo], references: [id])
 

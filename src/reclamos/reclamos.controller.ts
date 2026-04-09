@@ -39,6 +39,7 @@ export class ReclamosController {
         ...p.parte,
         nroWhatsappParte: p.nroWhatsappParte,
         nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
+        postergo: p.postergo,
       };
     };
     const reclamo = await this.reclamosService.findOne(+id);
