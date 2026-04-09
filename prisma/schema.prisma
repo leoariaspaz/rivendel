@@ -50,14 +50,15 @@ model Resolucion {
 }
 
 model Reclamos {
-  id              Int              @id @default(autoincrement())
-  rubros          String           @db.Text
-  idResolucion    Int
-  fechaHoraInicio DateTime
-  horaFin         DateTime?
-  numero          Int
-  partes          PartesReclamos[]
-  resolucion      Resolucion       @relation(fields: [idResolucion], references: [id])
+  id               Int              @id @default(autoincrement())
+  rubros           String           @db.Text
+  idResolucion     Int
+  fechaHoraInicio  DateTime
+  horaFin          DateTime?
+  numero           Int
+  proximaAudiencia DateTime?
+  partes           PartesReclamos[]
+  resolucion       Resolucion       @relation(fields: [idResolucion], references: [id])
 
   @@unique([numero, fechaHoraInicio])
   @@index([idResolucion], map: "Reclamos_idResolucion_fkey")

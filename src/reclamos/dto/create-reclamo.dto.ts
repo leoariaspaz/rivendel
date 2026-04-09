@@ -28,6 +28,11 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'La hora de fin no es válida.' })
   horaFin?: Date;
 
+  @IsOptional()
+  @Type(() => Date)
+  @IsNotEmpty({ message: 'Debe ingresar la fecha y hora de inicio.' })
+  proximaAudiencia?: Date;
+
   @ArrayUnique((p) => p.idParte, {
     message: 'No se pueden repetir reclamantes en un mismo reclamo.',
   })

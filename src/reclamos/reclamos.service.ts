@@ -45,9 +45,8 @@ export class ReclamosService {
         idResolucion: createReclamoDto.idResolucion,
         fechaHoraInicio: createReclamoDto.fechaHoraInicio,
         horaFin: createReclamoDto.horaFin,
-        partes: {
-          create: partes,
-        },
+        proximaAudiencia: createReclamoDto.proximaAudiencia,
+        partes: { create: partes },
       },
     });
   }
@@ -71,6 +70,7 @@ export class ReclamosService {
           },
           fechaHoraInicio: true,
           horaFin: true,
+          proximaAudiencia: true,
           partes: {
             select: {
               rol: true,
@@ -131,6 +131,7 @@ export class ReclamosService {
         },
         fechaHoraInicio: true,
         horaFin: true,
+        proximaAudiencia: true,
         partes: {
           select: {
             idParte: true,
@@ -251,6 +252,7 @@ export class ReclamosService {
           deleteMany: partesToDelete,
           createMany: { data: partesToCreate },
         },
+        proximaAudiencia: updateReclamoDto.proximaAudiencia,
       },
       include: {
         partes: true,
