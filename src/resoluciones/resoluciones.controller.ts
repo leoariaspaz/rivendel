@@ -10,7 +10,7 @@ export class ResolucionesController {
 
   @Post()
   async create(@Body() createResolucionDto: CreateResolucionDto) {
-    if (await this.resolucionesService.isUnique({ descripcion: createResolucionDto.descripcion })) {
+    if (!await this.resolucionesService.isUnique({ descripcion: createResolucionDto.descripcion })) {
       throw new BadRequestException(['Ya existe una resolución con esta descripción.']);
     }
     return this.resolucionesService.create(createResolucionDto);
