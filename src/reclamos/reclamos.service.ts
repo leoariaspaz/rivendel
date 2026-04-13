@@ -124,11 +124,6 @@ export class ReclamosService {
         numero: true,
         rubros: true,
         idResolucion: true,
-        resolucion: {
-          select: {
-            detalle: true,
-          },
-        },
         fechaHoraInicio: true,
         horaFin: true,
         proximaAudiencia: true,
