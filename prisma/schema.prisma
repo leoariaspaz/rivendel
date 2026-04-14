@@ -72,6 +72,8 @@ model PartesReclamos {
   nroWhatsappParte        String?
   nroWhatsappPatrocinante String?
   postergo                Boolean  @default(false)
+  incomparendo            Boolean  @default(false)
+  multado                 Boolean  @default(false)
   parte                   Parte    @relation(fields: [idParte], references: [id])
   reclamo                 Reclamos @relation(fields: [idReclamo], references: [id])
 

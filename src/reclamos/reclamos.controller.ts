@@ -40,21 +40,31 @@ export class ReclamosController {
         nroWhatsappParte: p.nroWhatsappParte,
         nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
         postergo: p.postergo,
+        incomparendo: p.incomparendo,
+        multado: p.multado,
       };
     };
     const reclamo = await this.reclamosService.findOne(+id);
-    const result = {
-      id: reclamo?.id,
-      numero: reclamo?.numero,
-      rubros: reclamo?.rubros,
-      fechaHoraInicio: reclamo?.fechaHoraInicio,
-      horaFin: reclamo?.horaFin,
-      idResolucion: reclamo?.idResolucion,
-      proximaAudiencia: reclamo?.proximaAudiencia,
+    // const result = {
+    //   id: reclamo?.id,
+    //   numero: reclamo?.numero,
+    //   rubros: reclamo?.rubros,
+    //   fechaHoraInicio: reclamo?.fechaHoraInicio,
+    //   horaFin: reclamo?.horaFin,
+    //   idResolucion: reclamo?.idResolucion,
+    //   proximaAudiencia: reclamo?.proximaAudiencia,
+    //   incomparendo: reclamo?.incomparendo,
+    //   multado: reclamo?.multado,
+    //   reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
+    //   reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
+    // };
+    // return result;
+
+    return {
+      ...reclamo,
       reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
       reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
     };
-    return result;
   }
 
   @Patch(':id')

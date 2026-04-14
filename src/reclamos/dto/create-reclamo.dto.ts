@@ -11,7 +11,7 @@ export class CreateReclamoDto {
   @Type(() => Number)
   numero!: number;
 
-  @ValidateIf(r => r.rubros)
+  @ValidateIf((r) => r.rubros)
   @IsString({ message: 'Los rubros ingresados son incorrectos.' })
   rubros!: string;
 

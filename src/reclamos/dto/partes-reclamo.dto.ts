@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer/types';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator/types';
 import { PartesService } from 'src/modules/partes/partes.service';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
@@ -25,4 +26,10 @@ export class PartesReclamoDTO {
   @IsOptional()
   @IsBoolean({ message: 'El valor de postergo debe ser verdadero o falso.' })
   postergo?: boolean;
+
+  @Type(() => Boolean)
+  incomparendo?: boolean;
+
+  @Type(() => Boolean)
+  multado?: boolean;
 }

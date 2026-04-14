@@ -5,7 +5,7 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { ReclamosWhereInput } from 'src/generated/prisma/models';
+import { ReclamosFindManyArgs, ReclamosWhereInput } from 'src/generated/prisma/models';
 
 @Injectable()
 export class ReclamosService {
@@ -22,6 +22,8 @@ export class ReclamosService {
           nroWhatsappParte: parte.nroWhatsappParte,
           nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
           postergo: parte.postergo,
+          incomparendo: parte.incomparendo,
+          multado: parte.multado,
         })
       );
     }
@@ -34,6 +36,8 @@ export class ReclamosService {
           nroWhatsappParte: parte.nroWhatsappParte,
           nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
           postergo: parte.postergo,
+          incomparendo: parte.incomparendo,
+          multado: parte.multado,
         })
       );
     }
@@ -52,41 +56,8 @@ export class ReclamosService {
   }
 
   findAll({ page, limit }: { page?: number; limit?: number } = {}) {
-    if (page && limit) {
-      const skip = (page - 1) * limit;
-      return this.prisma.reclamos.findMany({
-        skip,
-        take: Number(limit),
-        orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
-        select: {
-          id: true,
-          numero: true,
-          rubros: true,
-          resolucion: {
-            select: {
-              id: true,
-              descripcion: true,
-            },
-          },
-          fechaHoraInicio: true,
-          horaFin: true,
-          proximaAudiencia: true,
-          partes: {
-            select: {
-              rol: true,
-              parte: {
-                select: {
-                  id: true,
-                  nombre: true,
-                  cuil: true,
-                },
-              },
-            },
-          },
-        },
-      });
-    }
-    return this.prisma.reclamos.findMany({
+    let args = {
+      take: Number(limit),
       orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
       select: {
         id: true,
@@ -100,6 +71,7 @@ export class ReclamosService {
         },
         fechaHoraInicio: true,
         horaFin: true,
+        proximaAudiencia: true,
         partes: {
           select: {
             rol: true,
@@ -113,7 +85,12 @@ export class ReclamosService {
           },
         },
       },
-    });
+    } as ReclamosFindManyArgs;
+    if (page && limit) {
+      const skip = (page - 1) * limit;
+      args = { ...args, skip };
+    }
+    return this.prisma.reclamos.findMany(args);
   }
 
   findOne(id: number) {
@@ -134,6 +111,8 @@ export class ReclamosService {
             nroWhatsappParte: true,
             nroWhatsappPatrocinante: true,
             postergo: true,
+            incomparendo: true,
+            multado: true,
             parte: {
               select: {
                 id: true,
@@ -188,6 +167,9 @@ export class ReclamosService {
             rol: tipoRol,
             nroWhatsappParte: parte.nroWhatsappParte,
             nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+            postergo: parte.postergo,
+            incomparendo: parte.incomparendo,
+            multado: parte.multado,
           };
         }) || []
       );
@@ -208,6 +190,8 @@ export class ReclamosService {
             nroWhatsappParte: p.nroWhatsappParte || null,
             nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
             postergo: p.postergo || false,
+            incomparendo: p.incomparendo || false,
+            multado: p.multado || false,
           };
         }) || []
       );
@@ -224,6 +208,8 @@ export class ReclamosService {
           nroWhatsappParte: p.nroWhatsappParte || null,
           nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
           postergo: p.postergo,
+          incomparendo: p.incomparendo,
+          multado: p.multado,
         };
       });
 
@@ -254,10 +240,6 @@ export class ReclamosService {
       },
     });
 
-    console.log('Partes a eliminar:', partesToDelete);
-    console.log('Partes a crear:', partesToCreate);
-    console.log('Partes a actualizar:', partesToUpdate);
-
     let updateMany: any[] = [];
     for (const parte of partesToUpdate) {
       updateMany.push(
@@ -268,6 +250,8 @@ export class ReclamosService {
             nroWhatsappParte: parte.nroWhatsappParte,
             nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
             postergo: parte.postergo,
+            incomparendo: parte.incomparendo,
+            multado: parte.multado,
           },
         })
       );
