@@ -45,26 +45,17 @@ export class ReclamosController {
       };
     };
     const reclamo = await this.reclamosService.findOne(+id);
-    // const result = {
-    //   id: reclamo?.id,
-    //   numero: reclamo?.numero,
-    //   rubros: reclamo?.rubros,
-    //   fechaHoraInicio: reclamo?.fechaHoraInicio,
-    //   horaFin: reclamo?.horaFin,
-    //   idResolucion: reclamo?.idResolucion,
-    //   proximaAudiencia: reclamo?.proximaAudiencia,
-    //   incomparendo: reclamo?.incomparendo,
-    //   multado: reclamo?.multado,
-    //   reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
-    //   reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
-    // };
-    // return result;
-
-    return {
-      ...reclamo,
-      reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
-      reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
-    };
+    const cantidad = await this.reclamosService.count(reclamo?.numero?? 0, reclamo?.fechaHoraInicio);
+    if (reclamo) {
+      const { partes, ...result } = reclamo;
+      return {
+        ...result,
+        reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
+        reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
+        cantidad
+      };
+    }
+    return null;
   }
 
   @Patch(':id')

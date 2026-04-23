@@ -287,4 +287,18 @@ export class ReclamosService {
 
     return (await this.prisma.reclamos.count({ where: args })) === 0;
   }
+
+  count(numero: number, fecha?: Date) {
+    const POSTERGADO = 4;
+    const FRACASO = 5;
+    return this.prisma.reclamos.count({
+      where: {
+          numero, 
+          OR: [{ idResolucion: POSTERGADO }, { idResolucion: FRACASO }],
+          fechaHoraInicio: {
+            lte: fecha ?? new Date(),
+          },          
+        },
+    });
+  }
 }
