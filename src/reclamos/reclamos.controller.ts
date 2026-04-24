@@ -3,11 +3,16 @@ import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
 
+@ApiTags('Reclamos')
 @Controller('reclamos')
 export class ReclamosController {
   constructor(private readonly reclamosService: ReclamosService) {}
 
+  @ApiOperation({ summary: 'Crear un nuevo reclamo' })
+  @ApiResponse({ status: 201, description: 'Reclamo creado exitosamente.' })
+  @ApiResponse({ status: 400, description: 'Número de reclamo ya existe para la fecha dada.' })
   @Post()
   async create(@Body() createReclamoDto: CreateReclamoDto) {
     const filter = {
@@ -33,7 +38,7 @@ export class ReclamosController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     const getResult = (p) => {
       return {
         ...p.parte,
@@ -44,7 +49,7 @@ export class ReclamosController {
         multado: p.multado,
       };
     };
-    const reclamo = await this.reclamosService.findOne(+id);
+    const reclamo = await this.reclamosService.findOne(id);
     const cantidad = await this.reclamosService.count(reclamo?.numero?? 0, reclamo?.fechaHoraInicio);
     if (reclamo) {
       const { partes, ...result } = reclamo;

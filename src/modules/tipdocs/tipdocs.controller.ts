@@ -3,7 +3,9 @@ import { TipdocsService } from './tipdocs.service';
 import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
+import { ApiTags } from '@nestjs/swagger/dist';
 
+@ApiTags('Tipos de Documentos')
 @Controller('tipdocs')
 export class TipdocsController {
   constructor(private readonly tipdocsService: TipdocsService) {}

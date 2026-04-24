@@ -5,6 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { ConfigService } from '@nestjs/config';
 import { useContainer } from 'class-validator';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   console.log(`Starting application in ${process.env.NODE_ENV}...`);
@@ -28,8 +29,25 @@ async function bootstrap() {
   });
   app.getHttpAdapter().getInstance().set('etag', false); // Deshabilitar ETag
   app.use(cookieParser()); // Middleware para parsear cookies
+  
+  configurarSwagger(app);
+
   await app.listen(port);
 }
+
+function configurarSwagger(app) {
+  const config = new DocumentBuilder()
+    .setTitle('Rivendel API')
+    .setDescription('Sistema de gestión de reclamos y resoluciones')
+    .setVersion('1.0')
+    .addBearerAuth() // Útil ya que tienes @nestjs/jwt en tus dependencias
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  
+  // Se define la ruta de la documentación (ej. http://localhost:3000/docs)
+  SwaggerModule.setup('docs', app, document);
+}  
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
