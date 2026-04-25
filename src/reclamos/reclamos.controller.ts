@@ -10,7 +10,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
 export class ReclamosController {
   constructor(private readonly reclamosService: ReclamosService) {}
 
-  @ApiOperation({ summary: 'Crear un nuevo reclamo' })
+  @ApiOperation({ summary: 'Crea un nuevo reclamo' })
   @ApiResponse({ status: 201, description: 'Reclamo creado exitosamente.' })
   @ApiResponse({ status: 400, description: 'Número de reclamo ya existe para la fecha dada.' })
   @Post()
