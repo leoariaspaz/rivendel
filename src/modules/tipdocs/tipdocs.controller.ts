@@ -16,6 +16,7 @@ import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiExtraModels,
   ApiOperation,
@@ -30,13 +31,12 @@ import { TipoDocumentoDto } from './dto/tipo-documento.dto';
 
 @ApiTags('Tipos de Documentos')
 @ApiExtraModels(TipoDocumentoDto)
+@ApiBearerAuth('access-token')
 @Controller('tipdocs')
 export class TipdocsController {
   constructor(private readonly tipdocsService: TipdocsService) {}
 
   @ApiOperation({ summary: 'Crea un nuevo tipo de documento' })
-  @ApiResponse({ status: 201, description: 'Tipo de documento creado exitosamente.', type: TipoDocumentoDto })
-  @ApiResponse({ status: 400, description: 'Ya existe un tipo de documento con este sintético.' })
   @ApiBody({
     type: CreateTipdocDto,
     examples: {
@@ -56,6 +56,8 @@ export class TipdocsController {
       },
     },
   })
+  @ApiResponse({ status: 201, description: 'Tipo de documento creado exitosamente.', type: TipoDocumentoDto })
+  @ApiResponse({ status: 400, description: 'Ya existe un tipo de documento con este sintético.' })
   @Post()
   async create(@Body() createTipdocDto: CreateTipdocDto) {
     if (await this.tipdocsService.isUnique({ sintetico: createTipdocDto.sintetico })) {
