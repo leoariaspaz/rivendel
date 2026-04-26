@@ -28,6 +28,7 @@ import {
 } from '@nestjs/swagger/dist';
 import { TipoDocumento } from 'src/generated/prisma/client';
 import { TipoDocumentoDto } from './dto/tipo-documento.dto';
+import { TipDocListDto } from './dto/tipdoc-list.dto';
 
 @Controller('tipdocs')
 @ApiTags('Tipos de Documentos')
@@ -68,41 +69,6 @@ export class TipdocsController {
 
   @Get()
   @ApiOperation({ summary: 'Obtiene todos los tipos de documentos' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de tipos de documentos obtenida exitosamente.',
-    content: {
-      'application/json': {
-        schema: {
-          type: 'object',
-          properties: {
-            data: {
-              type: 'array',
-              items: { $ref: getSchemaPath(TipoDocumentoDto) },
-              description: 'Lista de tipos de documentos.',
-              example: [
-                {
-                  id: 1,
-                  sintetico: 'DNI',
-                  descripcion: 'Documento Nacional de Identidad',
-                },
-                {
-                  id: 2,
-                  sintetico: 'LE',
-                  descripcion: 'Libreta de Enrolamiento',
-                },
-              ],
-            },
-            totalRecords: {
-              type: 'integer',
-              description: 'Cantidad total de tipos de documentos disponibles.',
-              example: 2,
-            },
-          },
-        },
-      },
-    },
-  })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Número de página para paginación' })
   @ApiQuery({
     name: 'limit',
@@ -110,24 +76,28 @@ export class TipdocsController {
     type: Number,
     description: 'Cantidad de registros por página para paginación',
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de tipos de documentos obtenida exitosamente.',
+    type: TipDocListDto,
+  })
   async findAll(@Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
-    let data: TipoDocumento[];
-    let totalRecords: number;
+    const result = new TipDocListDto();
     if (page === null || limit === null) {
-      data = await this.tipdocsService.findAll();
-      totalRecords = data.length;
+      result.data = await this.tipdocsService.findAll();
+      result.totalRecords = result.data.length;
     } else {
-      totalRecords = await this.tipdocsService.getTotalCount();
-      data = await this.tipdocsService.findAllPaginated(page, limit);
+      result.totalRecords = await this.tipdocsService.getTotalCount();
+      result.data = await this.tipdocsService.findAllPaginated(page, limit);
     }
-    return { data, totalRecords };
+    return result;
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtiene un tipo de documento por su ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del tipo de documento' })
   @ApiResponse({ status: 200, description: 'Tipo de documento obtenido exitosamente.', type: TipoDocumentoDto })
   @ApiResponse({ status: 404, description: 'Tipo de documento no encontrado.' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID del tipo de documento' })
   findOne(@Param('id') id: number) {
     return this.tipdocsService.findOne(id);
   }
