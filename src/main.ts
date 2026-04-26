@@ -40,7 +40,21 @@ function configurarSwagger(app) {
     .setTitle('Rivendel API')
     .setDescription('Sistema de gestión de reclamos y resoluciones')
     .setVersion('1.0')
-    .addBearerAuth() // Útil ya que tienes @nestjs/jwt en tus dependencias
+    .addBearerAuth({
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Ingrese su token JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
+    .addCookieAuth('refresh_token', {
+      type: 'apiKey',
+      in: 'cookie',
+      name: 'refresh_token',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
