@@ -5,7 +5,7 @@ import { UpdateParteDto } from './dto/update-parte.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger/dist';
 import { PartesListDto } from './dto/partes-list.dto';
-import { ApiParteSave } from './partes.swagger';
+import { ApiParteSave } from './decorators/partes-swagger.decorator';
 
 @Controller('partes')
 @ApiBearerAuth('access-token')

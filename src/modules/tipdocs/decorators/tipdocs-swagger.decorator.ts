@@ -1,8 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
-import { TipoDocumentoDto } from './dto/tipo-documento.dto';
-import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
-import { CreateTipdocDto } from './dto/create-tipdoc.dto';
+import { TipoDocumentoDto } from '../dto/tipo-documento.dto';
+import { UpdateTipdocDto } from '../dto/update-tipdoc.dto';
+import { CreateTipdocDto } from '../dto/create-tipdoc.dto';
 
 export function ApiTipdocSave(operation: 'create' | 'update') {
   const isUpdate = operation === 'update';

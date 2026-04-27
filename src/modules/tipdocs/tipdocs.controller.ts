@@ -27,7 +27,7 @@ import {
 } from '@nestjs/swagger/dist';
 import { TipoDocumentoDto } from './dto/tipo-documento.dto';
 import { TipDocListDto } from './dto/tipdoc-list.dto';
-import { ApiTipdocSave } from './tipdocs.swagger';
+import { ApiTipdocSave } from './decorators/tipdocs-swagger.decorator';
 
 @Controller('tipdocs')
 @ApiTags('Tipos de Documentos')
