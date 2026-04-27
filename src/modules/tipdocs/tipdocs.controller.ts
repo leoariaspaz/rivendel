@@ -17,7 +17,6 @@ import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiExtraModels,
   ApiOperation,
   ApiParam,

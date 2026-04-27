@@ -6,6 +6,7 @@ import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger/dist';
 import { PatrocinanteDto } from './dto/patrocinante.dto';
 import { PatrocinantesListDto } from './dto/patrocinantes-list.dto';
+import { ApiPatrocinanteSave } from './decorators/patrocinantes-swagger.decorator';
 
 @Controller('patrocinantes')
 @ApiBearerAuth('access-token')
@@ -14,34 +15,7 @@ export class PatrocinantesController {
   constructor(private readonly patrocinantesService: PatrocinantesService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crea un nuevo patrocinante' })
-  @ApiBody({
-    type: CreatePatrocinanteDto,
-    examples: {
-      valid: {
-        summary: 'Ejemplo válido',
-        value: {
-          nombre: 'Juan Pérez',
-          nroMatricula: '123456',
-          direccion: 'Calle Falsa 123',
-          telefono: '555-1234',
-          email: 'juanperez@mail.com',
-        },
-      },
-      duplicateMatricula: {
-        summary: 'Ejemplo con número de matrícula duplicado',
-        value: {
-          nombre: 'María Gómez',
-          nroMatricula: '123456', // Mismo número de matrícula que el ejemplo válido
-          direccion: 'Avenida Siempre Viva 456',
-          telefono: '555-5678',
-          email: 'mariagomez@mail.com',
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 201, description: 'Patrocinante creado exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Ya existe un patrocinante con este número de matrícula.' })
+  @ApiPatrocinanteSave('create')
   async create(@Body() createPatrocinanteDto: CreatePatrocinanteDto) {
     if (await this.patrocinantesService.isUnique({ nroMatricula: createPatrocinanteDto.nroMatricula })) {
       throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
@@ -80,36 +54,7 @@ export class PatrocinantesController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualiza un patrocinante por su ID' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID del patrocinante a actualizar' })
-  @ApiBody({
-    type: UpdatePatrocinanteDto,
-    examples: {
-      valid: {
-        summary: 'Ejemplo válido de actualización',
-        value: {
-          nombre: 'Juan Pérez Actualizado',
-          nroMatricula: '654321',
-          direccion: 'Calle Nueva 789',
-          telefono: '555-4321',
-          email: 'juanperez2@mail.com',
-        },
-      },
-      duplicateMatricula: {
-        summary: 'Ejemplo con número de matrícula duplicado',
-        value: {
-          nombre: 'María Gómez Actualizada',
-          nroMatricula: '123456', // Mismo número de matrícula que el ejemplo de creación
-          direccion: 'Avenida Siempre Viva 456',
-          telefono: '555-5678',
-          email: 'mariagomez@mail.com',
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 200, description: 'Patrocinante actualizado exitosamente.', type: PatrocinanteDto })
-  @ApiResponse({ status: 400, description: 'Ya existe un patrocinante con este número de matrícula.' })
-  @ApiResponse({ status: 404, description: 'Patrocinante no encontrado.' })
+  @ApiPatrocinanteSave('update')
   async update(@Param('id') id: number, @Body() updatePatrocinanteDto: UpdatePatrocinanteDto) {
     if (!(await this.patrocinantesService.isUnique({ id, nroMatricula: updatePatrocinanteDto.nroMatricula }))) {
       throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
