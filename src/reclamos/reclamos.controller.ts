@@ -1,19 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
+import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
+import { ReclamoDto } from './dto/reclamo.dto';
 
-@ApiTags('Reclamos')
 @Controller('reclamos')
+@ApiTags('Reclamos')
+@ApiBearerAuth('access-token')
 export class ReclamosController {
   constructor(private readonly reclamosService: ReclamosService) {}
 
-  @ApiOperation({ summary: 'Crea un nuevo reclamo' })
-  @ApiResponse({ status: 201, description: 'Reclamo creado exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Número de reclamo ya existe para la fecha dada.' })
   @Post()
+  @ApiReclamoSave('create')
   async create(@Body() createReclamoDto: CreateReclamoDto) {
     const filter = {
       numero: createReclamoDto.numero,
@@ -28,6 +29,15 @@ export class ReclamosController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Obtiene una lista de reclamos con paginación y búsqueda' })
+  @ApiQuery({ name: 'query', required: false, description: 'Término de búsqueda para filtrar por número o descripción' })
+  @ApiQuery({ name: 'page', required: false, description: 'Número de página para paginación (comienza en 1)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Cantidad de registros por página para paginación' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de reclamos obtenida exitosamente. Se incluye el total de registros para paginación.',
+    type: [ReclamoDto],
+  })
   async findAll(@Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
     if (page && limit) {
       const totalRecords = await this.reclamosService.getTotalCount();
@@ -38,6 +48,10 @@ export class ReclamosController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Obtiene un reclamo por su ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo' })
+  @ApiResponse({ status: 200, description: 'Reclamo obtenido exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
   async findOne(@Param('id') id: number) {
     const getResult = (p) => {
       return {
@@ -64,6 +78,7 @@ export class ReclamosController {
   }
 
   @Patch(':id')
+  @ApiReclamoSave('update')  
   async update(@Param('id') id: number, @Body() updateReclamoDto: UpdateReclamoDto) {
     const filter = {
       id,
@@ -79,6 +94,11 @@ export class ReclamosController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Elimina un reclamo por su ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo a eliminar' })
+  @ApiResponse({ status: 204, description: 'Reclamo eliminado exitosamente.' })
+  @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
   remove(@Param('id') id: string) {
     return this.reclamosService.remove(+id);
   }
