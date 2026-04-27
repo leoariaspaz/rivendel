@@ -24,11 +24,10 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
-  getSchemaPath,
 } from '@nestjs/swagger/dist';
-import { TipoDocumento } from 'src/generated/prisma/client';
 import { TipoDocumentoDto } from './dto/tipo-documento.dto';
 import { TipDocListDto } from './dto/tipdoc-list.dto';
+import { ApiTipdocSave } from './tipdocs.swagger';
 
 @Controller('tipdocs')
 @ApiTags('Tipos de Documentos')
@@ -38,28 +37,7 @@ export class TipdocsController {
   constructor(private readonly tipdocsService: TipdocsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Crea un nuevo tipo de documento' })
-  @ApiBody({
-    type: CreateTipdocDto,
-    examples: {
-      valid: {
-        summary: 'Ejemplo válido',
-        value: {
-          sintetico: 'DNI',
-          descripcion: 'Documento Nacional de Identidad',
-        },
-      },
-      duplicateSintetico: {
-        summary: 'Ejemplo con sintético duplicado',
-        value: {
-          sintetico: 'DNI',
-          descripcion: 'Otro tipo de documento con el mismo sintético',
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 201, description: 'Tipo de documento creado exitosamente.', type: TipoDocumentoDto })
-  @ApiResponse({ status: 400, description: 'Ya existe un tipo de documento con este sintético.' })
+  @ApiTipdocSave('create')
   async create(@Body() createTipdocDto: CreateTipdocDto) {
     if (await this.tipdocsService.isUnique({ sintetico: createTipdocDto.sintetico })) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
@@ -103,30 +81,7 @@ export class TipdocsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Actualiza un tipo de documento por su ID' })
-  @ApiResponse({ status: 200, description: 'Tipo de documento actualizado exitosamente.', type: TipoDocumentoDto })
-  @ApiResponse({ status: 404, description: 'Tipo de documento no encontrado.' })
-  @ApiResponse({ status: 400, description: 'Ya existe un tipo de documento con este sintético.' })
-  @ApiParam({ name: 'id', type: Number, description: 'ID del tipo de documento a actualizar' })
-  @ApiBody({
-    type: UpdateTipdocDto,
-    examples: {
-      valid: {
-        summary: 'Ejemplo válido',
-        value: {
-          sintetico: 'LE',
-          descripcion: 'Libreta de Enrolamiento',
-        },
-      },
-      duplicateSintetico: {
-        summary: 'Ejemplo con sintético duplicado',
-        value: {
-          sintetico: 'DNI',
-          descripcion: 'Intento de actualización con sintético ya existente',
-        },
-      },
-    },
-  })
+  @ApiTipdocSave('update')
   async update(@Param('id') id: number, @Body() updateTipdocDto: UpdateTipdocDto) {
     if (await this.tipdocsService.isUnique({ id, sintetico: updateTipdocDto.sintetico })) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
