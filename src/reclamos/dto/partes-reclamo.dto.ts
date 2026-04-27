@@ -1,5 +1,5 @@
-import { Type } from 'class-transformer/types';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator/types';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
 import { PartesService } from 'src/modules/partes/partes.service';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
