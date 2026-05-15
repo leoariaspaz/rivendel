@@ -6,6 +6,7 @@ import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { ReclamoDto } from './dto/reclamo.dto';
+import { GetUser } from 'src/users/decorators/get-user.decorator';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')
@@ -15,17 +16,17 @@ export class ReclamosController {
 
   @Post()
   @ApiReclamoSave('create')
-  async create(@Body() createReclamoDto: CreateReclamoDto) {
+  async create(@GetUser('userId') userId: number, @Body() createReclamoDto: CreateReclamoDto) {
     const filter = {
       numero: createReclamoDto.numero,
       fecha: createReclamoDto.fechaHoraInicio,
     };
-    if (!(await this.reclamosService.isUnique(filter))) {
+    if (!(await this.reclamosService.isUnique(userId, filter))) {
       throw new BadRequestException([
         `Ya existe un reclamo Nº ${createReclamoDto.numero} para la fecha ${createReclamoDto.fechaHoraInicio}.`,
       ]);
     }
-    return this.reclamosService.create(createReclamoDto);
+    return this.reclamosService.create(userId, createReclamoDto);
   }
 
   @Get()
@@ -38,13 +39,13 @@ export class ReclamosController {
     description: 'Lista de reclamos obtenida exitosamente. Se incluye el total de registros para paginación.',
     type: [ReclamoDto],
   })
-  async findAll(@Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
+  async findAll(@GetUser('userId') userId, @Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
     if (page && limit) {
-      const totalRecords = await this.reclamosService.getTotalCount();
-      const data = await this.reclamosService.findAll({ page, limit });
+      const totalRecords = await this.reclamosService.getTotalCount(userId);
+      const data = await this.reclamosService.findAll(userId, { page, limit });
       return { data, totalRecords };
     }
-    return await this.reclamosService.findAll();
+    return await this.reclamosService.findAll(userId);
   }
 
   @Get(':id')
@@ -52,7 +53,7 @@ export class ReclamosController {
   @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo' })
   @ApiResponse({ status: 200, description: 'Reclamo obtenido exitosamente.' })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
-  async findOne(@Param('id') id: number) {
+  async findOne(@GetUser('userId') userId, @Param('id') id: number) {
     const getResult = (p) => {
       return {
         ...p.parte,
@@ -63,8 +64,8 @@ export class ReclamosController {
         multado: p.multado,
       };
     };
-    const reclamo = await this.reclamosService.findOne(id);
-    const cantidad = await this.reclamosService.count(reclamo?.numero?? 0, reclamo?.fechaHoraInicio);
+    const reclamo = await this.reclamosService.findOne(userId, id);
+    const cantidad = await this.reclamosService.count(userId, reclamo?.numero?? 0, reclamo?.fechaHoraInicio);
     if (reclamo) {
       const { partes, ...result } = reclamo;
       return {
@@ -79,18 +80,18 @@ export class ReclamosController {
 
   @Patch(':id')
   @ApiReclamoSave('update')  
-  async update(@Param('id') id: number, @Body() updateReclamoDto: UpdateReclamoDto) {
+  async update(@GetUser('userId') userId: number, @Param('id') id: number, @Body() updateReclamoDto: UpdateReclamoDto) {
     const filter = {
       id,
       numero: updateReclamoDto.numero,
       fecha: updateReclamoDto.fechaHoraInicio,
     };
-    if (!(await this.reclamosService.isUnique(filter))) {
+    if (!(await this.reclamosService.isUnique(userId, filter))) {
       throw new BadRequestException([
         `Ya existe un reclamo Nº ${updateReclamoDto.numero} para la fecha ${updateReclamoDto.fechaHoraInicio}.`,
       ]);
     }
-    return this.reclamosService.update(+id, updateReclamoDto);
+    return this.reclamosService.update(userId, +id, updateReclamoDto);
   }
 
   @Delete(':id')
@@ -99,7 +100,7 @@ export class ReclamosController {
   @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo a eliminar' })
   @ApiResponse({ status: 204, description: 'Reclamo eliminado exitosamente.' })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
-  remove(@Param('id') id: string) {
-    return this.reclamosService.remove(+id);
+  async remove(@GetUser('userId') userId, @Param('id') id: string) {
+    await this.reclamosService.remove(userId, +id);
   }
 }

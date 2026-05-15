@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
@@ -63,12 +63,13 @@ export class PatrocinantesController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Elimina un patrocinante por su ID' })
   @ApiParam({ name: 'id', type: Number, description: 'ID del patrocinante a eliminar' })
   @ApiResponse({ status: 204, description: 'Patrocinante eliminado exitosamente.' })
   @ApiResponse({ status: 404, description: 'Patrocinante no encontrado.' })
   @ApiResponse({ status: 400, description: 'No se puede eliminar el patrocinante porque tiene datos relacionados.' })
-  remove(@Param('id', ValidateIntRelationPipe(PatrocinantesService)) id: number) {
-    return this.patrocinantesService.remove(id);
+  async remove(@Param('id', ValidateIntRelationPipe(PatrocinantesService)) id: number) {
+    await this.patrocinantesService.remove(id);
   }
 }
