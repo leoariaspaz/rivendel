@@ -40,7 +40,7 @@ model Parte {
   idUsuario       Int?
   usuario         User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  @@unique([idTipoDocumento, nroDocumento])
+  @@unique([idTipoDocumento, nroDocumento, idUsuario])
   @@index([idPatrocinante], map: "Parte_idPatrocinante_fkey")
 }
 
