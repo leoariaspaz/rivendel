@@ -4,7 +4,7 @@ import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { ParteDB } from './dto/parte-db.dto';
 import { FindParteDTO } from './dto/find-parte.dto';
-import { ParteCountArgs, ParteFindManyArgs, ParteWhereInput } from 'src/generated/prisma/models';
+import { ParteFindManyArgs, ParteWhereInput } from 'src/generated/prisma/models';
 import {
   RelationshipValidation,
   RelationshipValidationResult,
@@ -15,22 +15,7 @@ import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/valid
 export class PartesService implements RelationshipValidation, ShouldExistRelationValidation {
   constructor(private prisma: PrismaService) {}
 
-  create(createParteDto: CreateParteDto) {
-    return this.prisma.parte.create({
-      data: {
-        nombre: createParteDto.nombre,
-        idTipoDocumento: createParteDto.idTipoDocumento,
-        nroDocumento: createParteDto.nroDocumento,
-        cuil: createParteDto.cuil ?? '',
-        idPatrocinante: createParteDto.idPatrocinante ?? null,
-        esApoderado: createParteDto.esApoderado,
-        domicilio: createParteDto.domicilio,
-        localidad: createParteDto.localidad,
-      },
-    });
-  }
-
-  SELECT_FIELDS = {
+  private SELECT_FIELDS = {
     id: true,
     nroDocumento: true,
     cuil: true,
@@ -53,7 +38,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     esApoderado: true,
   } as const;
 
-  mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
+  private mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
     const result = {
       id: p.id,
       nroDocumento: p.nroDocumento,
@@ -79,13 +64,51 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return result;
   }
 
-  selectPartes(data: ParteDB[]): FindParteDTO[] {
+  private selectPartes(data: ParteDB[]): FindParteDTO[] {
     return data.map(this.mapParteDBToFindParteDTO);
   }
 
-  async findOne(id: number) {
+  private getWhere(idUsuario: number, query: string | null): ParteWhereInput {
+    let w = { idUsuario } as ParteWhereInput;
+    if (query) {
+      w = {
+        ...w,
+        OR: [
+          {
+            nombre: {
+              contains: query,
+            },
+          },
+          {
+            cuil: {
+              contains: query,
+            },
+          },
+        ],
+      };
+    }
+    return w;
+  }
+
+  create(idUsuario: number, createParteDto: CreateParteDto) {
+    return this.prisma.parte.create({
+      data: {
+        nombre: createParteDto.nombre,
+        idTipoDocumento: createParteDto.idTipoDocumento,
+        nroDocumento: createParteDto.nroDocumento,
+        cuil: createParteDto.cuil ?? '',
+        idPatrocinante: createParteDto.idPatrocinante ?? null,
+        esApoderado: createParteDto.esApoderado,
+        domicilio: createParteDto.domicilio,
+        localidad: createParteDto.localidad,
+        idUsuario,
+      },
+    });
+  }
+
+  async findOne(idUsuario: number, id: number) {
     const p = await this.prisma.parte.findUnique({
-      where: { id },
+      where: { id, idUsuario },
       select: this.SELECT_FIELDS,
     });
 
@@ -93,10 +116,10 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return null;
   }
 
-  update(id: number, updateParteDto: UpdateParteDto) {
+  update(idUsuario: number, id: number, updateParteDto: UpdateParteDto) {
     const idPatrocinante = updateParteDto.idPatrocinante ? Number(updateParteDto.idPatrocinante) : null;
     return this.prisma.parte.update({
-      where: { id },
+      where: { idUsuario, id },
       data: {
         nombre: updateParteDto.nombre,
         idTipoDocumento: Number(updateParteDto.idTipoDocumento),
@@ -110,89 +133,25 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     });
   }
 
-  remove(id: number) {
+  remove(idUsuario: number, id: number) {
     return this.prisma.parte.delete({
-      where: { id },
+      where: { id, idUsuario },
     });
   }
 
-  getTotalCount(query: string | null) {
-    let filter = {} as ParteCountArgs;
-    if (query) {
-      filter = {
-        where: {
-          OR: [
-            {
-              nombre: {
-                contains: query,
-              },
-            },
-            {
-              cuil: {
-                contains: query,
-              },
-            },
-          ],
-        },
-      };
-    }
-    return this.prisma.parte.count(filter);
+  getTotalCount(idUsuario: number, query: string | null) {
+    return this.prisma.parte.count({ where: this.getWhere(idUsuario, query) });
   }
 
-  getFilteredTotalCount(term: string) {
-    if (term) {
-      return this.prisma.parte.count({
-        where: {
-          OR: [
-            {
-              nombre: {
-                contains: term,
-              },
-            },
-            {
-              cuil: {
-                contains: term,
-              },
-            },
-          ],
-        },
-      });
-    }
-  }
-
-  findAll(query: string | null, page: number | null, limit: number | null) {
-    let filters: ParteFindManyArgs = {};
-
+  findAll(idUsuario: number, query: string | null, page: number | null, limit: number | null) {
+    let filters: ParteFindManyArgs = { where: this.getWhere(idUsuario, query) } as ParteFindManyArgs;
     if (page && limit && page > 0) {
       const skip = (page - 1) * limit;
       filters = { ...filters, skip, take: Number(limit) } as ParteFindManyArgs;
     }
 
-    if (query) {
-      filters = {
-        ...filters,
-        where: {
-          OR: [
-            {
-              nombre: {
-                contains: query,
-              },
-            },
-            {
-              cuil: {
-                contains: query,
-              },
-            },
-          ],
-        },
-      };
-    }
-
     return this.prisma.parte
-      .findMany({
-        ...filters,
-        select: this.SELECT_FIELDS,
-      })
+      .findMany({ ...filters, select: this.SELECT_FIELDS })
       .then((data) => this.selectPartes(data));
   }
 
@@ -207,8 +166,8 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
 
-  async isUnique(filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
-    let args = { nroMatricula: filter.nroDocumento } as ParteWhereInput;
+  async isUnique(idUsuario: number, filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
+    let args = { idUsuario, nroDocumento: filter.nroDocumento } as ParteWhereInput;
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };
     }
