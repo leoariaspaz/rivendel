@@ -29,14 +29,19 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      'max-len': ['warn', { 
-        code: 100, 
-        ignoreComments: true, 
-        ignoreUrls: true, 
-        ignoreStrings: true, 
-        ignoreTemplateLiterals: true, 
-        ignoreRexegExpLiterals: true 
-      }],
+      'max-len': [
+        'warn',
+        {
+          code: 100,
+          ignoreComments: true,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRexegExpLiterals: true,
+        },
+      ],
+      'no-unreachable': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
-  },
+  }
 );
