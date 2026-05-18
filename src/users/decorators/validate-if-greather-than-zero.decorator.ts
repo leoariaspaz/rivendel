@@ -5,7 +5,7 @@ import { ValidateIf, ValidationOptions } from 'class-validator';
  * Es decir, las validaciones SOLO se ejecutan si el número es estrictamente mayor a cero.
  */
 export function ValidateIfGreaterThanZero(validationOptions?: ValidationOptions) {
-  return ValidateIf((object, value) => {
+  return ValidateIf((_object, value) => {
     if (value === undefined || value === null) {
       return false;
     }

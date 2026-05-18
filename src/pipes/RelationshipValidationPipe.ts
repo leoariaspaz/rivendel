@@ -7,7 +7,7 @@ export function ValidateIntRelationPipe(validatorClass: Type<RelationshipValidat
   class MixinRelationshipValidationPipe implements PipeTransform {
     constructor(private moduleRef: ModuleRef) {}
 
-    async transform(value: any, metadata: ArgumentMetadata): Promise<number> {
+    async transform(value: any, _metadata: ArgumentMetadata): Promise<number> {
       const validator = this.moduleRef.get(validatorClass, { strict: false });
 
       if (!validator) {

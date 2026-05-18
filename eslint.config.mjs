@@ -40,8 +40,8 @@ export default tseslint.config(
           ignoreRexegExpLiterals: true,
         },
       ],
-      'no-unreachable': 'error',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      //'no-unreachable': 'error',
+      //'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   }
 );

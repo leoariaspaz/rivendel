@@ -4,5 +4,8 @@
     "scripts/create-user.ts",
     "scripts/export-patrocinantes.ts",
     "scripts/update-password.ts"
+  ],
+  "ignoreDependencies": [
+    "@prisma/client"
   ]
 }

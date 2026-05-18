@@ -10,7 +10,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor(
     @Inject(databaseConfig.KEY)
-    private readonly config: DatabaseConfig
+    private readonly config: DatabaseConfig    
   ) {
     if (!PrismaService.printed) {
       console.log(
@@ -21,11 +21,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     const adapter = new PrismaMariaDb({
-      host: config.host,
-      port: config.port,
-      user: config.user,
-      password: config.password,
-      database: config.name,
+      host: config.host || '',
+      port: config.port || 0,
+      user: config.user || '',
+      password: config.password || '',
+      database: config.name || '',
       ssl: config.ssl,
     });
 

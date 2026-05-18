@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Patch, Req } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Patch } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateUserDTO } from './dto/update-user.dto';

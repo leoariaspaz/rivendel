@@ -42,7 +42,7 @@ export function ValidateRelation(validator: Type<ShouldExistRelationValidation>,
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
-      options: validationOptions,
+      options: validationOptions || {},
       constraints: [validator],
       validator: ValidateRelationConstraint,
     });
