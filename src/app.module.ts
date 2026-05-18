@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { PatrocinantesModule } from './modules/patrocinantes/patrocinantes.module';
 import { TipdocsModule } from './modules/tipdocs/tipdocs.module';
 import { PartesModule } from './modules/partes/partes.module';
-import { ResolucionesModule } from './resoluciones/resoluciones.module';
 import { ReclamosModule } from './reclamos/reclamos.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -23,7 +22,6 @@ const env = process.env.NODE_ENV || 'local';
     PatrocinantesModule,
     TipdocsModule,
     PartesModule,
-    ResolucionesModule,
     ReclamosModule,
     AuthModule,
     UsersModule,
