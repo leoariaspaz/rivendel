@@ -44,13 +44,6 @@ model Parte {
   @@index([idPatrocinante], map: "Parte_idPatrocinante_fkey")
 }
 
-model Resolucion {
-  id          Int        @id @default(autoincrement())
-  descripcion String
-  detalle     String     @db.Text
-  reclamos    Reclamos[]
-}
-
 model Reclamos {
   id               Int              @id @default(autoincrement())
   rubros           String           @db.Text
@@ -61,11 +54,9 @@ model Reclamos {
   proximaAudiencia DateTime?
   idUsuario        Int?
   partes           PartesReclamos[]
-  resolucion       Resolucion       @relation(fields: [idResolucion], references: [id])
   usuario          User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@unique([numero, fechaHoraInicio])
-  @@index([idResolucion], map: "Reclamos_idResolucion_fkey")
 }
 
 model PartesReclamos {
