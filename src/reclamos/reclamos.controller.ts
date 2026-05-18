@@ -3,7 +3,7 @@ import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { ReclamoDto } from './dto/reclamo.dto';
 import { GetUser } from 'src/users/decorators/get-user.decorator';

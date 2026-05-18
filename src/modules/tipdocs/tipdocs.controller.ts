@@ -23,7 +23,7 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
-} from '@nestjs/swagger/dist';
+} from '@nestjs/swagger';
 import { TipoDocumentoDto } from './dto/tipo-documento.dto';
 import { TipDocListDto } from './dto/tipdoc-list.dto';
 import { ApiTipdocSave } from './decorators/tipdocs-swagger.decorator';

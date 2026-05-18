@@ -3,7 +3,7 @@ import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
-import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger/dist';
+import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { PatrocinanteDto } from './dto/patrocinante.dto';
 import { PatrocinantesListDto } from './dto/patrocinantes-list.dto';
 import { ApiPatrocinanteSave } from './decorators/patrocinantes-swagger.decorator';

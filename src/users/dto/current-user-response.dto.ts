@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger/dist';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CurrentUserResponseDto {
   constructor(nombre: string | null | undefined) {
