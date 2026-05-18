@@ -6,10 +6,14 @@ import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { ReclamosFindManyArgs, ReclamosWhereInput } from 'src/generated/prisma/models';
+import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 
 @Injectable()
 export class ReclamosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private resolucionesService: ResolucionesService
+  ) {}
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
     const partes = Array<PartesReclamoDTO>();
@@ -65,12 +69,7 @@ export class ReclamosService {
         id: true,
         numero: true,
         rubros: true,
-        resolucion: {
-          select: {
-            id: true,
-            descripcion: true,
-          },
-        },
+        idResolucion: true,
         fechaHoraInicio: true,
         horaFin: true,
         proximaAudiencia: true,
@@ -92,7 +91,15 @@ export class ReclamosService {
       const skip = (page - 1) * limit;
       args = { ...args, skip };
     }
-    return this.prisma.reclamos.findMany(args);
+    const results = this.prisma.reclamos.findMany(args);
+    return results.then((reclamos) => {
+      return reclamos.map((reclamo) => {
+        return {
+          ...reclamo,
+          resolucion: this.resolucionesService.getDescripcion(reclamo.idResolucion),
+        };
+      });
+    });
   }
 
   findOne(idUsuario: number, id: number) {
