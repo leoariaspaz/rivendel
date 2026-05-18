@@ -91,13 +91,14 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   create(idUsuario: number, createParteDto: CreateParteDto) {
+    const idPatrocinante = (createParteDto.idPatrocinante ?? 0 > 0) ? createParteDto.idPatrocinante : null;
     return this.prisma.parte.create({
       data: {
         nombre: createParteDto.nombre,
         idTipoDocumento: createParteDto.idTipoDocumento,
         nroDocumento: createParteDto.nroDocumento,
         cuil: createParteDto.cuil ?? '',
-        idPatrocinante: createParteDto.idPatrocinante ?? null,
+        idPatrocinante,
         esApoderado: createParteDto.esApoderado,
         domicilio: createParteDto.domicilio,
         localidad: createParteDto.localidad,
