@@ -1,11 +1,12 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { PrismaClient } from 'src/generated/prisma/client';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Prisma, PrismaClient } from 'src/generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { databaseConfig, type DatabaseConfig } from 'src/config';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private static printed: boolean = false;
+  private readonly logger = new Logger(PrismaService.name);
 
   constructor(
     @Inject(databaseConfig.KEY)
@@ -27,11 +28,25 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       database: config.name,
       ssl: config.ssl,
     });
-    super({ adapter });
+
+    super({ 
+      adapter, 
+      log: [ 
+        { 
+          emit: 'event', 
+          level: 'query'
+        } 
+      ] 
+    });
   }
 
   async onModuleInit() {
     await this.$connect();
+    this.$on('query' as never, (e: Prisma.QueryEvent) => {
+      this.logger.debug(`Query: ${e.query}`);
+      this.logger.debug(`Params: ${e.params}`);
+      this.logger.debug(`Duration: ${e.duration}ms`);
+    });
   }
 
   async onModuleDestroy() {

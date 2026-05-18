@@ -11,7 +11,7 @@ import { ReclamosFindManyArgs, ReclamosWhereInput } from 'src/generated/prisma/m
 export class ReclamosService {
   constructor(private prisma: PrismaService) {}
 
-  create(createReclamoDto: CreateReclamoDto) {
+  create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
     const partes = Array<PartesReclamoDTO>();
 
     if (createReclamoDto.reclamantes && createReclamoDto.reclamantes.length > 0) {
@@ -51,14 +51,16 @@ export class ReclamosService {
         horaFin: createReclamoDto.horaFin,
         proximaAudiencia: createReclamoDto.proximaAudiencia,
         partes: { create: partes },
+        idUsuario,
       },
     });
   }
 
-  findAll({ page, limit }: { page?: number; limit?: number } = {}) {
+  findAll(idUsuario: number, { page, limit }: { page?: number; limit?: number } = {}) {
     let args = {
       take: Number(limit),
       orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
+      where: { idUsuario },
       select: {
         id: true,
         numero: true,
@@ -93,9 +95,9 @@ export class ReclamosService {
     return this.prisma.reclamos.findMany(args);
   }
 
-  findOne(id: number) {
+  findOne(idUsuario: number, id: number) {
     return this.prisma.reclamos.findUnique({
-      where: { id },
+      where: { idUsuario, id },
       select: {
         id: true,
         numero: true,
@@ -144,12 +146,12 @@ export class ReclamosService {
     });
   }
 
-  getTotalCount() {
-    return this.prisma.reclamos.count();
+  getTotalCount(idUsuario: number) {
+    return this.prisma.reclamos.count({ where: { idUsuario } });
   }
 
-  async update(id: number, updateReclamoDto: UpdateReclamoDto) {
-    const reclamo = await this.prisma.reclamos.findUnique({ where: { id }, include: { partes: true } });
+  async update(idUsuario: number, id: number, updateReclamoDto: UpdateReclamoDto) {
+    const reclamo = await this.prisma.reclamos.findUnique({ where: { idUsuario, id }, include: { partes: true } });
 
     if (!reclamo) {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);
@@ -260,13 +262,16 @@ export class ReclamosService {
     return this.prisma.$transaction([deleteOrCreate, ...updateMany]);
   }
 
-  remove(id: number) {
+  remove(idUsuario: number, id: number) {
     return this.prisma.reclamos.delete({
-      where: { id },
+      where: { idUsuario, id },
     });
   }
 
-  async isUnique(filter: { id?: number; numero: number | undefined; fecha: Date | undefined }): Promise<Boolean> {
+  async isUnique(
+    idUsuario: number,
+    filter: { id?: number; numero: number | undefined; fecha: Date | undefined }
+  ): Promise<Boolean> {
     const inicioDia = new Date(filter.fecha ?? '');
     inicioDia.setHours(0, 0, 0, 0);
 
@@ -279,6 +284,7 @@ export class ReclamosService {
         gte: inicioDia,
         lte: finDia,
       },
+      idUsuario,
     } as ReclamosWhereInput;
 
     if (filter.id) {
@@ -288,17 +294,18 @@ export class ReclamosService {
     return (await this.prisma.reclamos.count({ where: args })) === 0;
   }
 
-  count(numero: number, fecha?: Date) {
+  count(idUsuario: number, numero: number, fecha?: Date) {
     const POSTERGADO = 4;
     const FRACASO = 5;
     return this.prisma.reclamos.count({
       where: {
-          numero, 
-          OR: [{ idResolucion: POSTERGADO }, { idResolucion: FRACASO }],
-          fechaHoraInicio: {
-            lte: fecha ?? new Date(),
-          },          
+        idUsuario,
+        numero,
+        OR: [{ idResolucion: POSTERGADO }, { idResolucion: FRACASO }],
+        fechaHoraInicio: {
+          lte: fecha ?? new Date(),
         },
+      },
     });
   }
 }

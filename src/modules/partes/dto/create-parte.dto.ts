@@ -44,7 +44,6 @@ export class CreateParteDto {
   
   @IsOptional()
   @IsInt({ message: 'El patrocinante es incorrecto.' })
-  @IsPositive()
   @ValidateRelation(PatrocinantesService)
   idPatrocinante?: number;
 

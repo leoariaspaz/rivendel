@@ -118,6 +118,7 @@ export class PatrocinantesService implements RelationshipValidation, ShouldExist
   }
 
   async exists(id: number): Promise<ValidateRelationResult> {
+    if (id === 0) return { isValid: true, message: undefined };
     const exist = (await this.prisma.patrocinante.count({ where: { id } })) > 0;
     return { isValid: exist, message: exist ? '' : 'No existe el patrocinante.' };
   }

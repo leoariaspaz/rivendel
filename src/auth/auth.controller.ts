@@ -7,7 +7,7 @@ import { LocalGuard } from './local.guard';
 import { SkipJwt } from './skip-jwt.decorator';
 import { authConfig, type AuthConfig } from '../config/auth.config';
 import { UsersService } from 'src/users/users.service';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger/dist';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { UserDTO } from './dto/user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';

@@ -66,7 +66,8 @@ export class ResolucionesService implements RelationshipValidation, ShouldExistR
   }
 
   async exists(id: number): Promise<ValidateRelationResult> {
-    const exist = (await this.prisma.resolucion.count({ where: { id } })) > 0;
+    let exist = (await this.prisma.resolucion.count({ where: { id } })) > 0;
+    if (!exist) exist = id === 6; // Resolución "Sin resolución" que se asume siempre existente
     return { isValid: exist, message: exist ? '' : 'No existe la resolución.' };
   }
 

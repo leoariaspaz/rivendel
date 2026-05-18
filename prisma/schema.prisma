@@ -37,8 +37,10 @@ model Parte {
   esApoderado     Boolean          @default(false)
   tipoDocumento   TipoDocumento    @relation(fields: [idTipoDocumento], references: [id])
   reclamos        PartesReclamos[]
+  idUsuario       Int?
+  usuario         User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
-  @@unique([idTipoDocumento, nroDocumento])
+  @@unique([idTipoDocumento, nroDocumento, idUsuario])
   @@index([idPatrocinante], map: "Parte_idPatrocinante_fkey")
 }
 
@@ -57,8 +59,10 @@ model Reclamos {
   horaFin          DateTime?
   numero           Int
   proximaAudiencia DateTime?
+  idUsuario        Int?
   partes           PartesReclamos[]
   resolucion       Resolucion       @relation(fields: [idResolucion], references: [id])
+  usuario          User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@unique([numero, fechaHoraInicio])
   @@index([idResolucion], map: "Reclamos_idResolucion_fkey")
@@ -82,11 +86,13 @@ model PartesReclamos {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  email        String   @unique
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
   nombre       String?
+  reclamos     Reclamos[]
   password     String
   refreshToken String? // HASHED refresh token
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  partes       Parte[]
 }

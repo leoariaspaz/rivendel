@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Get, Patch, Req } from '@nestjs/
 import { UsersService } from './users.service';
 import { AuthService } from 'src/auth/auth.service';
 import { UpdateUserDTO } from './dto/update-user.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger/dist';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { GetUser } from './decorators/get-user.decorator';
 import { CurrentUserResponseDto } from './dto/current-user-response.dto';
 
