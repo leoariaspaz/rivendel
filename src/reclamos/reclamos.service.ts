@@ -5,8 +5,9 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { ReclamosFindManyArgs, ReclamosWhereInput } from 'src/generated/prisma/models';
+import { ReclamosFindManyArgs, ReclamosSelect, ReclamosWhereInput } from 'src/generated/prisma/models';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
+import { FindReclamoDTO } from './dto/find-reclamo.dto';
 
 @Injectable()
 export class ReclamosService {
@@ -14,6 +15,34 @@ export class ReclamosService {
     private prisma: PrismaService,
     private resolucionesService: ResolucionesService
   ) {}
+
+  getWhere(idUsuario: number, query: string | null): ReclamosWhereInput {
+    let w = { idUsuario } as ReclamosWhereInput;
+    if (query) {
+      w = {
+        ...w,
+        OR: [
+          { numero: { equals: Number(query) } },
+          {
+            partes: {
+              some: {
+                parte: {
+                  nombre: { contains: query },
+                },
+              },
+            },
+          },
+          {
+            fechaHoraInicio: {
+              gte: new Date(query),
+              lte: new Date(query),
+            },
+          },
+        ],
+      };
+    }
+    return w;
+  }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
     const partes = Array<PartesReclamoDTO>();
@@ -60,40 +89,49 @@ export class ReclamosService {
     });
   }
 
-  findAll(idUsuario: number, { page, limit }: { page?: number; limit?: number } = {}) {
-    let args = {
-      take: Number(limit),
-      orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
-      where: { idUsuario },
-      select: {
-        id: true,
-        numero: true,
-        rubros: true,
-        idResolucion: true,
-        fechaHoraInicio: true,
-        horaFin: true,
-        proximaAudiencia: true,
-        partes: {
-          select: {
-            rol: true,
-            parte: {
-              select: {
-                id: true,
-                nombre: true,
-                cuil: true,
-              },
+  findAll(
+    idUsuario: number,
+    query: string | null,
+    page: number | null,
+    limit: number | null
+  ): Promise<FindReclamoDTO[]> {
+    const w = this.getWhere(idUsuario, query);
+
+    const fields = {
+      id: true,
+      numero: true,
+      fechaHoraInicio: true,
+      horaFin: true,
+      idResolucion: true,
+      proximaAudiencia: true,
+      partes: {
+        select: {
+          rol: true,
+          parte: {
+            select: {
+              id: true,
+              nombre: true,
+              cuil: true,
             },
           },
         },
       },
-    } as ReclamosFindManyArgs;
-    if (page && limit) {
-      const skip = (page - 1) * limit;
-      args = { ...args, skip };
-    }
-    const results = this.prisma.reclamos.findMany(args);
-    return results.then((reclamos) => {
-      return reclamos.map((reclamo) => {
+    } satisfies ReclamosSelect;
+
+    const skip = page && limit ? (page - 1) * limit : undefined;
+
+    let args = {
+      take: Number(limit),
+      orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
+      where: w,
+      select: fields,
+      skip,
+    } satisfies ReclamosFindManyArgs;
+
+    const results = this.prisma.reclamos.findMany(args) as Promise<FindReclamoDTO[]>;
+
+    return results.then((reclamos): FindReclamoDTO[] => {
+      return reclamos.map((reclamo): FindReclamoDTO => {
         return {
           ...reclamo,
           resolucion: this.resolucionesService.getDescripcion(reclamo.idResolucion),
@@ -153,8 +191,8 @@ export class ReclamosService {
     });
   }
 
-  getTotalCount(idUsuario: number) {
-    return this.prisma.reclamos.count({ where: { idUsuario } });
+  getTotalCount(idUsuario: number, query: string | null): Promise<number> {
+    return this.prisma.reclamos.count({ where: this.getWhere(idUsuario, query) });
   }
 
   async update(idUsuario: number, id: number, updateReclamoDto: UpdateReclamoDto) {

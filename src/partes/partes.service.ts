@@ -152,7 +152,13 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     }
 
     return this.prisma.parte
-      .findMany({ ...filters, select: this.SELECT_FIELDS })
+      .findMany({ 
+        ...filters, 
+        select: this.SELECT_FIELDS, 
+        orderBy: { 
+          nombre: 'asc', 
+          nroDocumento: 'asc' 
+        } })
       .then((data) => this.selectPartes(data));
   }
 

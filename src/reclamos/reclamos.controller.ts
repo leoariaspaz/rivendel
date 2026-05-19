@@ -1,12 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  BadRequestException,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
-import { ReclamoDto } from './dto/reclamo.dto';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
+import { ReclamosListDto } from './dto/reclamos-list.dto';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')
@@ -31,21 +43,28 @@ export class ReclamosController {
 
   @Get()
   @ApiOperation({ summary: 'Obtiene una lista de reclamos con paginación y búsqueda' })
-  @ApiQuery({ name: 'query', required: false, description: 'Término de búsqueda para filtrar por número o descripción' })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Término de búsqueda para filtrar por número o descripción',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Número de página para paginación (comienza en 1)' })
   @ApiQuery({ name: 'limit', required: false, description: 'Cantidad de registros por página para paginación' })
   @ApiResponse({
     status: 200,
     description: 'Lista de reclamos obtenida exitosamente. Se incluye el total de registros para paginación.',
-    type: [ReclamoDto],
+    type: [ReclamosListDto],
   })
-  async findAll(@GetUser('userId') userId, @Query('page') page: number | null = null, @Query('limit') limit: number | null = null) {
-    if (page && limit) {
-      const totalRecords = await this.reclamosService.getTotalCount(userId);
-      const data = await this.reclamosService.findAll(userId, { page, limit });
-      return { data, totalRecords };
-    }
-    return await this.reclamosService.findAll(userId);
+  async findAll(
+    @GetUser('userId') userId,
+    @Query('query') query: string | null = null,
+    @Query('page') page: number | null = null,
+    @Query('limit') limit: number | null = null
+  ): Promise<ReclamosListDto> {
+    return new ReclamosListDto(
+      await this.reclamosService.findAll(userId, query, page, limit),
+      await this.reclamosService.getTotalCount(userId, query)
+    );
   }
 
   @Get(':id')
@@ -65,21 +84,21 @@ export class ReclamosController {
       };
     };
     const reclamo = await this.reclamosService.findOne(userId, id);
-    const cantidad = await this.reclamosService.count(userId, reclamo?.numero?? 0, reclamo?.fechaHoraInicio);
+    const cantidad = await this.reclamosService.count(userId, reclamo?.numero ?? 0, reclamo?.fechaHoraInicio);
     if (reclamo) {
       const { partes, ...result } = reclamo;
       return {
         ...result,
         reclamantes: reclamo?.partes.filter((p) => p.rol === RECLAMANTE).map(getResult),
         reclamados: reclamo?.partes.filter((p) => p.rol === RECLAMADO).map(getResult),
-        cantidad
+        cantidad,
       };
     }
     return null;
   }
 
   @Patch(':id')
-  @ApiReclamoSave('update')  
+  @ApiReclamoSave('update')
   async update(@GetUser('userId') userId: number, @Param('id') id: number, @Body() updateReclamoDto: UpdateReclamoDto) {
     const filter = {
       id,
