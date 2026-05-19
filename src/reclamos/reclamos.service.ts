@@ -7,7 +7,9 @@ import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { ReclamosFindManyArgs, ReclamosSelect, ReclamosWhereInput } from 'src/generated/prisma/models';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
-import { FindReclamoDTO } from './dto/find-reclamo.dto';
+import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 @Injectable()
 export class ReclamosService {
@@ -19,24 +21,45 @@ export class ReclamosService {
   getWhere(idUsuario: number, query: string | null): ReclamosWhereInput {
     let w = { idUsuario } as ReclamosWhereInput;
     if (query) {
-      w = {
-        ...w,
-        OR: [
-          { numero: { equals: Number(query) } },
-          {
-            partes: {
-              some: {
-                parte: {
-                  nombre: { contains: query },
-                },
+      const ORQuery: ReclamosWhereInput[] = [
+        {
+          partes: {
+            some: {
+              parte: {
+                nombre: { contains: query },
               },
             },
           },
+        },
+      ];
+
+      if (!Number.isNaN(Number(query))) {
+        ORQuery.push({ numero: { equals: Number(query) } });
+      }
+
+      dayjs.extend(customParseFormat);
+      const formats = ['D/M/YYYY', 'D-M-YYYY', 'DD/MM/YYYY', 'DD-MM-YYYY'];
+      const date = dayjs(query, formats, true);
+      if (date.isValid()) {
+        const inicioDia = date.toDate();
+        inicioDia.setHours(0, 0, 0, 0);
+        const finDia = date.toDate();
+        finDia.setHours(23, 59, 59, 999);
+        const condition = {
+          fechaHoraInicio: {
+            gte: inicioDia,
+            lte: finDia,
+          },
+        };
+
+        ORQuery.push(condition);
+      }
+
+      w = {
+        AND: [
+          w,
           {
-            fechaHoraInicio: {
-              gte: new Date(query),
-              lte: new Date(query),
-            },
+            OR: ORQuery,
           },
         ],
       };
@@ -94,9 +117,7 @@ export class ReclamosService {
     query: string | null,
     page: number | null,
     limit: number | null
-  ): Promise<FindReclamoDTO[]> {
-    const w = this.getWhere(idUsuario, query);
-
+  ): Promise<ReclamosListItemDTO[]> {
     const fields = {
       id: true,
       numero: true,
@@ -118,20 +139,25 @@ export class ReclamosService {
       },
     } satisfies ReclamosSelect;
 
-    const skip = page && limit ? (page - 1) * limit : undefined;
+    let skip: number | undefined;
+    let take: number | undefined;
+    if (page && limit && page > 0) {
+      skip = (page - 1) * limit;
+      take = Number(limit);
+    }
 
-    let args = {
-      take: Number(limit),
-      orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
-      where: w,
+    const args = {
       select: fields,
+      where: this.getWhere(idUsuario, query),
+      orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
       skip,
+      take,
     } satisfies ReclamosFindManyArgs;
 
-    const results = this.prisma.reclamos.findMany(args) as Promise<FindReclamoDTO[]>;
+    const results = this.prisma.reclamos.findMany(args) as Promise<ReclamosListItemDTO[]>;
 
-    return results.then((reclamos): FindReclamoDTO[] => {
-      return reclamos.map((reclamo): FindReclamoDTO => {
+    return results.then((reclamos): ReclamosListItemDTO[] => {
+      return reclamos.map((reclamo): ReclamosListItemDTO => {
         return {
           ...reclamo,
           resolucion: this.resolucionesService.getDescripcion(reclamo.idResolucion),
@@ -287,7 +313,7 @@ export class ReclamosService {
       },
     });
 
-    let updateMany: any[] = [];
+    const updateMany: any[] = [];
     for (const parte of partesToUpdate) {
       updateMany.push(
         this.prisma.partesReclamos.update({
@@ -304,7 +330,7 @@ export class ReclamosService {
       );
     }
 
-    return this.prisma.$transaction([deleteOrCreate, ...updateMany]);
+    return this.prisma.$transaction([deleteOrCreate, ...(updateMany as [])]);
   }
 
   remove(idUsuario: number, id: number) {
@@ -316,7 +342,7 @@ export class ReclamosService {
   async isUnique(
     idUsuario: number,
     filter: { id?: number; numero: number | undefined; fecha: Date | undefined }
-  ): Promise<Boolean> {
+  ): Promise<boolean> {
     const inicioDia = new Date(filter.fecha ?? '');
     inicioDia.setHours(0, 0, 0, 0);
 

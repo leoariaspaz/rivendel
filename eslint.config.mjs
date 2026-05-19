@@ -32,16 +32,15 @@ export default tseslint.config(
       'max-len': [
         'warn',
         {
-          code: 100,
+          code: 150,
           ignoreComments: true,
           ignoreUrls: true,
           ignoreStrings: true,
           ignoreTemplateLiterals: true,
-          ignoreRexegExpLiterals: true,
         },
       ],
-      //'no-unreachable': 'error',
-      //'@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-unreachable': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   }
 );

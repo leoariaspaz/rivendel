@@ -1,4 +1,4 @@
-export interface FindParteReclamoDTO {
+export interface ReclamosListParteReclamoItemDTO {
   rol: string;
   parte: {
     id: number;

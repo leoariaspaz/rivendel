@@ -65,7 +65,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   private selectPartes(data: ParteDB[]): FindParteDTO[] {
-    return data.map(this.mapParteDBToFindParteDTO);
+    return data.map((p) => this.mapParteDBToFindParteDTO(p));
   }
 
   private getWhere(idUsuario: number, query: string | null): ParteWhereInput {
@@ -145,20 +145,18 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   findAll(idUsuario: number, query: string | null, page: number | null, limit: number | null) {
-    let filters: ParteFindManyArgs = { where: this.getWhere(idUsuario, query) } as ParteFindManyArgs;
+    let filters: ParteFindManyArgs = { where: this.getWhere(idUsuario, query) };
     if (page && limit && page > 0) {
       const skip = (page - 1) * limit;
-      filters = { ...filters, skip, take: Number(limit) } as ParteFindManyArgs;
+      filters = { ...filters, skip, take: Number(limit) };
     }
 
     return this.prisma.parte
-      .findMany({ 
-        ...filters, 
-        select: this.SELECT_FIELDS, 
-        orderBy: { 
-          nombre: 'asc', 
-          nroDocumento: 'asc' 
-        } })
+      .findMany({
+        ...filters,
+        select: this.SELECT_FIELDS,
+        orderBy: [{ nombre: 'asc' }, { nroDocumento: 'asc' }],
+      })
       .then((data) => this.selectPartes(data));
   }
 
@@ -168,12 +166,15 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   async isRelated(value: number): Promise<RelationshipValidationResult> {
-    const parte = await this.prisma.parte.findFirst({ where: { id: value }, select: { reclamos: true } });
+    const parte = await this.prisma.parte.findFirst({
+      where: { id: value },
+      select: { reclamos: true },
+    });
     const cantReclamos = parte?.reclamos?.length ?? 0;
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
 
-  async isUnique(idUsuario: number, filter: { id?: number; nroDocumento: string | undefined }): Promise<Boolean> {
+  async isUnique(idUsuario: number, filter: { id?: number; nroDocumento: string | undefined }): Promise<boolean> {
     let args = { idUsuario, nroDocumento: filter.nroDocumento } as ParteWhereInput;
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };
