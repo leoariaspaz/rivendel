@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Parte } from "src/generated/prisma/client";
 import { FindParteDTO } from "./find-parte.dto";
 
 export class PartesListDto {

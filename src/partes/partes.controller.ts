@@ -53,7 +53,7 @@ export class PartesController {
     @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
     @Query('limit') limit: number | null = null
-  ) {
+  ): Promise<PartesListDto> {
     const result = new PartesListDto(
       await this.partesService.findAll(userId, query, page, limit),
       await this.partesService.getTotalCount(userId, query)
