@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UpdateReclamoDto } from '../dto/update-reclamo.dto';
 import { CreateReclamoDto } from '../dto/create-reclamo.dto';
 import { ReclamoDto } from '../dto/reclamo.dto';

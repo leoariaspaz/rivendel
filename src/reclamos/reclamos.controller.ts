@@ -72,7 +72,48 @@ export class ReclamosController {
   @Get(':id')
   @ApiOperation({ summary: 'Obtiene un reclamo por su ID' })
   @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo' })
-  @ApiResponse({ status: 200, description: 'Reclamo obtenido exitosamente.' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reclamo obtenido exitosamente.',
+    example: {
+      id: 1,
+      numero: 123,
+      fechaHoraInicio: '2024-01-01T17:00:00Z',
+      horaFin: '2024-01-01T17:15:00Z',
+      idResolucion: 1,
+      proximaAudiencia: null,
+      rubros: 'Rubro 1, Rubro 2',
+      partes: [
+        {
+          idParte: 1,
+          incomparendo: false,
+          multado: false,
+          nroWhatsappParte: null,
+          nroWhatsappPatrocinante: null,
+          postergo: false,
+          rol: RECLAMANTE,
+          cuil: '20121231238',
+          domicilio: 'Calle Falsa 123',
+          esApoderado: false,
+          id: 1,
+          localidad: 'Ciudad',
+          nombre: 'Juan Pérez',
+          nroDocumento: '12345678',
+          patrocinante: {
+            domicilio: 'Calle Patrocinante 456',
+            localidad: 'Ciudad Patrocinante',
+            nombre: 'Abogado Patrocinante',
+            nroCasillero: 1234,
+            nroMatricula: 5678,
+          },
+          tipoDocumento: {
+            sintetico: 'DNI',
+          },
+        },
+      ],
+      cantidad: 1,
+    },
+  })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
   async findOne(@GetUser('userId') userId: number, @Param('id') id: number) {
     const getResult = (p: ParteReclamoDbDTO): ParteReclamoDetail => {
