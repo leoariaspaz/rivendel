@@ -57,4 +57,12 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
   toReclamantesUpdatedList(partesReclamos: PartesReclamosList): PartesReclamosList {
     return this.toUpdatedList(partesReclamos, RECLAMANTE);
   }
+
+  existsReclamado(idParte: number) {
+    return this?.some((p) => p.idParte === idParte && p.rol === RECLAMADO);
+  }
+
+  existsReclamante(idParte: number) {
+    return this?.some((p) => p.idParte === idParte && p.rol === RECLAMANTE);
+  }
 }

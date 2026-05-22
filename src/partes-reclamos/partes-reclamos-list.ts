@@ -1,5 +1,6 @@
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { PartesReclamoDTOList } from './partes-reclamos-dto-list.service';
+import { PrismaService } from 'src/shared/services/prisma.service';
 
 export class PartesReclamosList extends Array<PartesReclamos> {
   constructor(private items: PartesReclamos[] = []) {
@@ -21,33 +22,56 @@ export class PartesReclamosList extends Array<PartesReclamos> {
   getNewPartes(
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamos[] | undefined {
+  ): PartesReclamosList {
     const reclamadosList = reclamados?.subtractReclamados(this).toReclamadosList();
     const reclamantesList = reclamantes?.subtractReclamantes(this).toReclamantesList();
-    return reclamadosList?.joinPartes(reclamantesList);
+    return reclamadosList?.joinPartes(reclamantesList) || new PartesReclamosList();
   }
 
   getUpdatedPartes(
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosList | undefined {
+  ): PartesReclamosList {
     const reclamadosList = reclamados?.intersectReclamados(this).toReclamadosUpdatedList(this);
     const reclamantesList = reclamantes?.intersectReclamantes(this).toReclamantesUpdatedList(this);
-    return reclamadosList?.joinPartes(reclamantesList);
+    return reclamadosList?.joinPartes(reclamantesList) || new PartesReclamosList();
   }
 
   findParteByRol(idParte: number, rol: number): PartesReclamos | undefined {
     return this.find((p) => p.idParte === idParte && p.rol === rol);
   }
 
+  private subtractReclamados(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
+    return this.filter((p) => !partes?.existsReclamado(p.idParte)) as PartesReclamosList;
+  }
+
+  private subtractReclamantes(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
+    return this.filter((p) => !partes?.existsReclamante(p.idParte)) as PartesReclamosList;
+  }
+
   getRemovedPartes(
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
   ): PartesReclamosList | undefined {
-    // const partesToDelete = this.partesReclamosService
-    //   .filterIfExists(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
-    //   .concat(this.partesReclamosService.filterIfExists(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
+    return this.subtractReclamados(reclamados).joinPartes(this.subtractReclamantes(reclamantes));
+  }
 
-    const notExists = reclamados?.    
+  update(prismaService: PrismaService): any[] {
+    const updateMany: any[] = [];
+    this.forEach((p) => {
+      const x = prismaService.partesReclamos.update({
+        where: { id: p.id },
+        data: {
+          rol: p.rol,
+          nroWhatsappParte: p.nroWhatsappParte,
+          nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
+          postergo: p.postergo,
+          incomparendo: p.incomparendo,
+          multado: p.multado,
+        },
+      });
+      updateMany.push(x);
+    });
+    return updateMany;
   }
 }

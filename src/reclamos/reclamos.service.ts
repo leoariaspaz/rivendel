@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
 import { ReclamosFindManyArgs, ReclamosSelect, ReclamosWhereInput } from 'src/generated/prisma/models';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { PartesReclamosExtensions } from 'src/partes-reclamos/partes-reclamos-extensions';
 import { PartesReclamosList } from 'src/partes-reclamos/partes-reclamos-list';
 
 @Injectable()
@@ -234,28 +232,24 @@ export class ReclamosService {
     }
 
     //creamos los nuevos partes que no existían antes
-    const _newPartes = new PartesReclamosList(reclamo.partes).getNewPartes(
+    const newPartes = new PartesReclamosList(reclamo.partes).getNewPartes(
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
     //actualizamos los que ya existen
-    const _existingPartes = new PartesReclamosList(reclamo.partes).getUpdatedPartes(
+    const existingPartes = new PartesReclamosList(reclamo.partes).getUpdatedPartes(
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
     //eliminamos los que no están en el dto
-    const _removedPartes = new PartesReclamosList(reclamo.partes).getRemovedPartes(
+    const removedPartes = new PartesReclamosList(reclamo.partes).getRemovedPartes(
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
-    const partesToDelete = this.partesReclamosService
-      .filterIfExists(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
-      .concat(this.partesReclamosService.filterIfExists(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
-
-    const deleteOrCreate = this.prisma.reclamos.update({
+    const createAndDelete = this.prisma.reclamos.update({
       where: { id },
       data: {
         numero: updateReclamoDto.numero,
@@ -264,8 +258,8 @@ export class ReclamosService {
         fechaHoraInicio: updateReclamoDto.fechaHoraInicio,
         horaFin: updateReclamoDto.horaFin,
         partes: {
-          deleteMany: partesToDelete,
-          createMany: { data: partesToCreate },
+          createMany: { data: newPartes },
+          deleteMany: removedPartes,
         },
         proximaAudiencia: updateReclamoDto.proximaAudiencia,
       },
@@ -274,24 +268,9 @@ export class ReclamosService {
       },
     });
 
-    const updateMany: any[] = [];
-    for (const parte of partesToUpdate) {
-      updateMany.push(
-        this.prisma.partesReclamos.update({
-          where: { id: parte.id },
-          data: {
-            rol: parte.rol,
-            nroWhatsappParte: parte.nroWhatsappParte,
-            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-            postergo: parte.postergo,
-            incomparendo: parte.incomparendo,
-            multado: parte.multado,
-          },
-        })
-      );
-    }
+    const updateMany = existingPartes.update(this.prisma);
 
-    return this.prisma.$transaction([deleteOrCreate, ...(updateMany as [])]);
+    return this.prisma.$transaction([createAndDelete, ...(updateMany as [])]);
   }
 
   remove(idUsuario: number, id: number) {
