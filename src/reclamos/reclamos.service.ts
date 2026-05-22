@@ -11,10 +11,7 @@ import { PartesReclamosList } from 'src/partes-reclamos/partes-reclamos-list';
 
 @Injectable()
 export class ReclamosService {
-  constructor(
-    private prisma: PrismaService,
-    private resolucionesService: ResolucionesService
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   getWhere(idUsuario: number, query: string | null): ReclamosWhereInput {
     let w = { idUsuario } as ReclamosWhereInput;
@@ -66,37 +63,9 @@ export class ReclamosService {
   }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
-    // const partes = Array<PartesReclamoDTO>();
-
-    // if (createReclamoDto.reclamantes && createReclamoDto.reclamantes.length > 0) {
-    //   createReclamoDto.reclamantes.forEach((parte) =>
-    //     partes.push({
-    //       idParte: parte.idParte,
-    //       rol: RECLAMANTE,
-    //       nroWhatsappParte: parte.nroWhatsappParte,
-    //       nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-    //       postergo: parte.postergo,
-    //       incomparendo: parte.incomparendo,
-    //       multado: parte.multado,
-    //     })
-    //   );
-    // }
-
-    // if (createReclamoDto.reclamados && createReclamoDto.reclamados.length > 0) {
-    //   createReclamoDto.reclamados.forEach((parte) =>
-    //     partes.push({
-    //       idParte: parte.idParte,
-    //       rol: RECLAMADO,
-    //       nroWhatsappParte: parte.nroWhatsappParte,
-    //       nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-    //       postergo: parte.postergo,
-    //       incomparendo: parte.incomparendo,
-    //       multado: parte.multado,
-    //     })
-    //   );
-    // }
-
-    const partes = this.partesReclamosService.join(createReclamoDto.reclamantes, createReclamoDto.reclamados);
+    const newPartes = new PartesReclamosList()
+      .joinPartes(createReclamoDto.reclamados?.toReclamadosList())
+      .joinPartes(createReclamoDto.reclamantes?.toReclamantesList());
 
     return this.prisma.reclamos.create({
       data: {
@@ -106,7 +75,7 @@ export class ReclamosService {
         fechaHoraInicio: createReclamoDto.fechaHoraInicio,
         horaFin: createReclamoDto.horaFin,
         proximaAudiencia: createReclamoDto.proximaAudiencia,
-        partes: { create: partes },
+        partes: { create: newPartes },
         idUsuario,
       },
     });
@@ -155,12 +124,13 @@ export class ReclamosService {
     } satisfies ReclamosFindManyArgs;
 
     const results = this.prisma.reclamos.findMany(args) as Promise<ReclamosListItemDTO[]>;
+    const resSrv = new ResolucionesService();
 
     return results.then((reclamos): ReclamosListItemDTO[] => {
       return reclamos.map((reclamo): ReclamosListItemDTO => {
         return {
           ...reclamo,
-          resolucion: this.resolucionesService.getDescripcion(reclamo.idResolucion),
+          resolucion: resSrv.getDescripcion(reclamo.idResolucion),
         };
       });
     });

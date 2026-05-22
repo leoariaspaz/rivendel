@@ -59,7 +59,7 @@ export class PartesReclamosList extends Array<PartesReclamos> {
   update(prismaService: PrismaService): any[] {
     const updateMany: any[] = [];
     this.forEach((p) => {
-      const x = prismaService.partesReclamos.update({
+      const parte = prismaService.partesReclamos.update({
         where: { id: p.id },
         data: {
           rol: p.rol,
@@ -70,7 +70,7 @@ export class PartesReclamosList extends Array<PartesReclamos> {
           multado: p.multado,
         },
       });
-      updateMany.push(x);
+      updateMany.push(parte);
     });
     return updateMany;
   }
