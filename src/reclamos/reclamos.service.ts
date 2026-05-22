@@ -3,13 +3,13 @@ import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { RECLAMADO, RECLAMANTE } from '../shared/utils/constants';
-import { PartesReclamoDTO } from './dto/partes-reclamo.dto';
-import { PartesReclamos } from 'src/generated/prisma/client';
 import { ReclamosFindManyArgs, ReclamosSelect, ReclamosWhereInput } from 'src/generated/prisma/models';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
+import { PartesReclamosExtensions } from 'src/partes-reclamos/partes-reclamos-extensions';
+import { PartesReclamosList } from 'src/partes-reclamos/partes-reclamos-list';
 
 @Injectable()
 export class ReclamosService {
@@ -68,35 +68,37 @@ export class ReclamosService {
   }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
-    const partes = Array<PartesReclamoDTO>();
+    // const partes = Array<PartesReclamoDTO>();
 
-    if (createReclamoDto.reclamantes && createReclamoDto.reclamantes.length > 0) {
-      createReclamoDto.reclamantes.forEach((parte) =>
-        partes.push({
-          idParte: parte.idParte,
-          rol: RECLAMANTE,
-          nroWhatsappParte: parte.nroWhatsappParte,
-          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-          postergo: parte.postergo,
-          incomparendo: parte.incomparendo,
-          multado: parte.multado,
-        })
-      );
-    }
+    // if (createReclamoDto.reclamantes && createReclamoDto.reclamantes.length > 0) {
+    //   createReclamoDto.reclamantes.forEach((parte) =>
+    //     partes.push({
+    //       idParte: parte.idParte,
+    //       rol: RECLAMANTE,
+    //       nroWhatsappParte: parte.nroWhatsappParte,
+    //       nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+    //       postergo: parte.postergo,
+    //       incomparendo: parte.incomparendo,
+    //       multado: parte.multado,
+    //     })
+    //   );
+    // }
 
-    if (createReclamoDto.reclamados && createReclamoDto.reclamados.length > 0) {
-      createReclamoDto.reclamados.forEach((parte) =>
-        partes.push({
-          idParte: parte.idParte,
-          rol: RECLAMADO,
-          nroWhatsappParte: parte.nroWhatsappParte,
-          nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-          postergo: parte.postergo,
-          incomparendo: parte.incomparendo,
-          multado: parte.multado,
-        })
-      );
-    }
+    // if (createReclamoDto.reclamados && createReclamoDto.reclamados.length > 0) {
+    //   createReclamoDto.reclamados.forEach((parte) =>
+    //     partes.push({
+    //       idParte: parte.idParte,
+    //       rol: RECLAMADO,
+    //       nroWhatsappParte: parte.nroWhatsappParte,
+    //       nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
+    //       postergo: parte.postergo,
+    //       incomparendo: parte.incomparendo,
+    //       multado: parte.multado,
+    //     })
+    //   );
+    // }
+
+    const partes = this.partesReclamosService.join(createReclamoDto.reclamantes, createReclamoDto.reclamados);
 
     return this.prisma.reclamos.create({
       data: {
@@ -222,77 +224,36 @@ export class ReclamosService {
   }
 
   async update(idUsuario: number, id: number, updateReclamoDto: UpdateReclamoDto) {
-    const reclamo = await this.prisma.reclamos.findUnique({ where: { idUsuario, id }, include: { partes: true } });
+    const reclamo = await this.prisma.reclamos.findUnique({
+      where: { idUsuario, id },
+      include: { partes: true },
+    });
 
     if (!reclamo) {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);
     }
 
-    const restarPartes = (
-      tipoRol: number,
-      A: PartesReclamoDTO[] | undefined,
-      B: Array<PartesReclamos>
-    ): PartesReclamoDTO[] => {
-      return (
-        A?.filter((parte) => !B.find((p) => p.idParte === parte.idParte && p.rol === tipoRol)).map((parte) => {
-          return {
-            idParte: parte.idParte,
-            rol: tipoRol,
-            nroWhatsappParte: parte.nroWhatsappParte,
-            nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante,
-            postergo: parte.postergo,
-            incomparendo: parte.incomparendo,
-            multado: parte.multado,
-          };
-        }) || []
-      );
-    };
-
-    const partesToCreate = restarPartes(RECLAMADO, updateReclamoDto.reclamados, reclamo.partes).concat(
-      restarPartes(RECLAMANTE, updateReclamoDto.reclamantes, reclamo.partes)
+    //creamos los nuevos partes que no existían antes
+    const _newPartes = new PartesReclamosList(reclamo.partes).getNewPartes(
+      updateReclamoDto.reclamados,
+      updateReclamoDto.reclamantes
     );
 
-    const mapParteToPartesReclamos = (rol: number, partes: PartesReclamoDTO[] | undefined): PartesReclamos[] => {
-      return (
-        partes?.map((p) => {
-          return {
-            id: 0,
-            idParte: p.idParte,
-            idReclamo: 0,
-            rol: rol,
-            nroWhatsappParte: p.nroWhatsappParte || null,
-            nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
-            postergo: p.postergo || false,
-            incomparendo: p.incomparendo || false,
-            multado: p.multado || false,
-          };
-        }) || []
-      );
-    };
-
-    const partesToUpdate = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados)
-      .concat(mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes))
-      .filter((p) => reclamo.partes.some((rp) => rp.idParte === p.idParte && rp.rol === p.rol))
-      .map((p) => {
-        return {
-          id: reclamo.partes.find((rp) => rp.idParte === p.idParte && rp.rol === p.rol)?.id || 0,
-          idParte: p.idParte,
-          rol: p.rol,
-          nroWhatsappParte: p.nroWhatsappParte || null,
-          nroWhatsappPatrocinante: p.nroWhatsappPatrocinante || null,
-          postergo: p.postergo,
-          incomparendo: p.incomparendo,
-          multado: p.multado,
-        };
-      });
-
-    const reclamadosEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMADO);
-    const reclamantesEnDB = reclamo.partes?.filter((p) => p.rol === RECLAMANTE);
-    const reclamadosAGrabar = mapParteToPartesReclamos(RECLAMADO, updateReclamoDto.reclamados);
-    const reclamantesAGrabar = mapParteToPartesReclamos(RECLAMANTE, updateReclamoDto.reclamantes);
-    const partesToDelete = restarPartes(RECLAMADO, reclamadosEnDB, reclamadosAGrabar).concat(
-      restarPartes(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar)
+    //actualizamos los que ya existen
+    const _existingPartes = new PartesReclamosList(reclamo.partes).getUpdatedPartes(
+      updateReclamoDto.reclamados,
+      updateReclamoDto.reclamantes
     );
+
+    //eliminamos los que no están en el dto
+    const _removedPartes = new PartesReclamosList(reclamo.partes).getRemovedPartes(
+      updateReclamoDto.reclamados,
+      updateReclamoDto.reclamantes
+    );
+
+    const partesToDelete = this.partesReclamosService
+      .filterIfExists(RECLAMADO, reclamadosEnDB, reclamadosAGrabar)
+      .concat(this.partesReclamosService.filterIfExists(RECLAMANTE, reclamantesEnDB, reclamantesAGrabar));
 
     const deleteOrCreate = this.prisma.reclamos.update({
       where: { id },
