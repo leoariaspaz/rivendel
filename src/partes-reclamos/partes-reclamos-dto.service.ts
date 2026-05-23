@@ -1,5 +1,5 @@
 import { PartesReclamos } from 'src/generated/prisma/browser';
-import { PartesReclamoDTO } from 'src/partes-reclamos/partes-reclamo.dto';
+import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 
 export class PartesReclamoDTOService {

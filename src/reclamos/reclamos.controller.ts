@@ -19,8 +19,7 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags }
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { ReclamosListDto } from './dto/reclamos-list.dto';
-import { ParteReclamoDetail } from './dto/parte-reclamo-detail.dto';
-import { ParteReclamoDbDTO } from './dto/parte-reclamo-db.dto';
+import { ParteReclamoDetail, ParteReclamoDbDTO } from '../partes-reclamos/partes-reclamos.interfaces';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')

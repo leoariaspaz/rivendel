@@ -1,7 +1,7 @@
-import { PartesReclamoDTO } from 'src/partes-reclamos/partes-reclamo.dto';
+import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 import { PartesReclamosList } from './partes-reclamos-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { PartesReclamosExtensions } from './partes-reclamos-extensions';
+import { PartesReclamosExtensions } from './partes-reclamos.extension';
 
 export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
   private subtractPartesReclamos(partesReclamos: PartesReclamosList, rol: number): PartesReclamoDTOList {

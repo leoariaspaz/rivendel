@@ -26,13 +26,11 @@ const env = process.env.NODE_ENV || 'local';
     AuthModule,
     UsersModule,
     ValidatorsModule,
-    ConfigModule.forRoot({ 
+    ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: [`.env.${env}`, '.env'],
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string()
-          .valid('development', 'production', 'test', 'local')
-          .default('local'),
+        NODE_ENV: Joi.string().valid('development', 'production', 'test', 'local').default('local'),
         PORT: Joi.number().default(3000),
         DATABASE_URL: Joi.string().optional(),
         DB_HOST: Joi.string().required(),
@@ -40,21 +38,14 @@ const env = process.env.NODE_ENV || 'local';
         DB_USER: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
-        DB_SSL: Joi.boolean()
-                  .truthy('true', '1', 'yes', 'y')
-                  .falsy('false', '0', 'no', 'n')
-                  .default(false),
+        DB_SSL: Joi.boolean().truthy('true', '1', 'yes', 'y').falsy('false', '0', 'no', 'n').default(false),
         JWT_ACCESS_SECRET: Joi.string().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),
         JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
         JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
         FRONTEND_URL: Joi.string().uri().required(),
       }),
-      load: [
-        authConfig,
-        databaseConfig,
-        jwtConfig,        
-      ],
+      load: [authConfig, databaseConfig, jwtConfig],
     }),
   ],
   controllers: [AppController],

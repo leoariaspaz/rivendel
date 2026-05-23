@@ -1,8 +1,6 @@
-import { Injectable } from '@nestjs/common';
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { PartesReclamoDTO } from 'src/partes-reclamos/partes-reclamo.dto';
+import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 
-@Injectable()
 export class PartesReclamosExtensions {
   constructor(private readonly data: PartesReclamos) {}
 
