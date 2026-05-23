@@ -1,5 +1,5 @@
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { PartesReclamoDTOList } from './partes-reclamos-dto-list.service';
+import { PartesReclamoDTOList } from '../dto/partes-reclamos-dto-list';
 import { PrismaService } from 'src/shared/services/prisma.service';
 
 export class PartesReclamosList extends Array<PartesReclamos> {

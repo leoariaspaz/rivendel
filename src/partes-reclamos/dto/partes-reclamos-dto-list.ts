@@ -1,7 +1,6 @@
 import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
-import { PartesReclamosList } from './partes-reclamos-list';
+import { PartesReclamosList } from '../models/partes-reclamos-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { PartesReclamosExtensions } from './partes-reclamos.extension';
 
 export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
   private subtractPartesReclamos(partesReclamos: PartesReclamosList, rol: number): PartesReclamoDTOList {
@@ -46,7 +45,7 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
     return this.map((p) => {
       const parte = partesReclamos.findParteByRol(p.idParte, rol);
       if (!parte) return;
-      return new PartesReclamosExtensions(parte).updateWith(p);
+      return p.update(parte);
     }) as PartesReclamosList;
   }
 

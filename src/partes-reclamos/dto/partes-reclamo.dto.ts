@@ -55,4 +55,13 @@ export class PartesReclamoDTO {
   toReclamante(): PartesReclamos {
     return this.toPartesReclamos(this, RECLAMANTE);
   }
+
+  update(p: PartesReclamos): PartesReclamos {
+    p.incomparendo = this.incomparendo || false;
+    p.multado = this.multado || false;
+    p.nroWhatsappParte = this.nroWhatsappParte || null;
+    p.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante || null;
+    p.postergo = this.postergo || false;
+    return p;
+  }
 }

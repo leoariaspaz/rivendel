@@ -7,7 +7,7 @@ import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { PartesReclamosList } from 'src/partes-reclamos/partes-reclamos-list';
+import { PartesReclamosList } from 'src/partes-reclamos/models/partes-reclamos-list';
 
 @Injectable()
 export class ReclamosService {

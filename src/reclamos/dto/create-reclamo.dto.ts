@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { PartesReclamoDTO } from '../../partes-reclamos/dto/partes-reclamo.dto';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
-import { PartesReclamoDTOList } from 'src/partes-reclamos/partes-reclamos-dto-list.service';
+import { PartesReclamoDTOList } from 'src/partes-reclamos/dto/partes-reclamos-dto-list';
 
 export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
