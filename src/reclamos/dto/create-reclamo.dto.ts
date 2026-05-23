@@ -1,6 +1,6 @@
 import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PartesReclamoDTO } from './partes-reclamo.dto';
+import { PartesReclamoDTO } from '../../partes-reclamos/partes-reclamo.dto';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { PartesReclamoDTOList } from 'src/partes-reclamos/partes-reclamos-dto-list.service';

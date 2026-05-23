@@ -10,8 +10,6 @@ import {
   RelationshipValidationResult,
 } from '../pipes/interfaces/relationship-validation.interface';
 import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
-import { Parte } from 'src/generated/prisma/client';
-import { PartesReclamoDTO } from 'src/reclamos/dto/partes-reclamo.dto';
 
 @Injectable()
 export class PartesService implements RelationshipValidation, ShouldExistRelationValidation {

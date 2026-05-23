@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PartesReclamos } from 'src/generated/prisma/client';
-import { PartesReclamoDTO } from 'src/reclamos/dto/partes-reclamo.dto';
+import { PartesReclamoDTO } from 'src/partes-reclamos/partes-reclamo.dto';
 
 @Injectable()
 export class PartesReclamosExtensions {
