@@ -8,6 +8,8 @@ import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { PartesReclamosList } from 'src/partes-reclamos/models/partes-reclamos-list';
+import { FindOneReclamo } from './models/find-one-reclamo';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ReclamosService {
@@ -134,8 +136,8 @@ export class ReclamosService {
     });
   }
 
-  findOne(idUsuario: number, id: number) {
-    return this.prisma.reclamos.findUnique({
+  async findOne(idUsuario: number, id: number): Promise<FindOneReclamo> {
+    const result = await this.prisma.reclamos.findUnique({
       where: { idUsuario, id },
       select: {
         id: true,
@@ -183,6 +185,8 @@ export class ReclamosService {
         },
       },
     });
+
+    return plainToInstance(FindOneReclamo, result);
   }
 
   getTotalCount(idUsuario: number, query: string | null): Promise<number> {

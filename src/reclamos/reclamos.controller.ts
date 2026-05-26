@@ -20,6 +20,7 @@ import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { ReclamosListDto } from './dto/reclamos-list.dto';
 import { ParteReclamoDetail, ParteReclamoDbDTO } from '../partes-reclamos/partes-reclamos.interfaces';
+import { FindOneReclamo } from './models/find-one-reclamo';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')
@@ -117,7 +118,7 @@ export class ReclamosController {
   async findOne(@GetUser('userId') userId: number, @Param('id') id: number) {
     const getResult = (p: ParteReclamoDbDTO): ParteReclamoDetail => {
       return {
-        ...p.parte,
+        //...p.parte,
         nroWhatsappParte: p.nroWhatsappParte,
         nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
         postergo: p.postergo,
@@ -127,6 +128,7 @@ export class ReclamosController {
     };
     const reclamo = await this.reclamosService.findOne(userId, id);
     const cantidad = await this.reclamosService.count(userId, reclamo?.numero ?? 0, reclamo?.fechaHoraInicio);
+
     if (reclamo) {
       const { partes, ...result } = reclamo;
       return {
