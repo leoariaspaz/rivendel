@@ -63,9 +63,7 @@ export class ReclamosService {
   }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
-    const newPartes = new PartesReclamosList()
-      .joinPartes(createReclamoDto.reclamados?.toReclamadosList())
-      .joinPartes(createReclamoDto.reclamantes?.toReclamantesList());
+    const newPartes = new PartesReclamosList().getNewPartes(createReclamoDto.reclamados, createReclamoDto.reclamantes);
 
     return this.prisma.reclamos.create({
       data: {

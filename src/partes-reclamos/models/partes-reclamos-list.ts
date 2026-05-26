@@ -23,9 +23,9 @@ export class PartesReclamosList extends Array<PartesReclamos> {
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
   ): PartesReclamosList {
-    const reclamadosList = reclamados?.subtractReclamados(this).toReclamadosList();
-    const reclamantesList = reclamantes?.subtractReclamantes(this).toReclamantesList();
-    return reclamadosList?.joinPartes(reclamantesList) || new PartesReclamosList();
+    return new PartesReclamosList()
+      .joinPartes(reclamados?.subtractReclamados(this).toReclamadosList())
+      .joinPartes(reclamantes?.subtractReclamantes(this).toReclamantesList());
   }
 
   getUpdatedPartes(
