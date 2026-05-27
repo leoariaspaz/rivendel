@@ -1,4 +1,4 @@
-export interface ParteDB {
+export interface FindOneParte {
   id: number;
   nroDocumento: string;
   cuil: string;
