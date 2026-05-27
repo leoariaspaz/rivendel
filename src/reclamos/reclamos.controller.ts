@@ -14,13 +14,12 @@ import {
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
-import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
+import { RECLAMANTE } from 'src/shared/utils/constants';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { ReclamosListDto } from './dto/reclamos-list.dto';
-import { ParteReclamoDetail, ParteReclamoDbDTO } from '../partes-reclamos/partes-reclamos.interfaces';
-import { FindOneReclamo } from './models/find-one-reclamo';
+import { FindOneReclamoDTO } from './dto/find-one-reclamo.dto';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')
@@ -115,30 +114,10 @@ export class ReclamosController {
     },
   })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
-  async findOne(@GetUser('userId') userId: number, @Param('id') id: number) {
-    const getResult = (p: ParteReclamoDbDTO): ParteReclamoDetail => {
-      return {
-        //...p.parte,
-        nroWhatsappParte: p.nroWhatsappParte,
-        nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
-        postergo: p.postergo,
-        incomparendo: p.incomparendo,
-        multado: p.multado,
-      } as ParteReclamoDetail;
-    };
+  async findOne(@GetUser('userId') userId: number, @Param('id') id: number): Promise<FindOneReclamoDTO> {
     const reclamo = await this.reclamosService.findOne(userId, id);
     const cantidad = await this.reclamosService.count(userId, reclamo?.numero ?? 0, reclamo?.fechaHoraInicio);
-
-    if (reclamo) {
-      const { partes, ...result } = reclamo;
-      return {
-        ...result,
-        reclamantes: partes?.filter((p) => p.rol === RECLAMANTE).map(getResult),
-        reclamados: partes?.filter((p) => p.rol === RECLAMADO).map(getResult),
-        cantidad,
-      };
-    }
-    return null;
+    return reclamo.toFindOneReclamoDTO(cantidad);
   }
 
   @Patch(':id')

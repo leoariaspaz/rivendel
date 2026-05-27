@@ -10,6 +10,7 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { PartesReclamosList } from 'src/partes-reclamos/models/partes-reclamos-list';
 import { FindOneReclamo } from './models/find-one-reclamo';
 import { plainToInstance } from 'class-transformer';
+import { FRACASO, POSTERGADO } from 'src/resoluciones/resoluciones.constants';
 
 @Injectable()
 export class ReclamosService {
@@ -186,6 +187,7 @@ export class ReclamosService {
       },
     });
 
+    //return new FindOneReclamo(plainToInstance(FindOneReclamo, result));
     return plainToInstance(FindOneReclamo, result);
   }
 
@@ -278,8 +280,6 @@ export class ReclamosService {
   }
 
   count(idUsuario: number, numero: number, fecha?: Date) {
-    const POSTERGADO = 4;
-    const FRACASO = 5;
     return this.prisma.reclamos.count({
       where: {
         idUsuario,

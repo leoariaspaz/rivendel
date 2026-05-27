@@ -1,4 +1,6 @@
+import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { FindOneReclamoDTO, FindOneReclamoParteDTO } from '../dto/find-one-reclamo.dto';
+import { Type } from 'class-transformer';
 
 class FindOneReclamoTipoDocumento {
   sintetico!: string;
@@ -20,7 +22,11 @@ class FindOneReclamoParte {
   localidad?: string | null;
   nombre!: string;
   nroDocumento!: string;
+
+  @Type(() => FindOneReclamoPatrocinante)
   patrocinante?: FindOneReclamoPatrocinante;
+
+  @Type(() => FindOneReclamoTipoDocumento)
   tipoDocumento!: FindOneReclamoTipoDocumento;
 }
 
@@ -32,24 +38,34 @@ class FindOneReclamoParteReclamo {
   nroWhatsappPatrocinante?: string | null;
   postergo!: boolean;
   rol!: number;
+
+  @Type(() => FindOneReclamoParte)
   parte?: FindOneReclamoParte;
 
-  toReclamante(): FindOneReclamoParteDTO {
-    return new FindOneReclamoParteDTO();
-  }
-
-  toReclamado(): FindOneReclamoParteDTO {
-    return new FindOneReclamoParteDTO();
-  }
-}
-
-class FindOneReclamoParteReclamoList extends Array<FindOneReclamoParteReclamo> {
-  toReclamantes(): FindOneReclamoParteDTO[] {
-    return [];
-  }
-
-  toReclamados(): FindOneReclamoParteDTO[] {
-    return [];
+  toDTO(): FindOneReclamoParteDTO {
+    const dto = new FindOneReclamoParteDTO();
+    dto.nroWhatsappParte = this.nroWhatsappParte;
+    dto.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante;
+    dto.postergo = this.postergo;
+    dto.incomparendo = this.incomparendo;
+    dto.multado = this.multado;
+    dto.nombre = this.parte?.nombre || '';
+    dto.nroDocumento = this.parte?.nroDocumento || '';
+    dto.cuil = this.parte?.cuil || '';
+    dto.localidad = this.parte?.localidad || '';
+    dto.domicilio = this.parte?.domicilio || '';
+    dto.esApoderado = this.parte?.esApoderado || false;
+    dto.tipoDocumento = { sintetico: this.parte?.tipoDocumento.sintetico || '' };
+    if (this.parte?.patrocinante) {
+      dto.patrocinante = {
+        nroMatricula: this.parte?.patrocinante.nroMatricula || 0,
+        nroCasillero: this.parte?.patrocinante.nroCasillero || 0,
+        nombre: this.parte?.patrocinante.nombre || '',
+        localidad: this.parte?.patrocinante.localidad || '',
+        domicilio: this.parte?.patrocinante.domicilio || '',
+      };
+    }
+    return dto;
   }
 }
 
@@ -61,21 +77,34 @@ export class FindOneReclamo {
   idResolucion!: number;
   proximaAudiencia?: Date | null;
   rubros!: string;
-  partes?: FindOneReclamoParteReclamoList;
-  //constructor(private reclamo: ParteReclamoDbDTO) {}
 
-  toFindOneReclamoDTO(): FindOneReclamoDTO {
-    const result = new FindOneReclamoDTO();
-    result.id = this.id;
-    result.numero = this.numero;
-    result.fechaHoraInicio = this.fechaHoraInicio;
-    result.horaFin = this.horaFin;
-    result.idResolucion = this.idResolucion;
-    result.rubros = this.rubros;
-    result.proximaAudiencia = this.proximaAudiencia;
-    result.reclamantes = this.partes?.toReclamantes();
-    result.reclamados = this.partes?.toReclamados();
+  @Type(() => FindOneReclamoParteReclamo)
+  partes?: FindOneReclamoParteReclamo[];
 
-    return result;
+  toDTOListByRol(rol: number): FindOneReclamoParteDTO[] | undefined {
+    return this.partes?.filter((r) => r.rol === rol).map((r: FindOneReclamoParteReclamo) => r.toDTO());
+  }
+
+  toReclamantes(): FindOneReclamoParteDTO[] | undefined {
+    return this.toDTOListByRol(RECLAMADO);
+  }
+
+  toReclamados(): FindOneReclamoParteDTO[] | undefined {
+    return this.toDTOListByRol(RECLAMANTE);
+  }
+
+  toFindOneReclamoDTO(cantidad: number): FindOneReclamoDTO {
+    const dto = new FindOneReclamoDTO();
+    dto.id = this.id;
+    dto.numero = this.numero;
+    dto.fechaHoraInicio = this.fechaHoraInicio;
+    dto.horaFin = this.horaFin;
+    dto.idResolucion = this.idResolucion;
+    dto.rubros = this.rubros;
+    dto.proximaAudiencia = this.proximaAudiencia;
+    dto.reclamantes = this.toReclamantes();
+    dto.reclamados = this.toReclamados();
+    dto.cantidad = cantidad;
+    return dto;
   }
 }
