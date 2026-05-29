@@ -44,6 +44,7 @@ class FindOneReclamoParteReclamo {
 
   toDTO(): FindOneReclamoParteDTO {
     const dto = new FindOneReclamoParteDTO();
+    dto.id = this.idParte;
     dto.nroWhatsappParte = this.nroWhatsappParte;
     dto.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante;
     dto.postergo = this.postergo;

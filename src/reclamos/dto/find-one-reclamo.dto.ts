@@ -1,4 +1,5 @@
 export class FindOneReclamoParteDTO {
+  id!: number;
   nombre!: string;
   nroDocumento!: string;
   cuil!: string;
