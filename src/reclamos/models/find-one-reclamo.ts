@@ -87,11 +87,11 @@ export class FindOneReclamo {
   }
 
   toReclamantes(): FindOneReclamoParteDTO[] | undefined {
-    return this.toDTOListByRol(RECLAMADO);
+    return this.toDTOListByRol(RECLAMANTE);
   }
 
   toReclamados(): FindOneReclamoParteDTO[] | undefined {
-    return this.toDTOListByRol(RECLAMANTE);
+    return this.toDTOListByRol(RECLAMADO);
   }
 
   toFindOneReclamoDTO(cantidad: number): FindOneReclamoDTO {
