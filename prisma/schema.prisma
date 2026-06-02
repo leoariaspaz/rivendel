@@ -69,8 +69,8 @@ model PartesReclamos {
   postergo                Boolean  @default(false)
   incomparendo            Boolean  @default(false)
   multado                 Boolean  @default(false)
-  parte                   Parte    @relation(fields: [idParte], references: [id])
-  reclamo                 Reclamos @relation(fields: [idReclamo], references: [id])
+  parte                   Parte    @relation(fields: [idParte], references: [id], onDelete: Restrict)
+  reclamo                 Reclamos @relation(fields: [idReclamo], references: [id], onDelete: Cascade)
 
   @@unique([idParte, idReclamo])
   @@index([idReclamo], map: "PartesReclamos_idReclamo_fkey")
