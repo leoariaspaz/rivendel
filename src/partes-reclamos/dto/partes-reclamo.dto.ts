@@ -34,26 +34,17 @@ export class PartesReclamoDTO {
   @Type(() => Boolean)
   multado?: boolean;
 
-  private toPartesReclamos(dto: PartesReclamoDTO, rol: number): PartesReclamos {
-    return {
-      id: 0,
-      idReclamo: 0,
-      idParte: dto.idParte,
-      rol: rol,
-      nroWhatsappParte: dto.nroWhatsappParte || null,
-      nroWhatsappPatrocinante: dto.nroWhatsappPatrocinante || null,
-      postergo: dto.postergo || false,
-      incomparendo: dto.incomparendo || false,
-      multado: dto.multado || false,
-    };
+  private assignRol(dto: PartesReclamoDTO, rol: number): PartesReclamoDTO {
+    dto.rol = rol;
+    return dto;
   }
 
-  toReclamado(): PartesReclamos {
-    return this.toPartesReclamos(this, RECLAMADO);
+  toReclamado(): PartesReclamoDTO {
+    return this.assignRol(this, RECLAMADO);
   }
 
-  toReclamante(): PartesReclamos {
-    return this.toPartesReclamos(this, RECLAMANTE);
+  toReclamante(): PartesReclamoDTO {
+    return this.assignRol(this, RECLAMANTE);
   }
 
   update(p: PartesReclamos): PartesReclamos {

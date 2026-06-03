@@ -1,11 +1,27 @@
 import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 import { PartesReclamosList } from '../models/partes-reclamos-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
+import { Logger } from '@nestjs/common';
+import { PartesReclamosCreateManyReclamoInput } from 'src/generated/prisma/models';
 
 export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
+  private readonly logger = new Logger();
+
+  constructor(private items: PartesReclamoDTO[] = []) {
+    super(...Array.from(items));
+  }
+
+  joinPartes(
+    reclamados: PartesReclamoDTOList | undefined,
+    reclamantes: PartesReclamoDTOList | undefined
+  ): PartesReclamoDTOList {
+    const join = [...(reclamados || []), ...(reclamantes || [])];
+    return new PartesReclamoDTOList(join);
+  }
+
   private subtractPartesReclamos(partesReclamos: PartesReclamosList, rol: number): PartesReclamoDTOList {
     const result = this.filter((parte) => !partesReclamos.contains(parte.idParte, rol));
-    return new PartesReclamoDTOList(...result);
+    return new PartesReclamoDTOList(result);
   }
 
   subtractReclamados(partesReclamos: PartesReclamosList): PartesReclamoDTOList {
@@ -16,21 +32,35 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
     return this.subtractPartesReclamos(partesReclamos, RECLAMANTE);
   }
 
-  toReclamadosList(): PartesReclamosList {
-    return this.map((parte) => {
-      return parte.toReclamado();
-    }) as PartesReclamosList;
+  toReclamadosList(): PartesReclamoDTOList {
+    const list = this.map((parte) => Object.assign(new PartesReclamoDTO(), parte).toReclamado());
+    return new PartesReclamoDTOList(list);
   }
 
-  toReclamantesList(): PartesReclamosList {
-    return this.map((parte) => {
-      return parte.toReclamante();
-    }) as PartesReclamosList;
+  toReclamantesList(): PartesReclamoDTOList {
+    const list = this.map((parte) => Object.assign(new PartesReclamoDTO(), parte).toReclamante());
+    return new PartesReclamoDTOList(list);
+  }
+
+  toCreateManyInput(): PartesReclamosCreateManyReclamoInput[] {
+    const result: PartesReclamosCreateManyReclamoInput[] = [];
+    this.forEach((item) => {
+      result.push({
+        idParte: item.idParte,
+        rol: item.rol,
+        incomparendo: item.incomparendo,
+        multado: item.multado,
+        nroWhatsappParte: item.nroWhatsappParte,
+        nroWhatsappPatrocinante: item.nroWhatsappParte,
+        postergo: item.postergo,
+      });
+    });
+    return result;
   }
 
   private intersectPartesReclamos(partesReclamos: PartesReclamosList, rol: number): PartesReclamoDTOList {
     const result = this.filter((parte) => partesReclamos.contains(parte.idParte, rol));
-    return new PartesReclamoDTOList(...result);
+    return new PartesReclamoDTOList(result);
   }
 
   intersectReclamados(partesReclamos: PartesReclamosList): PartesReclamoDTOList {
@@ -43,14 +73,17 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
 
   private toUpdatedList(partesReclamos: PartesReclamosList, rol: number): PartesReclamosList {
     return this.map((p) => {
-      const parte = partesReclamos.findParteByRol(p.idParte, rol);
+      const obj = Object.assign(new PartesReclamosList(), p);
+      const parte = partesReclamos.findParteByRol(obj.idParte, rol);
       if (!parte) return;
-      return p.update(parte);
+      return obj.update(parte);
     }) as PartesReclamosList;
   }
 
   toReclamadosUpdatedList(partesReclamos: PartesReclamosList): PartesReclamosList {
-    return this.toUpdatedList(partesReclamos, RECLAMADO);
+    const list = this.toUpdatedList(partesReclamos, RECLAMADO);
+    const result = Object.assign(new PartesReclamosList(), list);
+    return result;
   }
 
   toReclamantesUpdatedList(partesReclamos: PartesReclamosList): PartesReclamosList {
