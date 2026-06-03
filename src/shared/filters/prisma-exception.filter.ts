@@ -1,9 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpStatus,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { Prisma } from 'src/generated/prisma/client';
 import { Response } from 'express';
 
@@ -26,9 +21,9 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   mapPrismaErrorToMessage(error: Prisma.PrismaClientKnownRequestError): string {
     switch (error.code) {
       case 'P2000':
-        return `La columna ${error.meta?.column_name} de datos es demasiado larga para el valor proporcionado.`;
+        return `La columna ${error.meta?.column_name as string} de datos es demasiado larga para el valor proporcionado.`;
       case 'P2002':
-        return 'Ya existe un registro con los valores únicos proporcionados. ';
+        return `Ya existe un registro con los valores únicos proporcionados.`;
       case 'P2003':
         return 'Falló una restricción de clave foránea. Los datos relacionados no existen. ' + error.message;
       case 'P2004':

@@ -10,7 +10,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   constructor(
     @Inject(databaseConfig.KEY)
-    private readonly config: DatabaseConfig    
+    private readonly config: DatabaseConfig
   ) {
     if (!PrismaService.printed) {
       console.log(
@@ -29,14 +29,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       ssl: config.ssl,
     });
 
-    super({ 
-      adapter, 
-      log: [ 
-        { 
-          emit: 'event', 
-          level: 'query'
-        } 
-      ] 
+    super({
+      adapter,
+      log: [
+        {
+          emit: 'event',
+          level: 'query',
+        },
+      ],
     });
   }
 
