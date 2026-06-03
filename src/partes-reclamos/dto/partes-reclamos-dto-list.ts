@@ -71,23 +71,20 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
     return this.intersectPartesReclamos(partesReclamos, RECLAMANTE);
   }
 
-  private toUpdatedList(partesReclamos: PartesReclamosList, rol: number): PartesReclamosList {
+  private updatePartesReclamos(partesReclamos: PartesReclamosList, rol: number): PartesReclamosList {
     return this.map((p) => {
-      const obj = Object.assign(new PartesReclamosList(), p);
-      const parte = partesReclamos.findParteByRol(obj.idParte, rol);
+      const parte = partesReclamos.findParteByRol(p.idParte, rol);
       if (!parte) return;
-      return obj.update(parte);
+      return Object.assign(new PartesReclamoDTO(), p).update(parte);
     }) as PartesReclamosList;
   }
 
-  toReclamadosUpdatedList(partesReclamos: PartesReclamosList): PartesReclamosList {
-    const list = this.toUpdatedList(partesReclamos, RECLAMADO);
-    const result = Object.assign(new PartesReclamosList(), list);
-    return result;
+  updateReclamados(reclamados: PartesReclamosList): PartesReclamosList {
+    return this.updatePartesReclamos(reclamados, RECLAMADO);
   }
 
-  toReclamantesUpdatedList(partesReclamos: PartesReclamosList): PartesReclamosList {
-    return this.toUpdatedList(partesReclamos, RECLAMANTE);
+  updateReclamantes(reclamantes: PartesReclamosList): PartesReclamosList {
+    return this.updatePartesReclamos(reclamantes, RECLAMANTE);
   }
 
   existsReclamado(idParte: number) {

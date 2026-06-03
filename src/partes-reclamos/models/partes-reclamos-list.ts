@@ -1,10 +1,12 @@
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { PartesReclamoDTOList } from '../dto/partes-reclamos-dto-list';
-import { PrismaService } from 'src/shared/services/prisma.service';
+import { Logger } from '@nestjs/common';
 
 export class PartesReclamosList extends Array<PartesReclamos> {
+  private readonly logger = new Logger();
+
   constructor(private items: PartesReclamos[] = []) {
-    super(...items);
+    super(...Array.from(items || []));
   }
 
   contains(idParte: number, rol: number): boolean {
@@ -16,25 +18,13 @@ export class PartesReclamosList extends Array<PartesReclamos> {
   }
 
   joinPartes(partes: PartesReclamosList | undefined): PartesReclamosList {
-    return [...this, ...(partes?.all || [])] as PartesReclamosList;
+    const join = [...this, ...(partes?.all || [])];
+    return new PartesReclamosList(join);
   }
 
-  getNewPartes(
-    reclamados: PartesReclamoDTOList | undefined,
-    reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosList {
-    return new PartesReclamosList()
-      .joinPartes(reclamados?.subtractReclamados(this).toReclamadosList())
-      .joinPartes(reclamantes?.subtractReclamantes(this).toReclamantesList());
-  }
-
-  getUpdatedPartes(
-    reclamados: PartesReclamoDTOList | undefined,
-    reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosList {
-    const reclamadosList = reclamados?.intersectReclamados(this).toReclamadosUpdatedList(this);
-    const reclamantesList = reclamantes?.intersectReclamantes(this).toReclamantesUpdatedList(this);
-    return reclamadosList?.joinPartes(reclamantesList) || new PartesReclamosList();
+  debug(s: string | undefined = undefined) {
+    this.logger.debug(s || 'debug', this.all);
+    return this;
   }
 
   findParteByRol(idParte: number, rol: number): PartesReclamos | undefined {
@@ -42,36 +32,19 @@ export class PartesReclamosList extends Array<PartesReclamos> {
   }
 
   private subtractReclamados(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
-    return this.filter((p) => !partes?.existsReclamado(p.idParte)) as PartesReclamosList;
+    return new PartesReclamosList(this.filter((p) => !partes?.existsReclamado(p.idParte)));
   }
 
   private subtractReclamantes(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
-    return this.filter((p) => !partes?.existsReclamante(p.idParte)) as PartesReclamosList;
+    return new PartesReclamosList(this.filter((p) => !partes?.existsReclamante(p.idParte)));
   }
 
   getRemovedPartes(
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
   ): PartesReclamosList | undefined {
-    return this.subtractReclamados(reclamados).joinPartes(this.subtractReclamantes(reclamantes));
-  }
-
-  update(prismaService: PrismaService): any[] {
-    const updateMany: any[] = [];
-    this.forEach((p) => {
-      const parte = prismaService.partesReclamos.update({
-        where: { id: p.id },
-        data: {
-          rol: p.rol,
-          nroWhatsappParte: p.nroWhatsappParte,
-          nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
-          postergo: p.postergo,
-          incomparendo: p.incomparendo,
-          multado: p.multado,
-        },
-      });
-      updateMany.push(parte);
-    });
-    return updateMany;
+    const reclamadosList = this.subtractReclamados(reclamados);
+    const reclamantesList = this.subtractReclamantes(reclamantes);
+    return reclamadosList?.joinPartes(reclamantesList);
   }
 }
