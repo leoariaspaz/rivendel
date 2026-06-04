@@ -1,6 +1,7 @@
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { PartesReclamoDTOList } from '../dto/partes-reclamos-dto-list';
 import { Logger } from '@nestjs/common';
+import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 
 export class PartesReclamosList extends Array<PartesReclamos> {
   private readonly logger = new Logger();
@@ -31,20 +32,26 @@ export class PartesReclamosList extends Array<PartesReclamos> {
     return this.find((p) => p.idParte === idParte && p.rol === rol);
   }
 
-  private subtractReclamados(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
-    return new PartesReclamosList(this.filter((p) => !partes?.existsReclamado(p.idParte)));
+  private getPartesByRol(rol: number): PartesReclamosList {
+    const result = this.filter((p) => p.rol === rol);
+    return new PartesReclamosList(result);
   }
 
-  private subtractReclamantes(partes: PartesReclamoDTOList | undefined): PartesReclamosList {
-    return new PartesReclamosList(this.filter((p) => !partes?.existsReclamante(p.idParte)));
+  private notExistsReclamados(dtoList: PartesReclamoDTOList | undefined): PartesReclamosList {
+    const result = this.filter((p) => !dtoList?.existsReclamado(p.idParte));
+    return new PartesReclamosList(result);
   }
 
-  getRemovedPartes(
-    reclamados: PartesReclamoDTOList | undefined,
-    reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosList | undefined {
-    const reclamadosList = this.subtractReclamados(reclamados);
-    const reclamantesList = this.subtractReclamantes(reclamantes);
-    return reclamadosList?.joinPartes(reclamantesList);
+  private notExistsReclamantes(dtoList: PartesReclamoDTOList | undefined): PartesReclamosList {
+    const result = this.filter((p) => !dtoList?.existsReclamante(p.idParte));
+    return new PartesReclamosList(result);
+  }
+
+  subtractReclamados(reclamados: PartesReclamoDTOList | undefined): PartesReclamosList {
+    return this.getPartesByRol(RECLAMADO).notExistsReclamados(reclamados);
+  }
+
+  subtractReclamantes(reclamantes: PartesReclamoDTOList | undefined): PartesReclamosList {
+    return this.getPartesByRol(RECLAMANTE).notExistsReclamantes(reclamantes);
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PartesReclamoDTOList } from './dto/partes-reclamos-dto-list';
-import { PartesReclamosCreateManyReclamoInput } from 'src/generated/prisma/models';
+import { PartesReclamosCreateManyReclamoInput, PartesReclamosScalarWhereInput } from 'src/generated/prisma/models';
 import { PartesReclamosList } from './models/partes-reclamos-list';
 import { PrismaService } from 'src/shared/services/prisma.service';
 
@@ -53,8 +53,6 @@ export class PartesReclamosService {
 
     const updateMany: any[] = [];
     partes.forEach((p) => {
-      console.log('updateMany parte ', JSON.stringify(p, null, ''));
-
       const parte = prismaService.partesReclamos.update({
         where: { id: p.id },
         data: {
@@ -69,5 +67,28 @@ export class PartesReclamosService {
       updateMany.push(parte);
     });
     return updateMany;
+  }
+
+  getRemoved(
+    partes: PartesReclamosList,
+    reclamados: PartesReclamoDTOList | undefined,
+    reclamantes: PartesReclamoDTOList | undefined
+  ): PartesReclamosScalarWhereInput[] {
+    const removedPartes = [
+      ...partes.subtractReclamados(reclamados),
+      ...partes.subtractReclamantes(reclamantes),
+    ] as PartesReclamosList;
+
+    return this.toDeleteManyList(removedPartes);
+  }
+
+  private toDeleteManyList(partes: PartesReclamosList): PartesReclamosScalarWhereInput[] {
+    const result: PartesReclamosScalarWhereInput[] = [];
+    partes.forEach((parte) => {
+      result.push({
+        id: parte.id,
+      });
+    });
+    return result;
   }
 }

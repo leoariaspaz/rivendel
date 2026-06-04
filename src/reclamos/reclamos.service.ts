@@ -11,6 +11,7 @@ import { PartesReclamosList } from 'src/partes-reclamos/models/partes-reclamos-l
 import { FindOneReclamo } from './models/find-one-reclamo';
 import { plainToInstance } from 'class-transformer';
 import { FRACASO, POSTERGADO } from 'src/resoluciones/resoluciones.constants';
+import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.service';
 
 @Injectable()
 export class ReclamosService {
@@ -66,7 +67,11 @@ export class ReclamosService {
   }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
-    const newPartes = new PartesReclamosList().getNewPartes(createReclamoDto.reclamados, createReclamoDto.reclamantes);
+    const newPartes = new PartesReclamosService().getNew(
+      new PartesReclamosList(),
+      createReclamoDto.reclamados,
+      createReclamoDto.reclamantes
+    );
 
     return this.prisma.reclamos.create({
       data: {
@@ -109,8 +114,8 @@ export class ReclamosService {
       },
     } satisfies ReclamosSelect;
 
-    let skip: number | undefined;
-    let take: number | undefined;
+    let skip: number | undefined = undefined;
+    let take: number | undefined = undefined;
     if (page && limit && page > 0) {
       skip = (page - 1) * limit;
       take = Number(limit);
@@ -205,25 +210,30 @@ export class ReclamosService {
       throw new Error(`Reclamo con ID ${id} no encontrado.`);
     }
 
+    const partesReclamosService: PartesReclamosService = new PartesReclamosService();
+
     //creamos los nuevos partes que no existían antes
-    const newPartes = new PartesReclamosList(reclamo.partes).getNewPartes(
+    const newPartes = partesReclamosService.getNew(
+      new PartesReclamosList(reclamo.partes),
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
     //actualizamos los que ya existen
-    const existingPartes = new PartesReclamosList(reclamo.partes).getUpdatedPartes(
+    const existingPartes = partesReclamosService.getUpdated(
+      new PartesReclamosList(reclamo.partes),
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
     //eliminamos los que no están en el dto
-    const removedPartes = new PartesReclamosList(reclamo.partes).getRemovedPartes(
+    const removedPartes = partesReclamosService.getRemoved(
+      new PartesReclamosList(reclamo.partes),
       updateReclamoDto.reclamados,
       updateReclamoDto.reclamantes
     );
 
-    const createAndDelete = this.prisma.reclamos.update({
+    const createOrDelete = this.prisma.reclamos.update({
       where: { id },
       data: {
         numero: updateReclamoDto.numero,
@@ -242,9 +252,9 @@ export class ReclamosService {
       },
     });
 
-    const updateMany = existingPartes.update(this.prisma);
+    const updateMany = partesReclamosService.update(this.prisma, existingPartes);
 
-    return this.prisma.$transaction([createAndDelete, ...(updateMany as [])]);
+    return this.prisma.$transaction([createOrDelete, ...(updateMany as [])]);
   }
 
   remove(idUsuario: number, id: number) {
