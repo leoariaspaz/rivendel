@@ -88,10 +88,10 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
   }
 
   existsReclamado(idParte: number) {
-    return this?.some((p) => p.idParte === idParte && p.rol === RECLAMADO);
+    return this?.some((p) => p.idParte === idParte);
   }
 
   existsReclamante(idParte: number) {
-    return this?.some((p) => p.idParte === idParte && p.rol === RECLAMANTE);
+    return this?.some((p) => p.idParte === idParte);
   }
 }
