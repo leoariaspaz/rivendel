@@ -1,8 +1,9 @@
-import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min, ValidateIf } from 'class-validator';
+import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PartesReclamoDTO } from './partes-reclamo.dto';
+import { PartesReclamoDTO } from '../../partes-reclamos/dto/partes-reclamo.dto';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
+import { PartesReclamoDTOList } from 'src/partes-reclamos/dto/partes-reclamos-dto-list';
 
 export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
@@ -11,7 +12,6 @@ export class CreateReclamoDto {
   @Type(() => Number)
   numero!: number;
 
-  @ValidateIf((r) => r.rubros)
   @IsString({ message: 'Los rubros ingresados son incorrectos.' })
   rubros!: string;
 
@@ -33,17 +33,17 @@ export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar la fecha y hora de inicio.' })
   proximaAudiencia?: Date;
 
-  @ArrayUnique((p) => p.idParte, {
+  @ArrayUnique((p: PartesReclamoDTO) => p.idParte, {
     message: 'No se pueden repetir reclamantes en un mismo reclamo.',
   })
   @IsOptional()
-  @Type(() => Array<PartesReclamoDTO>)
-  reclamantes?: PartesReclamoDTO[];
+  @Type(() => PartesReclamoDTOList)
+  reclamantes?: PartesReclamoDTOList;
 
-  @ArrayUnique((p) => p.idParte, {
+  @ArrayUnique((p: PartesReclamoDTO) => p.idParte, {
     message: 'No se pueden repetir reclamados en un mismo reclamo.',
   })
   @IsOptional()
-  @Type(() => Array<PartesReclamoDTO>)
-  reclamados?: PartesReclamoDTO[];
+  @Type(() => PartesReclamoDTOList)
+  reclamados?: PartesReclamoDTOList;
 }

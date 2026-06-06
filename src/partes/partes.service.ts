@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { ParteDB } from './dto/parte-db.dto';
-import { FindParteDTO } from './dto/find-parte.dto';
+import { FindOneParte } from './models/find-one-parte';
+import { FindOneParteDTO } from './dto/find-one-parte.dto';
 import { ParteFindManyArgs, ParteWhereInput } from 'src/generated/prisma/models';
 import {
   RelationshipValidation,
@@ -38,7 +38,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     esApoderado: true,
   } as const;
 
-  private mapParteDBToFindParteDTO(p: ParteDB): FindParteDTO {
+  private mapParteToDTO(p: FindOneParte): FindOneParteDTO {
     const result = {
       id: p.id,
       nroDocumento: p.nroDocumento,
@@ -49,7 +49,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
       idTipoDocumento: p.idTipoDocumento,
       tipoDocumento: p.tipoDocumento.sintetico,
       esApoderado: p.esApoderado,
-    } as FindParteDTO;
+    } as FindOneParteDTO;
 
     if (p.patrocinante) {
       result.patrocinante = {
@@ -64,8 +64,8 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return result;
   }
 
-  private selectPartes(data: ParteDB[]): FindParteDTO[] {
-    return data.map((p) => this.mapParteDBToFindParteDTO(p));
+  private mapParteListToDTOList(data: FindOneParte[]): FindOneParteDTO[] {
+    return data.map((p) => this.mapParteToDTO(p));
   }
 
   private getWhere(idUsuario: number, query: string | null): ParteWhereInput {
@@ -113,7 +113,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
       select: this.SELECT_FIELDS,
     });
 
-    if (p) return this.mapParteDBToFindParteDTO(p);
+    if (p) return this.mapParteToDTO(p);
     return null;
   }
 
@@ -157,7 +157,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
         select: this.SELECT_FIELDS,
         orderBy: [{ nombre: 'asc' }, { nroDocumento: 'asc' }],
       })
-      .then((data) => this.selectPartes(data));
+      .then((data) => this.mapParteListToDTOList(data));
   }
 
   async exists(id: number): Promise<ValidateRelationResult> {

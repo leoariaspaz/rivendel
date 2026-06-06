@@ -14,13 +14,15 @@ import {
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
-import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
+import { RECLAMANTE } from 'src/shared/utils/constants';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ApiReclamoSave } from './decorators/reclamos-swagger.decorator';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 import { ReclamosListDto } from './dto/reclamos-list.dto';
-import { ParteReclamoDetail } from './dto/parte-reclamo-detail.dto';
-import { ParteReclamoDbDTO } from './dto/parte-reclamo-db.dto';
+import { FindOneReclamoDTO } from './dto/find-one-reclamo.dto';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 @Controller('reclamos')
 @ApiTags('Reclamos')
@@ -31,15 +33,7 @@ export class ReclamosController {
   @Post()
   @ApiReclamoSave('create')
   async create(@GetUser('userId') userId: number, @Body() createReclamoDto: CreateReclamoDto) {
-    const filter = {
-      numero: createReclamoDto.numero,
-      fecha: createReclamoDto.fechaHoraInicio,
-    };
-    if (!(await this.reclamosService.isUnique(userId, filter))) {
-      throw new BadRequestException([
-        `Ya existe un reclamo Nº ${createReclamoDto.numero} para la fecha ${createReclamoDto.fechaHoraInicio.toTimeString()}.`,
-      ]);
-    }
+    await this.validateUniqueness(undefined, createReclamoDto.numero, createReclamoDto.fechaHoraInicio);
     return this.reclamosService.create(userId, createReclamoDto);
   }
 
@@ -115,44 +109,16 @@ export class ReclamosController {
     },
   })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
-  async findOne(@GetUser('userId') userId: number, @Param('id') id: number) {
-    const getResult = (p: ParteReclamoDbDTO): ParteReclamoDetail => {
-      return {
-        ...p.parte,
-        nroWhatsappParte: p.nroWhatsappParte,
-        nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
-        postergo: p.postergo,
-        incomparendo: p.incomparendo,
-        multado: p.multado,
-      } as ParteReclamoDetail;
-    };
+  async findOne(@GetUser('userId') userId: number, @Param('id') id: number): Promise<FindOneReclamoDTO> {
     const reclamo = await this.reclamosService.findOne(userId, id);
     const cantidad = await this.reclamosService.count(userId, reclamo?.numero ?? 0, reclamo?.fechaHoraInicio);
-    if (reclamo) {
-      const { partes, ...result } = reclamo;
-      return {
-        ...result,
-        reclamantes: partes?.filter((p) => p.rol === RECLAMANTE).map(getResult),
-        reclamados: partes?.filter((p) => p.rol === RECLAMADO).map(getResult),
-        cantidad,
-      };
-    }
-    return null;
+    return reclamo.toFindOneReclamoDTO(cantidad);
   }
 
   @Patch(':id')
   @ApiReclamoSave('update')
   async update(@GetUser('userId') userId: number, @Param('id') id: number, @Body() updateReclamoDto: UpdateReclamoDto) {
-    const filter = {
-      id,
-      numero: updateReclamoDto.numero,
-      fecha: updateReclamoDto.fechaHoraInicio,
-    };
-    if (!(await this.reclamosService.isUnique(userId, filter))) {
-      throw new BadRequestException([
-        `Ya existe un reclamo Nº ${updateReclamoDto.numero} para la fecha ${updateReclamoDto.fechaHoraInicio?.toTimeString()}.`,
-      ]);
-    }
+    await this.validateUniqueness(id, updateReclamoDto.numero, updateReclamoDto.fechaHoraInicio);
     return this.reclamosService.update(userId, +id, updateReclamoDto);
   }
 
@@ -164,5 +130,14 @@ export class ReclamosController {
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
   async remove(@GetUser('userId') userId: number, @Param('id') id: string) {
     await this.reclamosService.remove(userId, +id);
+  }
+
+  private async validateUniqueness(id: number | undefined, numero: number | undefined, fecha: Date | undefined) {
+    const filter = { id, numero, fecha };
+    if (!(await this.reclamosService.isUnique(filter))) {
+      dayjs.extend(customParseFormat);
+      const fechaFormateada = dayjs(fecha).locale('es').format('DD [de] MMMM [de] YYYY [a las] HH:mm [hs]');
+      throw new BadRequestException([`Ya existe un reclamo Nº ${numero} para la fecha ${fechaFormateada}.`]);
+    }
   }
 }

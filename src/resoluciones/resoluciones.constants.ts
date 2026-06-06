@@ -1,9 +1,9 @@
-export const PENDIENTE: number = 1;
+const PENDIENTE: number = 1;
 export const SIN_ARREGLO: number = 2;
-export const CON_ARREGLO: number = 3;
+const CON_ARREGLO: number = 3;
 export const POSTERGADO: number = 4;
 export const FRACASO: number = 5;
-export const ANULADO: number = 6;
+const ANULADO: number = 6;
 
 export const RESOLUCIONES = [
   { value: PENDIENTE, text: 'Pendiente' },

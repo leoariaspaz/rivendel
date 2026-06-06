@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
+import { PartesReclamos } from 'src/generated/prisma/client';
 import { PartesService } from 'src/partes/partes.service';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
@@ -32,4 +33,26 @@ export class PartesReclamoDTO {
 
   @Type(() => Boolean)
   multado?: boolean;
+
+  private assignRol(dto: PartesReclamoDTO, rol: number): PartesReclamoDTO {
+    dto.rol = rol;
+    return dto;
+  }
+
+  toReclamado(): PartesReclamoDTO {
+    return this.assignRol(this, RECLAMADO);
+  }
+
+  toReclamante(): PartesReclamoDTO {
+    return this.assignRol(this, RECLAMANTE);
+  }
+
+  update(p: PartesReclamos): PartesReclamos {
+    p.nroWhatsappParte = this.nroWhatsappParte || null;
+    p.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante || null;
+    p.postergo = this.postergo || false;
+    p.incomparendo = this.incomparendo || false;
+    p.multado = this.multado || false;
+    return p;
+  }
 }

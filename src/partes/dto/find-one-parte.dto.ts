@@ -6,7 +6,7 @@ interface PatrocinanteDTO {
   localidad: string | null;
 }
 
-export interface FindParteDTO {
+export interface FindOneParteDTO {
   id: number;
   nroDocumento: string;
   cuil: string;

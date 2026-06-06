@@ -16,7 +16,7 @@ import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { PartesListDto } from './dto/partes-list.dto';
+import { FindOneParteDTOListDTO } from './dto/find-one-parte-dto-list.dto';
 import { ApiParteSave } from './decorators/partes-swagger.decorator';
 import { GetUser } from 'src/users/decorators/get-user.decorator';
 
@@ -46,15 +46,15 @@ export class PartesController {
   @ApiResponse({
     status: 200,
     description: 'Lista de partes obtenida exitosamente. Se incluye el total de registros para paginación.',
-    type: PartesListDto,
+    type: FindOneParteDTOListDTO,
   })
   async findAll(
     @GetUser('userId') userId: number,
     @Query('query') query: string | null = null,
     @Query('page') page: number | null = null,
     @Query('limit') limit: number | null = null
-  ): Promise<PartesListDto> {
-    const result = new PartesListDto(
+  ): Promise<FindOneParteDTOListDTO> {
+    const result = new FindOneParteDTOListDTO(
       await this.partesService.findAll(userId, query, page, limit),
       await this.partesService.getTotalCount(userId, query)
     );

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  BadRequestException,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { PatrocinantesService } from './patrocinantes.service';
 import { CreatePatrocinanteDto } from './dto/create-patrocinante.dto';
 import { UpdatePatrocinanteDto } from './dto/update-patrocinante.dto';
@@ -25,7 +37,11 @@ export class PatrocinantesController {
 
   @Get()
   @ApiOperation({ summary: 'Obtiene una lista de patrocinantes con paginación y búsqueda' })
-  @ApiQuery({ name: 'query', required: false, description: 'Término de búsqueda para filtrar por nombre o número de matrícula' })
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Término de búsqueda para filtrar por nombre o número de matrícula',
+  })
   @ApiQuery({ name: 'page', required: false, description: 'Número de página para paginación (comienza en 1)' })
   @ApiQuery({ name: 'limit', required: false, description: 'Cantidad de registros por página para paginación' })
   @ApiResponse({
