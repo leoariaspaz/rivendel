@@ -38,11 +38,12 @@ export class UsersService {
     });
   }
 
-  async update(userId: number, nombre: string, newPassword: string) {
+  async update(userId: number, nombre: string, nroHabilitacion: number, newPassword: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         nombre: nombre,
+        nroHabilitacion: nroHabilitacion,
         password: newPassword,
       },
     });
