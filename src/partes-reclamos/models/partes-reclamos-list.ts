@@ -1,11 +1,8 @@
 import { PartesReclamos } from 'src/generated/prisma/client';
 import { PartesReclamoDTOList } from '../dto/partes-reclamos-dto-list';
-import { Logger } from '@nestjs/common';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 
 export class PartesReclamosList extends Array<PartesReclamos> {
-  private readonly logger = new Logger();
-
   constructor(private items: PartesReclamos[] = []) {
     super(...Array.from(items || []));
   }
@@ -21,11 +18,6 @@ export class PartesReclamosList extends Array<PartesReclamos> {
   joinPartes(partes: PartesReclamosList | undefined): PartesReclamosList {
     const join = [...this, ...(partes?.all || [])];
     return new PartesReclamosList(join);
-  }
-
-  debug(s: string | undefined = undefined) {
-    this.logger.debug(s || 'debug', this.all);
-    return this;
   }
 
   findParteByRol(idParte: number, rol: number): PartesReclamos | undefined {

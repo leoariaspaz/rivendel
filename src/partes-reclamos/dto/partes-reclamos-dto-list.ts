@@ -1,12 +1,9 @@
 import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 import { PartesReclamosList } from '../models/partes-reclamos-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { Logger } from '@nestjs/common';
 import { PartesReclamosCreateManyReclamoInput } from 'src/generated/prisma/models';
 
 export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
-  private readonly logger = new Logger();
-
   constructor(private items: PartesReclamoDTO[] = []) {
     super(...Array.from(items));
   }

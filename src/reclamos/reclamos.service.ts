@@ -239,10 +239,6 @@ export class ReclamosService {
       updateReclamoDto.reclamantes
     );
 
-    console.log('newPartes', newPartes);
-    console.log('existingPartes', existingPartes);
-    console.log('removedPartes', removedPartes);
-
     const createOrDelete = this.prisma.reclamos.update({
       where: { id },
       data: {

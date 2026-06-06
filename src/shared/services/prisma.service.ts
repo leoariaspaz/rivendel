@@ -13,7 +13,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     private readonly config: DatabaseConfig
   ) {
     if (!PrismaService.printed) {
-      console.log(
+      const logger = new Logger(PrismaService.name);
+      logger.log(
         `Connecting to database ${config.name} at ${config.host}:${config.port} with ` +
           `user ${config.user} (SSL: ${config.ssl})`
       );
