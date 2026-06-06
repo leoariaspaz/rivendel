@@ -233,6 +233,10 @@ export class ReclamosService {
       updateReclamoDto.reclamantes
     );
 
+    console.log('newPartes', newPartes);
+    console.log('existingPartes', existingPartes);
+    console.log('removedPartes', removedPartes);
+
     const createOrDelete = this.prisma.reclamos.update({
       where: { id },
       data: {
@@ -263,10 +267,7 @@ export class ReclamosService {
     });
   }
 
-  async isUnique(
-    idUsuario: number,
-    filter: { id?: number; numero: number | undefined; fecha: Date | undefined }
-  ): Promise<boolean> {
+  async isUnique(filter: { id?: number; numero: number | undefined; fecha: Date | undefined }): Promise<boolean> {
     const inicioDia = new Date(filter.fecha ?? '');
     inicioDia.setHours(0, 0, 0, 0);
 
@@ -279,7 +280,6 @@ export class ReclamosService {
         gte: inicioDia,
         lte: finDia,
       },
-      idUsuario,
     } as ReclamosWhereInput;
 
     if (filter.id) {
