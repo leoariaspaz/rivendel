@@ -70,6 +70,11 @@ class FindOneReclamoParteReclamo {
   }
 }
 
+class UsuarioReclamo {
+  nombre!: string;
+  nroHabilitacion!: number;
+}
+
 export class FindOneReclamo {
   id!: number;
   numero!: number;
@@ -81,6 +86,9 @@ export class FindOneReclamo {
 
   @Type(() => FindOneReclamoParteReclamo)
   partes?: FindOneReclamoParteReclamo[];
+
+  @Type(() => UsuarioReclamo)
+  usuario!: UsuarioReclamo;
 
   toDTOListByRol(rol: number): FindOneReclamoParteDTO[] | undefined {
     return this.partes?.filter((r) => r.rol === rol).map((r: FindOneReclamoParteReclamo) => r.toDTO());
@@ -105,6 +113,10 @@ export class FindOneReclamo {
     dto.proximaAudiencia = this.proximaAudiencia;
     dto.reclamantes = this.toReclamantes();
     dto.reclamados = this.toReclamados();
+    dto.conciliador = {
+      nombre: this.usuario.nombre,
+      nroHabilitacion: this.usuario.nroHabilitacion,
+    };
     dto.cantidad = cantidad;
     return dto;
   }

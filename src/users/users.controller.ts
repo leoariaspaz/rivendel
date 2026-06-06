@@ -14,7 +14,7 @@ export class UsersController {
     private authService: AuthService
   ) {}
 
-  @Get('/getCurrent')
+  @Get()
   @ApiOperation({
     summary: 'Obtener información del usuario actual',
     description: 'Retorna un objeto con los datos básicos del usuario logueado.',
@@ -25,9 +25,9 @@ export class UsersController {
     type: CurrentUserResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Token inválido o expirado' })
-  async getCurrentUser(@GetUser('userId') userId: number) {
+  async getCurrentUser(@GetUser('userId') userId: number): Promise<CurrentUserResponseDto> {
     const result = await this.usersService.findById(userId);
-    return new CurrentUserResponseDto(result?.nombre);
+    return new CurrentUserResponseDto(result?.nombre, result?.nroHabilitacion);
   }
 
   @Patch()
@@ -42,6 +42,7 @@ export class UsersController {
         summary: 'Ejemplo válido',
         value: {
           nombre: 'Nuevo Nombre',
+          nroHabilitacion: 5,
           currentPassword: 'contraseñaActual',
           newPassword: 'nuevaContraseña',
         },
@@ -50,6 +51,7 @@ export class UsersController {
         summary: 'Error: Falta contraseña actual para cambiar la contraseña',
         value: {
           nombre: 'Nuevo Nombre',
+          nroHabilitacion: 5,
           newPassword: 'nuevaContraseña',
         },
       },
@@ -57,6 +59,7 @@ export class UsersController {
         summary: 'Error: Contraseña actual incorrecta',
         value: {
           nombre: 'Nuevo Nombre',
+          nroHabilitacion: 5,
           currentPassword: 'contraseñaIncorrecta',
           newPassword: 'nuevaContraseña',
         },
@@ -88,6 +91,6 @@ export class UsersController {
       }
     }
 
-    return this.usersService.update(userId, dto.nombre, password);
+    await this.usersService.update(userId, dto.nombre, dto.nroHabilitacion, password);
   }
 }
