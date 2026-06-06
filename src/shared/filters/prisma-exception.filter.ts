@@ -19,19 +19,37 @@ export class PrismaExceptionFilter implements ExceptionFilter {
   }
 
   mapPrismaErrorToMessage(error: Prisma.PrismaClientKnownRequestError): string {
+    const target = Array.isArray(error.meta?.target)
+      ? error.meta.target.join(', ')
+      : (error.meta?.target as string) || '';
+
+    const fieldName = (error.meta?.field_name as string) || '';
+    const modelName = (error.meta?.modelName as string) || 'el registro';
+
     switch (error.code) {
       case 'P2000':
-        return `La columna ${error.meta?.column_name as string} de datos es demasiado larga para el valor proporcionado.`;
+        return `El valor proporcionado excede el límite de caracteres permitido para el campo o columna.`;
+
       case 'P2002':
-        return `Ya existe un registro con los valores únicos proporcionados.`;
-      case 'P2003':
-        return 'Falló una restricción de clave foránea. Los datos relacionados no existen. ' + error.message;
+        return target
+          ? `Ya existe un registro con el/los campo(s): [${target}] duplicado(s).`
+          : `Conflicto: Ya existe un registro con los valores únicos proporcionados.`;
+
+      case 'P2003': {
+        const relacion = fieldName.split('_fkey')[0] || fieldName;
+        return `No se puede guardar el registro porque la referencia o relación (${relacion}) proporcionada no existe.`;
+      }
       case 'P2004':
-        return 'Falló una restricción de la base de datos.';
+        return `La operación no cumple con las reglas de validación de la base de datos.`;
+
       case 'P2025':
-        return 'El registro no existe.';
-      default:
-        return 'Ocurrió un error desconocido en la base de datos.';
+        return `Operación fallida: No se encontró ${modelName} con los identificadores proporcionados.`;
+
+      default: {
+        // loggear el error completo para análisis posterior
+        console.error('Error de Prisma no manejado:', error);
+        return 'No se pudo procesar la solicitud debido a un error interno en el servidor de datos.';
+      }
     }
   }
 }
