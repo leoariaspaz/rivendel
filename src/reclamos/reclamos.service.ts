@@ -189,6 +189,12 @@ export class ReclamosService {
             },
           },
         },
+        usuario: {
+          select: {
+            nombre: true,
+            nroHabilitacion: true,
+          },
+        },
       },
     });
 

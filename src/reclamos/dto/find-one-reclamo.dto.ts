@@ -23,6 +23,11 @@ export class FindOneReclamoParteDTO {
   } | null;
 }
 
+class UsuarioReclamoDTO {
+  nombre!: string;
+  nroHabilitacion!: number;
+}
+
 export class FindOneReclamoDTO {
   id!: number;
   numero!: number;
@@ -33,5 +38,6 @@ export class FindOneReclamoDTO {
   rubros!: string;
   reclamantes?: FindOneReclamoParteDTO[];
   reclamados?: FindOneReclamoParteDTO[];
+  conciliador!: UsuarioReclamoDTO;
   cantidad!: number;
 }
