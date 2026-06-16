@@ -60,11 +60,10 @@ export class AppService {
         format: winston.format.combine(
           winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
           winston.format.ms(), // Opcional: muestra el tiempo entre logs, típico de Nest
-          winston.format.printf(({ timestamp, level, message, context }) => {
-            // Si existe un contexto (ej: [UserService]), se lo pegamos al mensaje
-            const ctx = String(context) ? `[${String(context)}] ` : '';
-            return `${String(timestamp)} [${level.toUpperCase()}]: ${ctx}${String(message)}`;
-          }),
+          winston.format.printf(
+            ({ timestamp, level, message, context }) =>
+              `${String(timestamp)} [${level.toUpperCase()}]: ${this.getContext(context)}${String(message)}`
+          ),
           winston.format.colorize({ all: true }) //
         ),
       })
@@ -72,6 +71,12 @@ export class AppService {
 
     return WinstonModule.createLogger({ transports });
   }
+
+  private getContext = (context) => {
+    if (typeof context === 'string' || typeof context === 'number') return `[${context}] `;
+    if (context !== undefined && context !== null) return `[${JSON.stringify(context)}] `;
+    return '';
+  };
 
   configureSwagger(app: INestApplication<any>) {
     const config = new DocumentBuilder()
