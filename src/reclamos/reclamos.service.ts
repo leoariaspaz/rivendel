@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
 import { UpdateReclamoDto } from './dto/update-reclamo.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { ReclamosFindManyArgs, ReclamosSelect, ReclamosWhereInput } from 'src/generated/prisma/models';
+import { Prisma } from '@prisma/client';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { ReclamosListItemDTO } from './dto/reclamos-list-item.dto';
 import dayjs from 'dayjs';
@@ -17,10 +17,10 @@ import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.servi
 export class ReclamosService {
   constructor(private prisma: PrismaService) {}
 
-  getWhere(idUsuario: number, query: string | null): ReclamosWhereInput {
-    let w = { idUsuario } as ReclamosWhereInput;
+  getWhere(idUsuario: number, query: string | null): Prisma.ReclamosWhereInput {
+    let w = { idUsuario } as Prisma.ReclamosWhereInput;
     if (query) {
-      const ORQuery: ReclamosWhereInput[] = [
+      const ORQuery: Prisma.ReclamosWhereInput[] = [
         {
           partes: {
             some: {
@@ -112,7 +112,7 @@ export class ReclamosService {
           },
         },
       },
-    } satisfies ReclamosSelect;
+    } satisfies Prisma.ReclamosSelect;
 
     let skip: number | undefined = undefined;
     let take: number | undefined = undefined;
@@ -127,7 +127,7 @@ export class ReclamosService {
       orderBy: [{ numero: 'asc' }, { fechaHoraInicio: 'asc' }],
       skip,
       take,
-    } satisfies ReclamosFindManyArgs;
+    } satisfies Prisma.ReclamosFindManyArgs;
 
     const results = this.prisma.reclamos.findMany(args) as Promise<ReclamosListItemDTO[]>;
     const resSrv = new ResolucionesService();
@@ -282,7 +282,7 @@ export class ReclamosService {
         gte: inicioDia,
         lte: finDia,
       },
-    } as ReclamosWhereInput;
+    } as Prisma.ReclamosWhereInput;
 
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };

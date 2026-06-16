@@ -3,6 +3,9 @@ import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import 'winston-daily-rotate-file';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import fs from 'node:fs';
+import path from 'node:path';
+import { databaseConfig } from './config';
 
 @Injectable()
 export class AppService {
@@ -57,11 +60,10 @@ export class AppService {
         format: winston.format.combine(
           winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
           winston.format.ms(), // Opcional: muestra el tiempo entre logs, típico de Nest
-          winston.format.printf(({ timestamp, level, message, context }) => {
-            // Si existe un contexto (ej: [UserService]), se lo pegamos al mensaje
-            const ctx = String(context) ? `[${String(context)}] ` : '';
-            return `${String(timestamp)} [${level.toUpperCase()}]: ${ctx}${String(message)}`;
-          }),
+          winston.format.printf(
+            ({ timestamp, level, message, context }) =>
+              `${String(timestamp)} [${level.toUpperCase()}]: ${this.getContext(context)}${String(message)}`
+          ),
           winston.format.colorize({ all: true }) //
         ),
       })
@@ -70,7 +72,13 @@ export class AppService {
     return WinstonModule.createLogger({ transports });
   }
 
-  configurarSwagger(app: INestApplication<any>) {
+  private getContext = (context) => {
+    if (typeof context === 'string' || typeof context === 'number') return `[${context}] `;
+    if (context !== undefined && context !== null) return `[${JSON.stringify(context)}] `;
+    return '';
+  };
+
+  configureSwagger(app: INestApplication<any>) {
     const config = new DocumentBuilder()
       .setTitle('Rivendel API')
       .setDescription('Sistema de gestión de reclamos y resoluciones')
@@ -95,7 +103,15 @@ export class AppService {
 
     const document = SwaggerModule.createDocument(app, config);
 
-    // Se define la ruta de la documentación (ej. http://localhost:3000/docs)
-    SwaggerModule.setup('docs', app, document);
+    SwaggerModule.setup('/', app, document);
+  }
+
+  loadDBCertificate() {
+    const config = databaseConfig();
+    if (config.certified) {
+      const caPath = path.join(config.tempPath, config.certifiedName);
+      fs.writeFileSync(caPath, config.certified);
+      process.env.NODE_EXTRA_CA_CERTS = caPath;
+    }
   }
 }

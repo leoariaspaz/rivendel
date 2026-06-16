@@ -7,7 +7,7 @@ import {
   RelationshipValidationResult,
 } from 'src/pipes/interfaces/relationship-validation.interface';
 import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
-import { PatrocinanteWhereInput } from 'src/generated/prisma/models';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PatrocinantesService implements RelationshipValidation, ShouldExistRelationValidation {
@@ -133,11 +133,11 @@ export class PatrocinantesService implements RelationshipValidation, ShouldExist
     return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 
-  async isUnique(filter: { id?: number | undefined, nroMatricula: number | undefined }): Promise<Boolean> {
-    let args = { nroMatricula: filter.nroMatricula } as PatrocinanteWhereInput;
+  async isUnique(filter: { id?: number | undefined; nroMatricula: number | undefined }): Promise<boolean> {
+    let args = { nroMatricula: filter.nroMatricula } as Prisma.PatrocinanteWhereInput;
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };
     }
-    return await this.prisma.patrocinante.count({ where: args }) === 0;
+    return (await this.prisma.patrocinante.count({ where: args })) === 0;
   }
 }

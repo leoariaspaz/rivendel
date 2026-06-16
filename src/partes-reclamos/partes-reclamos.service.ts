@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PartesReclamoDTOList } from './dto/partes-reclamos-dto-list';
-import { PartesReclamosCreateManyReclamoInput, PartesReclamosScalarWhereInput } from 'src/generated/prisma/models';
+import { Prisma } from '@prisma/client';
 import { PartesReclamosList } from './models/partes-reclamos-list';
 import { PrismaService } from 'src/shared/services/prisma.service';
 
@@ -10,7 +10,7 @@ export class PartesReclamosService {
     partes: PartesReclamosList,
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosCreateManyReclamoInput[] {
+  ): Prisma.PartesReclamosCreateManyReclamoInput[] {
     const newPartes = [
       ...(reclamados?.subtractReclamados(partes).toReclamadosList() || []),
       ...(reclamantes?.subtractReclamantes(partes).toReclamantesList() || []),
@@ -18,8 +18,8 @@ export class PartesReclamosService {
     return this.toCreateManyList(newPartes);
   }
 
-  private toCreateManyList(partes: PartesReclamoDTOList): PartesReclamosCreateManyReclamoInput[] {
-    const result = [] as PartesReclamosCreateManyReclamoInput[];
+  private toCreateManyList(partes: PartesReclamoDTOList): Prisma.PartesReclamosCreateManyReclamoInput[] {
+    const result = [] as Prisma.PartesReclamosCreateManyReclamoInput[];
     partes.forEach((parte) => {
       result.push({
         idParte: parte.idParte,
@@ -73,7 +73,7 @@ export class PartesReclamosService {
     partes: PartesReclamosList,
     reclamados: PartesReclamoDTOList | undefined,
     reclamantes: PartesReclamoDTOList | undefined
-  ): PartesReclamosScalarWhereInput[] {
+  ): Prisma.PartesReclamosScalarWhereInput[] {
     const removedPartes = [
       ...partes.subtractReclamados(reclamados),
       ...partes.subtractReclamantes(reclamantes),
@@ -82,8 +82,8 @@ export class PartesReclamosService {
     return this.toDeleteManyList(removedPartes);
   }
 
-  private toDeleteManyList(partes: PartesReclamosList): PartesReclamosScalarWhereInput[] {
-    const result: PartesReclamosScalarWhereInput[] = [];
+  private toDeleteManyList(partes: PartesReclamosList): Prisma.PartesReclamosScalarWhereInput[] {
+    const result: Prisma.PartesReclamosScalarWhereInput[] = [];
     partes.forEach((parte) => {
       result.push({
         id: parte.id,

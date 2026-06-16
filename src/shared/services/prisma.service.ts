@@ -1,6 +1,5 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Prisma, PrismaClient } from 'src/generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { databaseConfig, type DatabaseConfig } from 'src/config';
 
 @Injectable()
@@ -13,31 +12,23 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     private readonly config: DatabaseConfig
   ) {
     if (!PrismaService.printed) {
+      const dbUrl = new URL(process.env.DATABASE_URL!);
+
+      const DB_HOST = dbUrl.hostname;
+      const DB_PORT = dbUrl.port || '3306';
+      const DB_NAME = dbUrl.pathname.replace(/^\//, '');
+      const DB_SSL_ACCEPT = dbUrl.searchParams.get('sslaccept');
+      const DB_CERT = config.certified?.substring(0, 19).concat('...');
+
       const logger = new Logger(PrismaService.name);
       logger.log(
-        `Connecting to database ${config.name} at ${config.host}:${config.port} with ` +
-          `user ${config.user} (SSL: ${config.ssl})`
+        `Connecting to database ${DB_NAME} at ${DB_HOST}:${DB_PORT} with (SSL: ${DB_SSL_ACCEPT}) (CERT: ${DB_CERT})`
       );
       PrismaService.printed = true;
     }
 
-    const adapter = new PrismaMariaDb({
-      host: config.host || '',
-      port: config.port || 0,
-      user: config.user || '',
-      password: config.password || '',
-      database: config.name || '',
-      ssl: config.ssl,
-    });
-
     super({
-      adapter,
-      log: [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-      ],
+      datasourceUrl: config.url,
     });
   }
 

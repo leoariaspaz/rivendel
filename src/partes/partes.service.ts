@@ -4,7 +4,7 @@ import { UpdateParteDto } from './dto/update-parte.dto';
 import { PrismaService } from 'src/shared/services/prisma.service';
 import { FindOneParte } from './models/find-one-parte';
 import { FindOneParteDTO } from './dto/find-one-parte.dto';
-import { ParteFindManyArgs, ParteWhereInput } from 'src/generated/prisma/models';
+import { Prisma } from '@prisma/client';
 import {
   RelationshipValidation,
   RelationshipValidationResult,
@@ -68,8 +68,8 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     return data.map((p) => this.mapParteToDTO(p));
   }
 
-  private getWhere(idUsuario: number, query: string | null): ParteWhereInput {
-    let w = { idUsuario } as ParteWhereInput;
+  private getWhere(idUsuario: number, query: string | null): Prisma.ParteWhereInput {
+    let w = { idUsuario } as Prisma.ParteWhereInput;
     if (query) {
       w = {
         ...w,
@@ -145,7 +145,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   findAll(idUsuario: number, query: string | null, page: number | null, limit: number | null) {
-    let filters: ParteFindManyArgs = { where: this.getWhere(idUsuario, query) };
+    let filters: Prisma.ParteFindManyArgs = { where: this.getWhere(idUsuario, query) };
     if (page && limit && page > 0) {
       const skip = (page - 1) * limit;
       filters = { ...filters, skip, take: Number(limit) };
@@ -175,7 +175,7 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
   }
 
   async isUnique(idUsuario: number, filter: { id?: number; nroDocumento: string | undefined }): Promise<boolean> {
-    let args = { idUsuario, nroDocumento: filter.nroDocumento } as ParteWhereInput;
+    let args = { idUsuario, nroDocumento: filter.nroDocumento } as Prisma.ParteWhereInput;
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };
     }

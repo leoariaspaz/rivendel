@@ -10,10 +10,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const appService = new AppService();
+  appService.loadDBCertificate();
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, appService.configureOptions());
   const logger = new Logger();
 
-  logger.log(`Starting application in ${process.env.NODE_ENV}...`);
+  logger.debug(`Starting application in ${process.env.NODE_ENV}...`);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') as number;
@@ -33,8 +35,9 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().set('etag', false); // Deshabilitar ETag
   app.use(cookieParser()); // Middleware para parsear cookies
 
-  appService.configurarSwagger(app);
+  appService.configureSwagger(app);
 
+  logger.debug(`Escuchando en puerto ${port}`);
   await app.listen(port);
 }
 
