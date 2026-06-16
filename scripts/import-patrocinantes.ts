@@ -1,35 +1,19 @@
+//pnpm exec dotenv -e .env.production -- npx tsx scripts/import-patrocinantes.ts
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 import patrocinantesRaw from './patrocinantes.json';
-import fs from 'node:fs';
-import path from 'node:path';
+import { client } from './prisma.service';
+import { PrismaClient } from '@prisma/client';
 
-dotenv.config();
-console.log(process.env.DATABASE_URL);
-
-if (process.env.DATABASE_CA_CERT) {
-  const caPath = path.join('/tmp', 'ca.name');
-  fs.writeFileSync(caPath, process.env.DATABASE_CA_CERT);
-  process.env.NODE_EXTRA_CA_CERTS = caPath;
+interface PatrocinanteJson {
+  id: number;
+  nombre: string;
+  nroMatricula: number;
+  domicilio: string | null;
+  localidad: string | null;
+  nroCasillero: number | null;
 }
 
-const prisma = new PrismaClient({ datasourceUrl: process.env.DATABASE_URL });
-
-// async function test() {
-//   const td = await prisma.$queryRaw`select * from TipoDocumento`;
-//   console.log(td);
-// }
-
-async function bulkInsert() {
-  interface PatrocinanteJson {
-    id: number;
-    nombre: string;
-    nroMatricula: number;
-    domicilio: string | null;
-    localidad: string | null;
-    nroCasillero: number | null;
-  }
-
+async function bulkInsert(dbService: PrismaClient) {
   const patrocinantes = patrocinantesRaw as PatrocinanteJson[];
 
   const data = patrocinantes.map((p) => ({
@@ -41,7 +25,7 @@ async function bulkInsert() {
     nroCasillero: p.nroCasillero,
   }));
 
-  const result = await prisma.patrocinante.createMany({
+  const result = await dbService.patrocinante.createMany({
     data,
     skipDuplicates: true, // evita error si hay nroMatricula duplicados
   });
@@ -49,6 +33,8 @@ async function bulkInsert() {
   console.log(`Insertados: ${result.count}`);
 }
 
-bulkInsert()
+dotenv.config();
+const srv = client();
+bulkInsert(srv)
   .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .finally(() => srv.$disconnect());

@@ -1,22 +1,10 @@
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import { PrismaClient } from '../src/generated/prisma/client';
-import * as dotenv from 'dotenv';
 import * as path from 'path';
 import * as fs from 'fs';
+import { client } from './prisma.service';
 
-//npx ts-node scripts/export-db.ts 
+//npx ts-node scripts/export-db.ts
 async function main() {
-  dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
-
-  const adapter = new PrismaMariaDb({
-    host: process.env.DB_HOST,
-    port: Number(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    ssl: false,
-  });
-  const prisma = new PrismaClient({ adapter });
+  const prisma = client();
 
   try {
     console.log('🚀 Iniciando exportación de Patrocinantes...');
@@ -39,4 +27,5 @@ async function main() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();
