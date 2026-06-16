@@ -3,6 +3,9 @@ import * as winston from 'winston';
 import { WinstonModule } from 'nest-winston';
 import 'winston-daily-rotate-file';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import fs from 'node:fs';
+import path from 'node:path';
+import { databaseConfig } from './config';
 
 @Injectable()
 export class AppService {
@@ -70,7 +73,7 @@ export class AppService {
     return WinstonModule.createLogger({ transports });
   }
 
-  configurarSwagger(app: INestApplication<any>) {
+  configureSwagger(app: INestApplication<any>) {
     const config = new DocumentBuilder()
       .setTitle('Rivendel API')
       .setDescription('Sistema de gestión de reclamos y resoluciones')
@@ -95,7 +98,15 @@ export class AppService {
 
     const document = SwaggerModule.createDocument(app, config);
 
-    // Se define la ruta de la documentación (ej. http://localhost:3000/docs)
-    SwaggerModule.setup('docs', app, document);
+    SwaggerModule.setup('/', app, document);
+  }
+
+  loadDBCertificate() {
+    const config = databaseConfig();
+    if (config.certified) {
+      const caPath = path.join(config.tempPath, config.certifiedName);
+      fs.writeFileSync(caPath, config.certified);
+      process.env.NODE_EXTRA_CA_CERTS = caPath;
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Prisma, PrismaClient } from 'src/generated/prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { Prisma, PrismaClient } from '@prisma/client';
+//import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { databaseConfig, type DatabaseConfig } from 'src/config';
 
 @Injectable()
@@ -12,32 +12,36 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     @Inject(databaseConfig.KEY)
     private readonly config: DatabaseConfig
   ) {
-    if (!PrismaService.printed) {
-      const logger = new Logger(PrismaService.name);
-      logger.log(
-        `Connecting to database ${config.name} at ${config.host}:${config.port} with ` +
-          `user ${config.user} (SSL: ${config.ssl})`
-      );
-      PrismaService.printed = true;
-    }
+    // if (!PrismaService.printed) {
+    //   const logger = new Logger(PrismaService.name);
+    //   logger.log(
+    //     `Connecting to database ${config.name} at ${config.host}:${config.port} with ` +
+    //       `user ${config.user} (SSL: ${config.ssl})`
+    //   );
+    //   PrismaService.printed = true;
+    // }
 
-    const adapter = new PrismaMariaDb({
-      host: config.host || '',
-      port: config.port || 0,
-      user: config.user || '',
-      password: config.password || '',
-      database: config.name || '',
-      ssl: config.ssl,
-    });
+    // const adapter = new PrismaMariaDb({
+    //   host: config.host || '',
+    //   port: config.port || 0,
+    //   user: config.user || '',
+    //   password: config.password || '',
+    //   database: config.name || '',
+    //   ssl: config.ssl,
+    // });
+
+    // super({
+    //   adapter,
+    //   log: [
+    //     {
+    //       emit: 'event',
+    //       level: 'query',
+    //     },
+    //   ],
+    // });
 
     super({
-      adapter,
-      log: [
-        {
-          emit: 'event',
-          level: 'query',
-        },
-      ],
+      datasourceUrl: config.url,
     });
   }
 
