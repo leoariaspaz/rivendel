@@ -7,7 +7,7 @@ import {
   RelationshipValidationResult,
 } from 'src/pipes/interfaces/relationship-validation.interface';
 import { ShouldExistRelationValidation, ValidateRelationResult } from 'src/validators/interfaces';
-import { TipoDocumentoWhereInput } from 'src/generated/prisma/models/TipoDocumento';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class TipdocsService implements RelationshipValidation, ShouldExistRelationValidation {
@@ -77,8 +77,8 @@ export class TipdocsService implements RelationshipValidation, ShouldExistRelati
     return { hasRelations: cantPartes > 0, message: cantPartes > 0 ? 'Hay partes relacionadas.' : '' };
   }
 
-  async isUnique(filter: { id?: number; sintetico: string }): Promise<Boolean> {
-    let args = { sintetico: filter.sintetico } as TipoDocumentoWhereInput;
+  async isUnique(filter: { id?: number; sintetico: string }): Promise<boolean> {
+    let args = { sintetico: filter.sintetico } as Prisma.TipoDocumentoWhereInput;
     if (filter.id) {
       args = { ...args, id: { not: filter.id } };
     }

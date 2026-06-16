@@ -1,7 +1,7 @@
 import { PartesReclamoDTO } from 'src/partes-reclamos/dto/partes-reclamo.dto';
 import { PartesReclamosList } from '../models/partes-reclamos-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
-import { PartesReclamosCreateManyReclamoInput } from 'src/generated/prisma/models';
+import { Prisma } from '@prisma/client';
 
 export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
   constructor(private items: PartesReclamoDTO[] = []) {
@@ -39,8 +39,8 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
     return new PartesReclamoDTOList(list);
   }
 
-  toCreateManyInput(): PartesReclamosCreateManyReclamoInput[] {
-    const result: PartesReclamosCreateManyReclamoInput[] = [];
+  toCreateManyInput(): Prisma.PartesReclamosCreateManyReclamoInput[] {
+    const result: Prisma.PartesReclamosCreateManyReclamoInput[] = [];
     this.forEach((item) => {
       result.push({
         idParte: item.idParte,

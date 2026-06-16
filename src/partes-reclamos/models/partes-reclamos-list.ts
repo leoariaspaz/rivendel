@@ -1,4 +1,4 @@
-import { PartesReclamos } from 'src/generated/prisma/client';
+import { PartesReclamos } from '@prisma/client';
 import { PartesReclamoDTOList } from '../dto/partes-reclamos-dto-list';
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 
