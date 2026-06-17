@@ -22,9 +22,7 @@
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "allowUnreachableCode": false,
-    //"noUnusedLocals": true,
     "noUnusedParameters": true,
-    //"exactOptionalPropertyTypes": true
     "resolveJsonModule": true
   },
   "exclude": ["src/generated/**", "generated/**", "dist/**", "scripts/**"]
