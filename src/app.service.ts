@@ -108,9 +108,9 @@ export class AppService {
 
   loadDBCertificate() {
     const config = databaseConfig();
-    if (config.certified) {
-      const caPath = path.join(config.tempPath, config.certifiedName);
-      fs.writeFileSync(caPath, config.certified);
+    if (config.dbCertificate) {
+      const caPath = path.join(config.dbCertPath, config.dbCertName);
+      fs.writeFileSync(caPath, config.dbCertificate);
       process.env.NODE_EXTRA_CA_CERTS = caPath;
     }
   }

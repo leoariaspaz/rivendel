@@ -12,13 +12,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     private readonly config: DatabaseConfig
   ) {
     if (!PrismaService.printed) {
-      const dbUrl = new URL(process.env.DATABASE_URL!);
+      const dbUrl = new URL(config.dbUrl!);
 
       const DB_HOST = dbUrl.hostname;
       const DB_PORT = dbUrl.port || '3306';
       const DB_NAME = dbUrl.pathname.replace(/^\//, '');
-      const DB_SSL_ACCEPT = dbUrl.searchParams.get('sslaccept');
-      const DB_CERT = config.certified?.substring(0, 19).concat('...');
+      const DB_SSL_ACCEPT = dbUrl.searchParams.get('sslaccept') || false;
+      const DB_CERT = config.dbCertificate?.substring(0, 19).concat('...');
 
       const logger = new Logger(PrismaService.name);
       logger.log(
@@ -28,7 +28,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     }
 
     super({
-      datasourceUrl: config.url,
+      datasourceUrl: config.dbUrl,
     });
   }
 
