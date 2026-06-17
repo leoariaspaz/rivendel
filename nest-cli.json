@@ -13,9 +13,6 @@
           "dtoFileNameSuffix": [".dto.ts", ".entity.ts"]
         }
       }
-    ],
-    "assets": [
-      { "include": "scripts/patrocinantes.json", "outDir": "dist" }
     ]
   }
 }
