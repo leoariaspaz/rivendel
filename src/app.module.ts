@@ -15,8 +15,6 @@ import { authConfig } from './config/auth.config';
 import { databaseConfig, jwtConfig } from './config';
 import { ValidatorsModule } from './validators/validators.module';
 
-const env = process.env.NODE_ENV || 'local';
-
 @Module({
   imports: [
     PatrocinantesModule,
@@ -28,22 +26,22 @@ const env = process.env.NODE_ENV || 'local';
     ValidatorsModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [`.env.${env}`, '.env'],
+      envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
       validationSchema: Joi.object({
         NODE_ENV: Joi.string().valid('development', 'production', 'test', 'local').default('local'),
         PORT: Joi.number().default(3000),
-        DATABASE_URL: Joi.string().optional(),
-        DB_HOST: Joi.string().required(),
-        DB_PORT: Joi.number().default(3306),
-        DB_USER: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
-        DB_SSL: Joi.boolean().truthy('true', '1', 'yes', 'y').falsy('false', '0', 'no', 'n').default(false),
-        JWT_ACCESS_SECRET: Joi.string().required(),
-        JWT_REFRESH_SECRET: Joi.string().required(),
-        JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
-        JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
         FRONTEND_URL: Joi.string().uri().required(),
+        DATABASE_URL: Joi.string().required(),
+        DATABASE_CA_CERT: Joi.string().optional(),
+        DATABASE_CA_TEMP_PATH: Joi.string().optional(),
+        DATABASE_CA_NAME: Joi.string().optional(),
+        JWT_ACCESS_SECRET: Joi.string().required(),
+        JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
+        JWT_REFRESH_SECRET: Joi.string().required(),
+        JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
+        USE_SECURE_COOKIES: Joi.boolean().required(),
+        PATH_REFRESH_TOKEN: Joi.string().required(),
+        REFRESH_TOKEN_COOKIE_MAX_AGE: Joi.number().required(),
       }),
       load: [authConfig, databaseConfig, jwtConfig],
     }),
