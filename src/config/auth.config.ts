@@ -9,7 +9,7 @@ function getSameSite(value?: string): 'strict' | 'lax' | 'none' {
 }
 
 function getPartitioned() {
-  return getSameSite() === 'none';
+  return getSameSite(process.env.SAME_SITE) === 'none';
 }
 
 export const authConfig = registerAs('auth', () => ({
