@@ -4,7 +4,7 @@ import { envToBool } from './utils';
 export const authConfig = registerAs('auth', () => ({
   refreshCookieOptions: {
     httpOnly: true,
-    sameSite: 'strict' as const,
+    sameSite: process.env.SAME_SITE || 'strict',
     secure: envToBool(process.env.USE_SECURE_COOKIES),
     path: process.env.PATH_REFRESH_TOKEN || '/',
     maxAge: parseInt(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE || '0', 10),
