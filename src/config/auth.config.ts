@@ -8,6 +8,10 @@ function getSameSite(value?: string): 'strict' | 'lax' | 'none' {
   return 'strict';
 }
 
+function getPartitioned() {
+  return getSameSite() === 'none';
+}
+
 export const authConfig = registerAs('auth', () => ({
   refreshCookieOptions: {
     httpOnly: true,
@@ -15,6 +19,7 @@ export const authConfig = registerAs('auth', () => ({
     secure: envToBool(process.env.USE_SECURE_COOKIES),
     path: process.env.PATH_REFRESH_TOKEN || '/',
     maxAge: parseInt(process.env.REFRESH_TOKEN_COOKIE_MAX_AGE || '0', 10),
+    partitioned: getPartitioned(),
   },
 }));
 
