@@ -39,6 +39,7 @@ import { ValidatorsModule } from './validators/validators.module';
         JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),
         JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
+        SAME_SITE: Joi.string().valid('lax', 'none', 'stric').optional(),
         USE_SECURE_COOKIES: Joi.boolean().required(),
         PATH_REFRESH_TOKEN: Joi.string().required(),
         REFRESH_TOKEN_COOKIE_MAX_AGE: Joi.number().required(),
