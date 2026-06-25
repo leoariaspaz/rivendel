@@ -55,6 +55,7 @@ model Reclamos {
   idUsuario        Int?
   partes           PartesReclamos[]
   usuario          User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  clausulas        Json?
 
   @@unique([numero, fechaHoraInicio])
 }
