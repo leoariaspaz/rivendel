@@ -1,9 +1,11 @@
 import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { PartesReclamoDTO } from '../../partes-reclamos/dto/partes-reclamo.dto';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { PartesReclamoDTOList } from 'src/partes-reclamos/dto/partes-reclamos-dto-list';
+import { TiptapDocument } from 'src/tiptap/tiptap-document.types';
+import { IsTiptapDocument } from 'src/validators/ValidateTipTapDocument';
 
 export class CreateReclamoDto {
   @IsNotEmpty({ message: 'Debe ingresar un número de reclamo.' })
@@ -46,4 +48,20 @@ export class CreateReclamoDto {
   @IsOptional()
   @Type(() => PartesReclamoDTOList)
   reclamados?: PartesReclamoDTOList;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return value;
+  })
+  @IsTiptapDocument()
+  clausulas?: TiptapDocument;
 }
