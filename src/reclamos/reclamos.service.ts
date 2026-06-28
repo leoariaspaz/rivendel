@@ -162,6 +162,7 @@ export class ReclamosService {
         fechaHoraInicio: true,
         horaFin: true,
         proximaAudiencia: true,
+        clausulas: true,
         partes: {
           select: {
             idParte: true,
