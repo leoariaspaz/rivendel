@@ -1,4 +1,4 @@
-import { TiptapDocument } from "src/tiptap/tiptap-document.types";
+import { TiptapDocument } from 'src/tiptap/tiptap-document.types';
 
 export class FindOneReclamoParteDTO {
   id!: number;

@@ -209,7 +209,9 @@ export class ReclamosService {
     });
 
     //return new FindOneReclamo(plainToInstance(FindOneReclamo, result));
-    return plainToInstance(FindOneReclamo, result);
+    const reclamo = plainToInstance(FindOneReclamo, result);
+    assertValidTiptapDocument(reclamo.clausulas);
+    return reclamo;
   }
 
   getTotalCount(idUsuario: number, query: string | null): Promise<number> {
