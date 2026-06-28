@@ -210,7 +210,9 @@ export class ReclamosService {
 
     //return new FindOneReclamo(plainToInstance(FindOneReclamo, result));
     const reclamo = plainToInstance(FindOneReclamo, result);
-    assertValidTiptapDocument(reclamo.clausulas);
+    if (reclamo.clausulas) {
+      assertValidTiptapDocument(reclamo.clausulas);
+    }
     return reclamo;
   }
 
