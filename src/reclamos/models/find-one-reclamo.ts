@@ -1,6 +1,7 @@
 import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { FindOneReclamoDTO, FindOneReclamoParteDTO } from '../dto/find-one-reclamo.dto';
 import { Type } from 'class-transformer';
+import { TiptapDocument } from 'src/tiptap/tiptap-document.types';
 
 class FindOneReclamoTipoDocumento {
   sintetico!: string;
@@ -90,6 +91,8 @@ export class FindOneReclamo {
   @Type(() => UsuarioReclamo)
   usuario!: UsuarioReclamo;
 
+  clausulas?: TiptapDocument;
+
   toDTOListByRol(rol: number): FindOneReclamoParteDTO[] | undefined {
     return this.partes?.filter((r) => r.rol === rol).map((r: FindOneReclamoParteReclamo) => r.toDTO());
   }
@@ -118,6 +121,7 @@ export class FindOneReclamo {
       nroHabilitacion: this.usuario.nroHabilitacion,
     };
     dto.cantidad = cantidad;
+    dto.clausulas = this.clausulas;
     return dto;
   }
 }

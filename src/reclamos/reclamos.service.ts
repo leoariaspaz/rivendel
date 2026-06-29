@@ -12,6 +12,7 @@ import { FindOneReclamo } from './models/find-one-reclamo';
 import { plainToInstance } from 'class-transformer';
 import { FRACASO, POSTERGADO } from 'src/resoluciones/resoluciones.constants';
 import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.service';
+import { assertValidTiptapDocument } from 'src/validators/validate-tiptap-document';
 
 @Injectable()
 export class ReclamosService {
@@ -67,6 +68,10 @@ export class ReclamosService {
   }
 
   create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
+    if (createReclamoDto.clausulas) {
+      assertValidTiptapDocument(createReclamoDto.clausulas);
+    }
+
     const newPartes = new PartesReclamosService().getNew(
       new PartesReclamosList(),
       createReclamoDto.reclamados,
@@ -82,6 +87,10 @@ export class ReclamosService {
         horaFin: createReclamoDto.horaFin,
         proximaAudiencia: createReclamoDto.proximaAudiencia,
         partes: { create: newPartes },
+        clausulas:
+          createReclamoDto.clausulas != null
+            ? (createReclamoDto.clausulas as unknown as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
         idUsuario,
       },
     });
@@ -153,6 +162,7 @@ export class ReclamosService {
         fechaHoraInicio: true,
         horaFin: true,
         proximaAudiencia: true,
+        clausulas: true,
         partes: {
           select: {
             idParte: true,
@@ -199,7 +209,11 @@ export class ReclamosService {
     });
 
     //return new FindOneReclamo(plainToInstance(FindOneReclamo, result));
-    return plainToInstance(FindOneReclamo, result);
+    const reclamo = plainToInstance(FindOneReclamo, result);
+    if (reclamo.clausulas) {
+      assertValidTiptapDocument(reclamo.clausulas);
+    }
+    return reclamo;
   }
 
   getTotalCount(idUsuario: number, query: string | null): Promise<number> {
@@ -207,6 +221,10 @@ export class ReclamosService {
   }
 
   async update(idUsuario: number, id: number, updateReclamoDto: UpdateReclamoDto) {
+    if (updateReclamoDto.clausulas) {
+      assertValidTiptapDocument(updateReclamoDto.clausulas);
+    }
+
     const reclamo = await this.prisma.reclamos.findUnique({
       where: { idUsuario, id },
       include: { partes: true },
@@ -252,6 +270,10 @@ export class ReclamosService {
           deleteMany: removedPartes,
         },
         proximaAudiencia: updateReclamoDto.proximaAudiencia,
+        clausulas:
+          updateReclamoDto.clausulas != null
+            ? (updateReclamoDto.clausulas as unknown as Prisma.InputJsonValue)
+            : Prisma.JsonNull,
       },
       include: {
         partes: true,

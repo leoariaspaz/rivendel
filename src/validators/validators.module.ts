@@ -16,7 +16,7 @@ import { ValidateRelationConstraint } from './ValidateRelationConstraint';
     TipdocsService,
     PrismaService,
     ResolucionesService,
-		PartesService,
+    PartesService,
     ValidateRelationConstraint,
   ],
   exports: [ValidateRelationConstraint],

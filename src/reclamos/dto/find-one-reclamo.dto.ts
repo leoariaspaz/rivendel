@@ -1,3 +1,5 @@
+import { TiptapDocument } from 'src/tiptap/tiptap-document.types';
+
 export class FindOneReclamoParteDTO {
   id!: number;
   nombre!: string;
@@ -40,4 +42,5 @@ export class FindOneReclamoDTO {
   reclamados?: FindOneReclamoParteDTO[];
   conciliador!: UsuarioReclamoDTO;
   cantidad!: number;
+  clausulas?: TiptapDocument;
 }

@@ -9,8 +9,7 @@ import {
 } from 'class-validator';
 import { ShouldExistRelationValidation } from './interfaces';
 
-
-@ValidatorConstraint({ name: 'MustExistConstraint', async: true })
+@ValidatorConstraint({ async: true })
 @Injectable()
 export class ValidateRelationConstraint implements ValidatorConstraintInterface {
   private message: string | undefined;
@@ -20,10 +19,11 @@ export class ValidateRelationConstraint implements ValidatorConstraintInterface 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
     if (value === null || value === undefined) return false;
 
-    // El primer parámetro de nuestro decorador será la clase (Service)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const [validator] = args.constraints;
 
     // Obtenemos la instancia del servicio desde el contenedor de Nest
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const service = this.moduleRef.get<ShouldExistRelationValidation>(validator, { strict: false });
     const result = await service.exists(value);
     if (!result.isValid) {
@@ -37,7 +37,10 @@ export class ValidateRelationConstraint implements ValidatorConstraintInterface 
   }
 }
 
-export function ValidateRelation(validator: Type<ShouldExistRelationValidation>, validationOptions?: ValidationOptions) {
+export function ValidateRelation(
+  validator: Type<ShouldExistRelationValidation>,
+  validationOptions?: ValidationOptions
+) {
   return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
