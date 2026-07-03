@@ -12,7 +12,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     private readonly config: DatabaseConfig
   ) {
     if (!PrismaService.printed) {
-      const dbUrl = new URL(config.dbUrl!);
+      const dbUrl = new URL(config.dbUrl);
 
       const DB_HOST = dbUrl.hostname;
       const DB_PORT = dbUrl.port || '3306';
