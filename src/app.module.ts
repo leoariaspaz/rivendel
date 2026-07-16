@@ -14,6 +14,7 @@ import * as Joi from 'joi';
 import { authConfig } from './config/auth.config';
 import { databaseConfig, googleConfig, jwtConfig } from './config';
 import { ValidatorsModule } from './validators/validators.module';
+import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ValidatorsModule } from './validators/validators.module';
       }),
       load: [authConfig, databaseConfig, jwtConfig, googleConfig],
     }),
+    GoogleCalendarModule,
   ],
   controllers: [AppController],
   providers: [
