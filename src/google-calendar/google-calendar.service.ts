@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/services/prisma.service';
-import { GoogleConfig } from 'src/config';
+import { googleConfig, type GoogleConfig } from 'src/config';
 import { google, Auth } from 'googleapis';
 
 @Injectable()
 export class GoogleCalendarService {
   constructor(
+    @Inject(googleConfig.KEY)
     private readonly config: GoogleConfig,
     private readonly prisma: PrismaService
   ) {}
