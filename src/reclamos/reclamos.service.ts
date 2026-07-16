@@ -13,10 +13,14 @@ import { plainToInstance } from 'class-transformer';
 import { FRACASO, POSTERGADO } from 'src/resoluciones/resoluciones.constants';
 import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.service';
 import { assertValidTiptapDocument } from 'src/validators/validate-tiptap-document';
+import { GoogleCalendarService } from 'src/google-calendar/google-calendar.service';
 
 @Injectable()
 export class ReclamosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private googleCalendarService: GoogleCalendarService
+  ) {}
 
   getWhere(idUsuario: number, query: string | null): Prisma.ReclamosWhereInput {
     let w = { idUsuario } as Prisma.ReclamosWhereInput;
@@ -67,7 +71,7 @@ export class ReclamosService {
     return w;
   }
 
-  create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
+  async create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
     if (createReclamoDto.clausulas) {
       assertValidTiptapDocument(createReclamoDto.clausulas);
     }
@@ -78,7 +82,7 @@ export class ReclamosService {
       createReclamoDto.reclamantes
     );
 
-    return this.prisma.reclamos.create({
+    await this.prisma.reclamos.create({
       data: {
         numero: createReclamoDto.numero,
         rubros: createReclamoDto.rubros,
@@ -94,6 +98,16 @@ export class ReclamosService {
         idUsuario,
       },
     });
+
+    // En el servicio que corresponda, inyectás GoogleCalendarService:
+    const eventLink = await this.googleCalendarService.createEvent(idUsuario, {
+      title: `Audiencia - Reclamo Nº #${createReclamoDto.numero}`,
+      description: 'reclamo.descripcion',
+      start: createReclamoDto.fechaHoraInicio,
+      end: createReclamoDto.horaFin || new Date(createReclamoDto.fechaHoraInicio.getTime() + 60 * 60 * 1000), // Si no hay horaFin, asumimos 60 minutos después de fechaHoraInicio
+    });
+
+    return { message: 'Reclamo creado exitosamente', eventLink };
   }
 
   findAll(
