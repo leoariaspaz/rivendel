@@ -1,14 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/shared/services/prisma.service';
 import { googleConfig, type GoogleConfig } from 'src/config';
 import { google, Auth } from 'googleapis';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class GoogleCalendarService {
   constructor(
     @Inject(googleConfig.KEY)
     private readonly config: GoogleConfig,
-    private readonly prisma: PrismaService
+    private readonly usersService: UsersService
   ) {}
 
   // Crea el cliente OAuth2 base (sin credenciales de usuario)
@@ -34,25 +34,12 @@ export class GoogleCalendarService {
   async handleCallback(code: string, userId: number): Promise<void> {
     const client = this.createOAuthClient();
     const { tokens } = await client.getToken(code);
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        googleRefreshToken: tokens.refresh_token,
-        googleCalendarConnected: true,
-      },
-    });
+    await this.usersService.updateGoogleCalendarConnection(userId, tokens.refresh_token || null, true);
   }
 
   // Desconectar Google Calendar
   async disconnect(userId: number): Promise<void> {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        googleRefreshToken: null,
-        googleCalendarConnected: false,
-      },
-    });
+    await this.usersService.updateGoogleCalendarConnection(userId, null, false);
   }
 
   // Crea un evento en el calendario del usuario
@@ -66,8 +53,7 @@ export class GoogleCalendarService {
       location?: string;
     }
   ): Promise<string> {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-
+    const user = await this.usersService.findById(userId);
     if (!user?.googleRefreshToken) {
       throw new Error('El usuario no tiene Google Calendar conectado');
     }

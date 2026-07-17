@@ -38,13 +38,27 @@ export class UsersService {
     });
   }
 
-  async update(userId: number, nombre: string, nroHabilitacion: number, newPassword: string) {
+  async update(userId: number, nombre: string, nroHabilitacion: number, newPassword: string): Promise<void> {
     await this.prisma.user.update({
       where: { id: userId },
       data: {
         nombre: nombre,
         nroHabilitacion: nroHabilitacion,
         password: newPassword,
+      },
+    });
+  }
+
+  async updateGoogleCalendarConnection(
+    userId: number,
+    refresh_token: string | null,
+    connected: boolean
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        googleRefreshToken: refresh_token,
+        googleCalendarConnected: connected,
       },
     });
   }

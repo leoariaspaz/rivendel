@@ -1,12 +1,17 @@
-import { Controller, Get, Post, Query, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Query, Res, Req, Inject } from '@nestjs/common';
 import { GoogleCalendarService } from './google-calendar.service';
 import { SkipJwt } from 'src/auth/skip-jwt.decorator';
 import { Response } from 'express';
 import { RequestWithUser } from './dto/request-with-user.dto';
+import { appConfig, type AppConfig } from 'src/config/app.config';
 
 @Controller('google-calendar')
 export class GoogleCalendarController {
-  constructor(private readonly googleCalendarService: GoogleCalendarService) {}
+  constructor(
+    private readonly googleCalendarService: GoogleCalendarService,
+    @Inject(appConfig.KEY)
+    private readonly config: AppConfig
+  ) {}
 
   // El frontend llama esto para obtener la URL de autorización
   @Get('auth-url')
@@ -24,7 +29,7 @@ export class GoogleCalendarController {
     @Query('state') state: string, // userId que mandamos en el paso de auth
     @Res() res: Response
   ) {
-    const frontendUrl = process.env.FRONTEND_URL;
+    const frontendUrl = this.config.frontendUrl;
 
     try {
       const userId = parseInt(state, 10);
