@@ -2,7 +2,7 @@ import { Controller, Get, Post, Query, Res, Req, Inject } from '@nestjs/common';
 import { GoogleCalendarService } from './google-calendar.service';
 import { SkipJwt } from 'src/auth/skip-jwt.decorator';
 import { Response } from 'express';
-import { RequestWithUser } from './dto/request-with-user.dto';
+import { UserRequest } from '../auth/dto/user-request';
 import { appConfig, type AppConfig } from 'src/config/app.config';
 
 @Controller('google-calendar')
@@ -15,8 +15,8 @@ export class GoogleCalendarController {
 
   // El frontend llama esto para obtener la URL de autorización
   @Get('auth-url')
-  getAuthUrl(@Req() req: RequestWithUser) {
-    const url = this.googleCalendarService.getAuthUrl(req.user.id);
+  getAuthUrl(@Req() req: UserRequest) {
+    const url = this.googleCalendarService.getAuthUrl(req.user.userId);
     return { url };
   }
 
@@ -41,8 +41,8 @@ export class GoogleCalendarController {
   }
 
   @Post('disconnect')
-  async disconnect(@Req() req: RequestWithUser) {
-    await this.googleCalendarService.disconnect(req.user.id);
+  async disconnect(@Req() req: UserRequest) {
+    await this.googleCalendarService.disconnect(req.user.userId);
     return { success: true };
   }
 }
