@@ -1,17 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { googleConfig, type GoogleConfig } from 'src/config';
 import { google, Auth } from 'googleapis';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class GoogleCalendarService {
+  private readonly logger = new Logger(GoogleCalendarService.name);
+
   constructor(
     @Inject(googleConfig.KEY)
     private readonly config: GoogleConfig,
     private readonly usersService: UsersService
   ) {}
 
-  // Crea el cliente OAuth2 base (sin credenciales de usuario)
   private createOAuthClient(): Auth.OAuth2Client {
     return new google.auth.OAuth2(
       this.config.googleClientId,
@@ -30,19 +31,29 @@ export class GoogleCalendarService {
     });
   }
 
-  // Intercambia el code por tokens y los guarda
   async handleCallback(code: string, userId: number): Promise<void> {
     const client = this.createOAuthClient();
     const { tokens } = await client.getToken(code);
     await this.usersService.updateGoogleCalendarConnection(userId, tokens.refresh_token || null, true);
   }
 
-  // Desconectar Google Calendar
-  async disconnect(userId: number): Promise<void> {
+  async disconnect(userId: number): Promise<boolean> {
+    const user = await this.usersService.findById(userId);
+
+    if (user?.googleRefreshToken) {
+      try {
+        const client = this.createOAuthClient();
+        await client.revokeToken(user.googleRefreshToken);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.error('No se pudo revocar el token en Google: ' + message);
+        return false;
+      }
+    }
     await this.usersService.updateGoogleCalendarConnection(userId, null, false);
+    return true;
   }
 
-  // Crea un evento en el calendario del usuario
   async createEvent(
     userId: number,
     event: {

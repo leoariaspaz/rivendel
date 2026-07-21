@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, Res, Req, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Query, Res, Req, Inject, BadRequestException } from '@nestjs/common';
 import { GoogleCalendarService } from './google-calendar.service';
 import { SkipJwt } from 'src/auth/skip-jwt.decorator';
 import { Response } from 'express';
@@ -35,7 +35,9 @@ export class GoogleCalendarController {
 
   @Post('disconnect')
   async disconnect(@Req() req: UserRequest) {
-    await this.googleCalendarService.disconnect(req.user.userId);
-    return { success: true };
+    const result = await this.googleCalendarService.disconnect(req.user.userId);
+    if (!result) {
+      return new BadRequestException();
+    }
   }
 }
