@@ -20,18 +20,12 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') as number;
 
-  const frontendUrl = configService.get<string>('FRONTEND_URL');
   app.useGlobalFilters(new PrismaExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }));
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  logger.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
-  app.enableCors({
-    origin: frontendUrl,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // para enviar cookies o cabeceras de autorización
-  });
+  appService.enableCors(app, logger);
   app.getHttpAdapter().getInstance().set('etag', false); // Deshabilitar ETag
   app.use(cookieParser()); // Middleware para parsear cookies
 

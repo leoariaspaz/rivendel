@@ -13,30 +13,23 @@ export class GoogleCalendarController {
     private readonly config: AppConfig
   ) {}
 
-  // El frontend llama esto para obtener la URL de autorización
   @Get('auth-url')
-  getAuthUrl(@Req() req: UserRequest) {
-    const url = this.googleCalendarService.getAuthUrl(req.user.userId);
+  getAuthUrl(@Req() req: UserRequest, @Query('returnUrl') returnUrl: string) {
+    const url = this.googleCalendarService.getAuthUrl(req.user.userId, returnUrl);
     return { url };
   }
 
-  // Google redirige acá después del consentimiento
-  // OJO: esta ruta NO lleva JwtAuthGuard porque viene de Google
   @SkipJwt()
   @Get('callback')
-  async handleCallback(
-    @Query('code') code: string,
-    @Query('state') state: string, // userId que mandamos en el paso de auth
-    @Res() res: Response
-  ) {
-    const frontendUrl = this.config.frontendUrl;
+  async handleCallback(@Query('code') code: string, @Query('state') state: string, @Res() res: Response) {
+    const frontendUrl = this.config.frontendUrl + '/google-calendar/callback';
 
     try {
-      const userId = parseInt(state, 10);
+      const { userId, returnUrl } = JSON.parse(state) as { userId: number; returnUrl: string };
       await this.googleCalendarService.handleCallback(code, userId);
-      res.redirect(`${frontendUrl}?google_calendar=connected`);
+      res.redirect(`${frontendUrl}?google_calendar=connected&returnUrl=${returnUrl}`);
     } catch {
-      res.redirect(`${frontendUrl}?google_calendar=error`);
+      res.redirect(`${frontendUrl}?google_calendar=error&returnUrl=/`);
     }
   }
 

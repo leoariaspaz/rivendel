@@ -5,7 +5,7 @@ import 'winston-daily-rotate-file';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import fs from 'node:fs';
 import path from 'node:path';
-import { databaseConfig } from './config';
+import { databaseConfig, appConfig } from './config';
 
 @Injectable()
 export class AppService {
@@ -113,5 +113,15 @@ export class AppService {
       fs.writeFileSync(caPath, config.dbCertificate);
       process.env.NODE_EXTRA_CA_CERTS = caPath;
     }
+  }
+
+  enableCors(app: INestApplication, logger: LoggerService) {
+    const frontendUrl = appConfig().frontendUrl;
+    logger.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
+    app.enableCors({
+      origin: frontendUrl,
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      credentials: true, // para enviar cookies o cabeceras de autorización
+    });
   }
 }

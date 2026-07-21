@@ -20,13 +20,13 @@ export class GoogleCalendarService {
     );
   }
 
-  getAuthUrl(userId: number): string {
+  getAuthUrl(userId: number, returnUrl: string): string {
     const client = this.createOAuthClient();
     return client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent',
       scope: ['https://www.googleapis.com/auth/calendar.events'],
-      state: String(userId), // <-- se devuelve intacto en el callback
+      state: JSON.stringify({ userId, returnUrl }),
     });
   }
 
