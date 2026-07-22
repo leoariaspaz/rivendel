@@ -56,6 +56,7 @@ model Reclamos {
   partes           PartesReclamos[]
   usuario          User?            @relation(fields: [idUsuario], references: [id], onDelete: Restrict, onUpdate: Cascade)
   clausulas        Json?
+  googleEventId    String?
 
   @@unique([numero, fechaHoraInicio])
 }
@@ -84,7 +85,7 @@ model User {
   nroHabilitacion         Int?
   reclamos                Reclamos[]
   password                String
-  refreshToken            String? // HASHED refresh token
+  refreshToken            String?
   createdAt               DateTime   @default(now())
   updatedAt               DateTime   @updatedAt
   partes                  Parte[]
