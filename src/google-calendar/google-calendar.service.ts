@@ -74,20 +74,6 @@ export class GoogleCalendarService {
 
     const calendar = google.calendar({ version: 'v3', auth: client });
 
-    const existing = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: new Date(event.start).toISOString(),
-      timeMax: new Date(event.end).toISOString(),
-      q: event.title, // busca por texto en el título
-      singleEvents: true,
-    });
-
-    const duplicate = existing.data.items?.find((e) => e.summary === event.title);
-
-    if (duplicate) {
-      return duplicate.htmlLink ?? ''; // ya existe, devolvemos el link sin crear
-    }
-
     const response = await calendar.events.insert({
       calendarId: 'primary', // calendario principal del usuario
       requestBody: {
@@ -99,13 +85,13 @@ export class GoogleCalendarService {
       },
     });
 
-    if (!response.data.htmlLink) {
+    if (!response.data.id) {
       this.logger.log(
         `No se pudo generar el enlace del evento de Google Calendar para el usuario ${userId}: ${JSON.stringify(event, null, ' ')}`
       );
       return null;
     }
-    return response.data.htmlLink; // URL del evento en Google Calendar
+    return response.data.id;
   }
 
   async deleteEvent(userId: number, eventId: string): Promise<void> {
@@ -119,9 +105,16 @@ export class GoogleCalendarService {
     client.setCredentials({ refresh_token: user.googleRefreshToken });
     const calendar = google.calendar({ version: 'v3', auth: client });
 
-    await calendar.events.delete({
-      calendarId: 'primary',
-      eventId: eventId,
-    });
+    try {
+      await calendar.events.delete({
+        calendarId: 'primary',
+        eventId: eventId,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(
+        `Error al eliminar el evento de Google Calendar con ID: ${eventId} para el usuario ${userId}. Error: ${message}`
+      );
+    }
   }
 }
