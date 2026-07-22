@@ -63,7 +63,7 @@ export class GoogleCalendarService {
       end: Date;
       location?: string;
     }
-  ): Promise<string> {
+  ): Promise<string | null> {
     const user = await this.usersService.findById(userId);
     if (!user?.googleRefreshToken) {
       throw new Error('El usuario no tiene Google Calendar conectado');
@@ -73,8 +73,6 @@ export class GoogleCalendarService {
     client.setCredentials({ refresh_token: user.googleRefreshToken });
 
     const calendar = google.calendar({ version: 'v3', auth: client });
-
-    this.logger.log(`Creando evento en Google Calendar para el usuario ${userId}: ${JSON.stringify(event, null, ' ')}`);
 
     const existing = await calendar.events.list({
       calendarId: 'primary',
@@ -102,8 +100,28 @@ export class GoogleCalendarService {
     });
 
     if (!response.data.htmlLink) {
-      throw new Error('No se pudo generar el enlace del evento de Google Calendar');
+      this.logger.log(
+        `No se pudo generar el enlace del evento de Google Calendar para el usuario ${userId}: ${JSON.stringify(event, null, ' ')}`
+      );
+      return null;
     }
     return response.data.htmlLink; // URL del evento en Google Calendar
+  }
+
+  async deleteEvent(userId: number, eventId: string): Promise<void> {
+    const user = await this.usersService.findById(userId);
+
+    if (!user?.googleRefreshToken) {
+      throw new Error('El usuario no tiene Google Calendar conectado');
+    }
+
+    const client = this.createOAuthClient();
+    client.setCredentials({ refresh_token: user.googleRefreshToken });
+    const calendar = google.calendar({ version: 'v3', auth: client });
+
+    await calendar.events.delete({
+      calendarId: 'primary',
+      eventId: eventId,
+    });
   }
 }

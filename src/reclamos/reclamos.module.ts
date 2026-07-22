@@ -5,9 +5,10 @@ import { PrismaService } from 'src/shared/services/prisma.service';
 import { ResolucionesService } from 'src/resoluciones/resoluciones.service';
 import { GoogleCalendarService } from 'src/google-calendar/google-calendar.service';
 import { UsersService } from 'src/users/users.service';
+import { PartesService } from 'src/partes/partes.service';
 
 @Module({
   controllers: [ReclamosController],
-  providers: [ReclamosService, PrismaService, ResolucionesService, GoogleCalendarService, UsersService],
+  providers: [ReclamosService, PrismaService, ResolucionesService, GoogleCalendarService, UsersService, PartesService],
 })
 export class ReclamosModule {}
