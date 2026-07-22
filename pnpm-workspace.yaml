@@ -6,3 +6,5 @@ allowBuilds:
   '@swc/core': false
   esbuild: true
   prisma: true
+overrides:
+  google-auth-library: ^10.9.0

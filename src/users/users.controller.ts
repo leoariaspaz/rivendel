@@ -27,7 +27,7 @@ export class UsersController {
   @ApiResponse({ status: 401, description: 'Token inválido o expirado' })
   async getCurrentUser(@GetUser('userId') userId: number): Promise<CurrentUserResponseDto> {
     const result = await this.usersService.findById(userId);
-    return new CurrentUserResponseDto(result?.nombre, result?.nroHabilitacion);
+    return new CurrentUserResponseDto(result?.nombre, result?.nroHabilitacion, result?.googleCalendarConnected);
   }
 
   @Patch()

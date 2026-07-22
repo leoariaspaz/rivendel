@@ -12,8 +12,10 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import * as Joi from 'joi';
 import { authConfig } from './config/auth.config';
-import { databaseConfig, jwtConfig } from './config';
+import { databaseConfig, googleConfig, jwtConfig } from './config';
 import { ValidatorsModule } from './validators/validators.module';
+import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
+import { appConfig } from './config/app.config';
 
 @Module({
   imports: [
@@ -47,9 +49,13 @@ import { ValidatorsModule } from './validators/validators.module';
         USE_SECURE_COOKIES: Joi.boolean().required(),
         PATH_REFRESH_TOKEN: Joi.string().required(),
         REFRESH_TOKEN_COOKIE_MAX_AGE: Joi.number().required(),
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        GOOGLE_REDIRECT_URI: Joi.string().uri().required(),
       }),
-      load: [authConfig, databaseConfig, jwtConfig],
+      load: [authConfig, databaseConfig, jwtConfig, googleConfig, appConfig],
     }),
+    GoogleCalendarModule,
   ],
   controllers: [AppController],
   providers: [

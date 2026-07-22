@@ -13,6 +13,7 @@ import { UserDTO } from './dto/user.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
+import { UserRequest } from './dto/user-request';
 
 @Controller('auth')
 @ApiTags('Autenticación')
@@ -73,10 +74,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Refresh token inválido o expirado' })
   @ApiBearerAuth('access-token')
-  async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async refresh(@Req() req: UserRequest, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.refreshTokens(
       req.user.userId,
-      req.cookies.refresh_token
+      req.cookies?.refresh_token ?? ''
     );
 
     res.cookie('refresh_token', refreshToken, this.authConfig.refreshCookieOptions);
@@ -107,7 +108,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'No autorizado / Token inválido' })
   @ApiBearerAuth('access-token')
-  async logout(@Req() req, @Res({ passthrough: true }) res: Response) {
+  async logout(@Req() req: UserRequest, @Res({ passthrough: true }) res: Response) {
     await this.authService.logout(req.user.userId);
     res.clearCookie('refresh_token');
     return new LogoutResponseDto(true);

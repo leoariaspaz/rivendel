@@ -10,13 +10,19 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { PartesReclamosList } from 'src/partes-reclamos/models/partes-reclamos-list';
 import { FindOneReclamo } from './models/find-one-reclamo';
 import { plainToInstance } from 'class-transformer';
-import { FRACASO, POSTERGADO } from 'src/resoluciones/resoluciones.constants';
+import { POSTERGADO } from 'src/resoluciones/resoluciones.constants';
 import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.service';
 import { assertValidTiptapDocument } from 'src/validators/validate-tiptap-document';
+import { GoogleCalendarService } from 'src/google-calendar/google-calendar.service';
+import { PartesService } from 'src/partes/partes.service';
 
 @Injectable()
 export class ReclamosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private partesService: PartesService,
+    private googleCalendarService: GoogleCalendarService
+  ) {}
 
   getWhere(idUsuario: number, query: string | null): Prisma.ReclamosWhereInput {
     let w = { idUsuario } as Prisma.ReclamosWhereInput;
@@ -67,7 +73,62 @@ export class ReclamosService {
     return w;
   }
 
-  create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
+  async createEventInGoogleCalendar(
+    idUsuario: number,
+    nroReclamo: number,
+    start: Date | undefined = new Date(),
+    end: Date | undefined,
+    reclamados: number[] | undefined,
+    reclamantes: number[] | undefined,
+    replaceId: string | null = null
+  ): Promise<string | null> {
+    async function getParteNames(partesService: PartesService, partesIds: number[], title: string): Promise<string> {
+      const partes = await Promise.all(
+        partesIds.map(async (parteId) => {
+          const parte = await partesService.findOne(idUsuario, parteId);
+          return parte ? parte.nombre : '';
+        })
+      );
+
+      const nombres = partes.filter((name) => name !== '');
+      if (nombres.length > 0) {
+        return `${title}:\n` + nombres.map((name) => `- ${name}`).join('\n') + '\n';
+      }
+
+      return '';
+    }
+
+    let partes = '';
+
+    if (reclamantes && reclamantes.length > 0) {
+      partes += await getParteNames(this.partesService, reclamantes, 'Reclamantes');
+    }
+
+    if (reclamados && reclamados.length > 0) {
+      partes += await getParteNames(this.partesService, reclamados, 'Reclamados');
+    }
+
+    if (replaceId) {
+      await this.googleCalendarService.deleteEvent(idUsuario, replaceId);
+    }
+
+    const cantidad = await this.count(idUsuario, nroReclamo, start);
+    let title = `Audiencia - Reclamo Nº ${nroReclamo}`;
+    if (cantidad > 0) {
+      const unidades = ['', '', 'Segunda ', 'Tercera', 'Cuarta', 'Quinta', 'Sexta', 'Séptima', 'Octava', 'Novena'];
+      title = `${unidades[cantidad]} Audiencia - Reclamo Nº ${nroReclamo}`.trim();
+    }
+
+    const data = {
+      title,
+      description: partes,
+      start,
+      end: end || new Date(start.getTime() + 60 * 60 * 1000), // Si no hay horaFin, asumimos 60 minutos después de fechaHoraInicio
+    };
+    return await this.googleCalendarService.createEvent(idUsuario, data);
+  }
+
+  async create(idUsuario: number, createReclamoDto: CreateReclamoDto) {
     if (createReclamoDto.clausulas) {
       assertValidTiptapDocument(createReclamoDto.clausulas);
     }
@@ -78,7 +139,16 @@ export class ReclamosService {
       createReclamoDto.reclamantes
     );
 
-    return this.prisma.reclamos.create({
+    const eventLink = await this.createEventInGoogleCalendar(
+      idUsuario,
+      createReclamoDto.numero,
+      createReclamoDto.fechaHoraInicio,
+      createReclamoDto.horaFin,
+      createReclamoDto.reclamados?.map((p) => p.idParte),
+      createReclamoDto.reclamantes?.map((p) => p.idParte)
+    );
+
+    return await this.prisma.reclamos.create({
       data: {
         numero: createReclamoDto.numero,
         rubros: createReclamoDto.rubros,
@@ -91,6 +161,7 @@ export class ReclamosService {
           createReclamoDto.clausulas != null
             ? (createReclamoDto.clausulas as unknown as Prisma.InputJsonValue)
             : Prisma.JsonNull,
+        googleEventId: eventLink,
         idUsuario,
       },
     });
@@ -208,7 +279,6 @@ export class ReclamosService {
       },
     });
 
-    //return new FindOneReclamo(plainToInstance(FindOneReclamo, result));
     const reclamo = plainToInstance(FindOneReclamo, result);
     if (reclamo.clausulas) {
       assertValidTiptapDocument(reclamo.clausulas);
@@ -257,6 +327,23 @@ export class ReclamosService {
       updateReclamoDto.reclamantes
     );
 
+    let eventId: string | null = reclamo.googleEventId;
+    if (
+      !eventId ||
+      reclamo.fechaHoraInicio.getTime() !== updateReclamoDto.fechaHoraInicio?.getTime() ||
+      reclamo.horaFin?.getTime() !== updateReclamoDto.horaFin?.getTime()
+    ) {
+      eventId = await this.createEventInGoogleCalendar(
+        idUsuario,
+        reclamo.numero,
+        updateReclamoDto.fechaHoraInicio,
+        updateReclamoDto.horaFin,
+        updateReclamoDto.reclamados?.map((p) => p.idParte),
+        updateReclamoDto.reclamantes?.map((p) => p.idParte),
+        eventId
+      );
+    }
+
     const createOrDelete = this.prisma.reclamos.update({
       where: { id },
       data: {
@@ -274,6 +361,7 @@ export class ReclamosService {
           updateReclamoDto.clausulas != null
             ? (updateReclamoDto.clausulas as unknown as Prisma.InputJsonValue)
             : Prisma.JsonNull,
+        googleEventId: eventId,
       },
       include: {
         partes: true,
@@ -318,7 +406,7 @@ export class ReclamosService {
       where: {
         idUsuario,
         numero,
-        OR: [{ idResolucion: POSTERGADO }, { idResolucion: FRACASO }],
+        OR: [{ idResolucion: POSTERGADO }],
         fechaHoraInicio: {
           lte: fecha ?? new Date(),
         },

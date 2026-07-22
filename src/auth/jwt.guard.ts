@@ -1,8 +1,8 @@
-import { ExecutionContext, Injectable } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { AuthGuard } from "@nestjs/passport";
-import { IS_PUBLIC_KEY } from "./public.decorator";
-import { SKIP_JWT_KEY } from "./skip-jwt.decorator";
+import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
+import { IS_PUBLIC_KEY } from './public.decorator';
+import { SKIP_JWT_KEY } from './skip-jwt.decorator';
 
 @Injectable()
 export class JwtGuard extends AuthGuard('jwt') {
@@ -20,9 +20,8 @@ export class JwtGuard extends AuthGuard('jwt') {
 
   private hasAnyDeactivator(context: ExecutionContext): boolean {
     const keys = [IS_PUBLIC_KEY, SKIP_JWT_KEY];
-    return keys.some(key => this.reflector.getAllAndOverride<boolean>(key, [
-      context.getHandler(),
-      context.getClass(),
-    ]));
+    return keys.some((key) =>
+      this.reflector.getAllAndOverride<boolean>(key, [context.getHandler(), context.getClass()])
+    );
   }
 }
