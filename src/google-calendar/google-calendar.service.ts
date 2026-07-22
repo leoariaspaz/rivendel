@@ -74,14 +74,30 @@ export class GoogleCalendarService {
 
     const calendar = google.calendar({ version: 'v3', auth: client });
 
+    this.logger.log(`Creando evento en Google Calendar para el usuario ${userId}: ${JSON.stringify(event, null, ' ')}`);
+
+    const existing = await calendar.events.list({
+      calendarId: 'primary',
+      timeMin: new Date(event.start).toISOString(),
+      timeMax: new Date(event.end).toISOString(),
+      q: event.title, // busca por texto en el título
+      singleEvents: true,
+    });
+
+    const duplicate = existing.data.items?.find((e) => e.summary === event.title);
+
+    if (duplicate) {
+      return duplicate.htmlLink ?? ''; // ya existe, devolvemos el link sin crear
+    }
+
     const response = await calendar.events.insert({
       calendarId: 'primary', // calendario principal del usuario
       requestBody: {
         summary: event.title,
         description: event.description,
         location: event.location,
-        start: { dateTime: event.start.toISOString() },
-        end: { dateTime: event.end.toISOString() },
+        start: { dateTime: new Date(event.start).toISOString() },
+        end: { dateTime: new Date(event.end).toISOString() },
       },
     });
 
