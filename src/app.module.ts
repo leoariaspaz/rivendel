@@ -16,6 +16,7 @@ import { databaseConfig, googleConfig, jwtConfig } from './config';
 import { ValidatorsModule } from './validators/validators.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 import { appConfig } from './config/app.config';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { appConfig } from './config/app.config';
       load: [authConfig, databaseConfig, jwtConfig, googleConfig, appConfig],
     }),
     GoogleCalendarModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [
