@@ -117,4 +117,9 @@ export class GoogleCalendarService {
       );
     }
   }
+
+  async existsCalendarForUser(userId: number): Promise<boolean> {
+    const user = await this.usersService.findById(userId);
+    return (user?.googleCalendarConnected ?? false) && (user?.googleRefreshToken ?? null) !== null;
+  }
 }

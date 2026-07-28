@@ -98,6 +98,8 @@ export class ReclamosService {
       return '';
     }
 
+    if (!(await this.googleCalendarService.existsCalendarForUser(idUsuario))) return null;
+
     let partes = '';
 
     if (reclamantes && reclamantes.length > 0) {
