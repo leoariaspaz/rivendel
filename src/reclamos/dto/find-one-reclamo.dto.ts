@@ -43,4 +43,5 @@ export class FindOneReclamoDTO {
   conciliador!: UsuarioReclamoDTO;
   cantidad!: number;
   clausulas?: TiptapDocument;
+  googleEventId?: string | null;
 }

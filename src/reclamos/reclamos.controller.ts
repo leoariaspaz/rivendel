@@ -132,7 +132,7 @@ export class ReclamosController {
   @ApiParam({ name: 'id', type: Number, description: 'ID del reclamo a eliminar' })
   @ApiResponse({ status: 204, description: 'Reclamo eliminado exitosamente.' })
   @ApiResponse({ status: 404, description: 'Reclamo no encontrado.' })
-  async remove(@GetUser('userId') userId: number, @Param('id') id: string) {
+  async remove(@GetUser('userId') userId: number, @Param('id') id: string): Promise<void> {
     await this.reclamosService.remove(userId, +id);
   }
 

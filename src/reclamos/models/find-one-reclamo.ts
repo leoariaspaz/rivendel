@@ -84,6 +84,7 @@ export class FindOneReclamo {
   idResolucion!: number;
   proximaAudiencia?: Date | null;
   rubros!: string;
+  googleEventId?: string | null;
 
   @Type(() => FindOneReclamoParteReclamo)
   partes?: FindOneReclamoParteReclamo[];
@@ -122,6 +123,7 @@ export class FindOneReclamo {
     };
     dto.cantidad = cantidad;
     dto.clausulas = this.clausulas;
+    dto.googleEventId = this.googleEventId;
     return dto;
   }
 }
