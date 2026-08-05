@@ -98,6 +98,8 @@ export class ReclamosService {
       return '';
     }
 
+    if (!(await this.googleCalendarService.existsCalendarForUser(idUsuario))) return null;
+
     let partes = '';
 
     if (reclamantes && reclamantes.length > 0) {
@@ -234,6 +236,7 @@ export class ReclamosService {
         horaFin: true,
         proximaAudiencia: true,
         clausulas: true,
+        googleEventId: true,
         partes: {
           select: {
             idParte: true,
@@ -373,8 +376,14 @@ export class ReclamosService {
     return this.prisma.$transaction([createOrDelete, ...(updateMany as [])]);
   }
 
-  remove(idUsuario: number, id: number) {
-    return this.prisma.reclamos.delete({
+  async remove(idUsuario: number, id: number): Promise<void> {
+    const reclamo = await this.findOne(idUsuario, id);
+    if (reclamo.googleEventId) {
+      if (await this.googleCalendarService.existsCalendarForUser(idUsuario)) {
+        await this.googleCalendarService.deleteEvent(idUsuario, reclamo.googleEventId);
+      }
+    }
+    await this.prisma.reclamos.delete({
       where: { idUsuario, id },
     });
   }
