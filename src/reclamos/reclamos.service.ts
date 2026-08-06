@@ -244,7 +244,8 @@ export class ReclamosService {
             nroWhatsappParte: true,
             nroWhatsappPatrocinante: true,
             postergo: true,
-            incomparendo: true,
+            incomparendoParte: true,
+            incomparendoPatrocinante: true,
             multado: true,
             parte: {
               select: {

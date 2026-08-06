@@ -12,7 +12,8 @@ export class FindOneReclamoParteDTO {
   nroWhatsappParte?: string | null;
   nroWhatsappPatrocinante?: string | null;
   postergo!: boolean;
-  incomparendo!: boolean;
+  incomparendoParte!: boolean;
+  incomparendoPatrocinante!: boolean;
   tipoDocumento?: {
     sintetico: string | null;
   };
