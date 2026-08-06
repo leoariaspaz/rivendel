@@ -33,7 +33,8 @@ class FindOneReclamoParte {
 
 class FindOneReclamoParteReclamo {
   idParte!: number;
-  incomparendo!: boolean;
+  incomparendoParte!: boolean;
+  incomparendoPatrocinante!: boolean;
   multado!: boolean;
   nroWhatsappParte?: string | null;
   nroWhatsappPatrocinante?: string | null;
@@ -49,7 +50,8 @@ class FindOneReclamoParteReclamo {
     dto.nroWhatsappParte = this.nroWhatsappParte;
     dto.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante;
     dto.postergo = this.postergo;
-    dto.incomparendo = this.incomparendo;
+    dto.incomparendoParte = this.incomparendoParte;
+    dto.incomparendoPatrocinante = this.incomparendoPatrocinante;
     dto.multado = this.multado;
     dto.nombre = this.parte?.nombre || '';
     dto.nroDocumento = this.parte?.nroDocumento || '';

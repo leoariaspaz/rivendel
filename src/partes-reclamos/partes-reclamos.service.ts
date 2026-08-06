@@ -27,7 +27,8 @@ export class PartesReclamosService {
         nroWhatsappParte: parte.nroWhatsappParte || null,
         nroWhatsappPatrocinante: parte.nroWhatsappPatrocinante || null,
         postergo: parte.postergo || false,
-        incomparendo: parte.incomparendo || false,
+        incomparendoParte: parte.incomparendoParte || false,
+        incomparendoPatrocinante: parte.incomparendoPatrocinante || false,
         multado: parte.multado || false,
       });
     });
@@ -60,7 +61,8 @@ export class PartesReclamosService {
           nroWhatsappParte: p.nroWhatsappParte,
           nroWhatsappPatrocinante: p.nroWhatsappPatrocinante,
           postergo: p.postergo,
-          incomparendo: p.incomparendo,
+          incomparendoParte: p.incomparendoParte,
+          incomparendoPatrocinante: p.incomparendoPatrocinante,
           multado: p.multado,
         },
       });

@@ -62,17 +62,18 @@ model Reclamos {
 }
 
 model PartesReclamos {
-  id                      Int      @id @default(autoincrement())
-  idParte                 Int
-  idReclamo               Int
-  rol                     Int
-  nroWhatsappParte        String?
-  nroWhatsappPatrocinante String?
-  postergo                Boolean  @default(false)
-  incomparendo            Boolean  @default(false)
-  multado                 Boolean  @default(false)
-  parte                   Parte    @relation(fields: [idParte], references: [id], onDelete: Restrict)
-  reclamo                 Reclamos @relation(fields: [idReclamo], references: [id], onDelete: Cascade)
+  id                       Int      @id @default(autoincrement())
+  idParte                  Int
+  idReclamo                Int
+  rol                      Int
+  nroWhatsappParte         String?
+  nroWhatsappPatrocinante  String?
+  postergo                 Boolean  @default(false)
+  incomparendoParte        Boolean  @default(false)
+  incomparendoPatrocinante Boolean  @default(false)
+  multado                  Boolean  @default(false)
+  parte                    Parte    @relation(fields: [idParte], references: [id], onDelete: Restrict)
+  reclamo                  Reclamos @relation(fields: [idReclamo], references: [id], onDelete: Cascade)
 
   @@unique([idParte, idReclamo])
   @@index([idReclamo], map: "PartesReclamos_idReclamo_fkey")

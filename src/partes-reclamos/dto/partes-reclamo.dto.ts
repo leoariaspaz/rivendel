@@ -29,7 +29,10 @@ export class PartesReclamoDTO {
   postergo?: boolean;
 
   @Type(() => Boolean)
-  incomparendo?: boolean;
+  incomparendoParte?: boolean;
+
+  @Type(() => Boolean)
+  incomparendoPatrocinante?: boolean;
 
   @Type(() => Boolean)
   multado?: boolean;
@@ -51,7 +54,8 @@ export class PartesReclamoDTO {
     p.nroWhatsappParte = this.nroWhatsappParte || null;
     p.nroWhatsappPatrocinante = this.nroWhatsappPatrocinante || null;
     p.postergo = this.postergo || false;
-    p.incomparendo = this.incomparendo || false;
+    p.incomparendoParte = this.incomparendoParte || false;
+    p.incomparendoPatrocinante = this.incomparendoPatrocinante || false;
     p.multado = this.multado || false;
     return p;
   }

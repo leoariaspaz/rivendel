@@ -45,7 +45,8 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
       result.push({
         idParte: item.idParte,
         rol: item.rol,
-        incomparendo: item.incomparendo,
+        incomparendoParte: item.incomparendoParte,
+        incomparendoPatrocinante: item.incomparendoPatrocinante,
         multado: item.multado,
         nroWhatsappParte: item.nroWhatsappParte,
         nroWhatsappPatrocinante: item.nroWhatsappParte,

@@ -10,7 +10,6 @@ import {
   BadRequestException,
   HttpCode,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { ReclamosService } from './reclamos.service';
 import { CreateReclamoDto } from './dto/create-reclamo.dto';
@@ -30,13 +29,10 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 @ApiBearerAuth('access-token')
 export class ReclamosController {
   constructor(private readonly reclamosService: ReclamosService) {}
-  private readonly logger = new Logger(ReclamosController.name);
 
   @Post()
   @ApiReclamoSave('create')
   async create(@GetUser('userId') userId: number, @Body() createReclamoDto: CreateReclamoDto) {
-    this.logger.log('UserID = ' + userId);
-    this.logger.log('dto = ' + JSON.stringify(createReclamoDto, null, ' '));
     await this.validateUniqueness(undefined, createReclamoDto.numero, createReclamoDto.fechaHoraInicio);
     return this.reclamosService.create(userId, createReclamoDto);
   }
