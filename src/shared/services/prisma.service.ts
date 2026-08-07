@@ -18,12 +18,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       const DB_PORT = dbUrl.port || '3306';
       const DB_NAME = dbUrl.pathname.replace(/^\//, '');
       const DB_SSL_ACCEPT = dbUrl.searchParams.get('sslaccept') || false;
-      const DB_CERT = config.dbCertificate?.substring(0, 19).concat('...');
+      let DB_CERT = 'N/A';
+      if (config.dbCertificate ?? '' !== '') DB_CERT = (config.dbCertificate ?? '').substring(0, 19).concat('...');
 
       const logger = new Logger(PrismaService.name);
       logger.log(
         `Connecting to database ${DB_NAME} at ${DB_HOST}:${DB_PORT} with (SSL: ${DB_SSL_ACCEPT}) (CERT: ${DB_CERT})`
       );
+      logger.log(`Database URL: ${config.dbUrl}`);
       PrismaService.printed = true;
     }
 
