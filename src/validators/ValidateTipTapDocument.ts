@@ -5,7 +5,7 @@ import {
   ValidatorConstraintInterface,
   registerDecorator,
 } from 'class-validator';
-import { assertValidTiptapDocument, TiptapDocumentValidationError } from './validate-tiptap-document';
+import { assertValidTiptapDocument, TiptapDocumentValidationError } from './AssertValidateTiptapDocument';
 
 export function IsTiptapDocument(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {

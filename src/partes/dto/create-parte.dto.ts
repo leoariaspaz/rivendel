@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Matches,
   MinLength,
   ValidateIf,
 } from 'class-validator';
@@ -26,22 +27,22 @@ export class CreateParteDto {
   idTipoDocumento!: number;
 
   @IsNotEmpty({ message: 'Debe ingresar un número de documento.' })
-  @MinLength(7, { message: 'El número de documento tiene longitud incorrecta.' })
   @IsNumberString({}, { message: 'El documento tiene formato incorrecto.' })
   nroDocumento!: string;
 
-  @ValidateIf((p) => p.cuil)
-  @MinLength(11, { message: 'El cuil tiene longitud incorrecta' })
+  @ValidateIf((o: CreateParteDto) => o.cuil !== undefined && o.cuil !== null && o.cuil !== '')
+  @IsString({ message: 'El CUIL tiene formato incorrecto.' })
+  @Matches(/^\d{11}$/, { message: 'El CUIL debe constar de exactamente 11 números.' })  
   cuil?: string;
-  
+
   @IsOptional()
   @MinLength(4, { message: 'El domicilio es demasiado corto.' })
   domicilio?: string;
-  
+
   @IsOptional()
   @MinLength(4, { message: 'La localidad es demasiada corta.' })
   localidad?: string;
-  
+
   @IsOptional()
   @IsInt({ message: 'El patrocinante es incorrecto.' })
   @ValidateRelation(PatrocinantesService)
