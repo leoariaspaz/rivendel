@@ -12,7 +12,7 @@ import { FindOneReclamo } from './models/find-one-reclamo';
 import { plainToInstance } from 'class-transformer';
 import { POSTERGADO } from 'src/resoluciones/resoluciones.constants';
 import { PartesReclamosService } from 'src/partes-reclamos/partes-reclamos.service';
-import { assertValidTiptapDocument } from 'src/validators/validate-tiptap-document';
+import { assertValidTiptapDocument } from 'src/validators/AssertValidateTiptapDocument';
 import { GoogleCalendarService } from 'src/google-calendar/google-calendar.service';
 import { PartesService } from 'src/partes/partes.service';
 

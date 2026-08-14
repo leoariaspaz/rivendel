@@ -173,12 +173,4 @@ export class PartesService implements RelationshipValidation, ShouldExistRelatio
     const cantReclamos = parte?.reclamos?.length ?? 0;
     return { hasRelations: cantReclamos > 0, message: cantReclamos > 0 ? 'Hay reclamos relacionados.' : '' };
   }
-
-  async isUnique(idUsuario: number, filter: { id?: number; nroDocumento: string | undefined }): Promise<boolean> {
-    let args = { idUsuario, nroDocumento: filter.nroDocumento } as Prisma.ParteWhereInput;
-    if (filter.id) {
-      args = { ...args, id: { not: filter.id } };
-    }
-    return (await this.prisma.parte.count({ where: args })) === 0;
-  }
 }

@@ -1,16 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Query,
-  BadRequestException,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { PartesService } from './partes.service';
 import { CreateParteDto } from './dto/create-parte.dto';
 import { UpdateParteDto } from './dto/update-parte.dto';
@@ -28,9 +16,6 @@ export class PartesController {
   @Post()
   @ApiParteSave('create')
   async create(@GetUser('userId') userId: number, @Body() createParteDto: CreateParteDto) {
-    if (!await this.partesService.isUnique(userId, { nroDocumento: createParteDto.nroDocumento })) {
-      throw new BadRequestException(['Ya existe una parte con este número de documento.']);
-    }
     return this.partesService.create(userId, createParteDto);
   }
 
@@ -73,9 +58,6 @@ export class PartesController {
   @Patch(':id')
   @ApiParteSave('update')
   async update(@GetUser('userId') userId: number, @Param('id') id: number, @Body() updateParteDto: UpdateParteDto) {
-    if (!await this.partesService.isUnique(userId, { id, nroDocumento: updateParteDto.nroDocumento })) {
-      throw new BadRequestException(['Ya existe una parte con este número de documento.']);
-    }
     return this.partesService.update(userId, +id, updateParteDto);
   }
 
