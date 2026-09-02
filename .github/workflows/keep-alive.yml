@@ -1,0 +1,21 @@
+name: Keep Rivendel Alive 
+on: 
+    schedule: 
+        - cron: '*/10 11-23,0 * * *' 
+    workflow_dispatch: {} 
+jobs: 
+    ping: 
+        runs-on: ubuntu-latest 
+        steps: 
+            - name: Ping /health con reintentos 
+              run:  | 
+                    for i in $(seq 1 9); do status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://rivendel-l13c.onrender.com/health) 
+                        echo "Intento $i: status $status" 
+                        if [ "$status" = "200" ]; 
+                            then echo "Servicio despierto y respondiendo OK" 
+                            exit 0 
+                        fi 
+                        sleep 10 
+                    done 
+                    echo "El servicio no respondió 200 tras 9 intentos" 
+                    exit 1
