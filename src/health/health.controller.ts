@@ -8,7 +8,12 @@ export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
   @Get()
-  async check() {
+  health() {
+    return { status: 'ok' };
+  }
+
+  @Get('services')
+  async services() {
     await this.prisma.$queryRaw`SELECT 1`;
     return { status: 'ok', db: 'connected' };
   }
