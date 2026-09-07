@@ -34,6 +34,7 @@ import { HealthModule } from './health/health.module';
         NODE_ENV: Joi.string().valid('production', 'backup', 'local').default('local'),
         PORT: Joi.number().default(3000),
         FRONTEND_URL: Joi.string().uri().required(),
+        ALLOWED_ORIGINS: Joi.string().default('http://localhost:5173'),
         DATABASE_URL: Joi.string().uri().required(),
         DATABASE_CA_CERT: Joi.string().optional().allow('').default(''),
         DATABASE_CA_TEMP_PATH: Joi.string().optional().allow('').default(''),

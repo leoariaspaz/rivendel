@@ -115,11 +115,28 @@ export class AppService {
     }
   }
 
+  private testAllowedOrigins(origin: string): boolean {
+    const allowedOrigins = appConfig().allowedOrigins;
+    if (allowedOrigins instanceof RegExp) {
+      const isMatch = allowedOrigins.test(origin);
+      return isMatch;
+    } else {
+      const isAllowed = allowedOrigins.includes(origin);
+      return isAllowed;
+    }
+  }
+
   enableCors(app: INestApplication, logger: LoggerService) {
     const frontendUrl = appConfig().frontendUrl;
     logger.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
+    const originFactory = (origin: string, callback) => {
+      const allowed = !origin || this.testAllowedOrigins(origin) || origin === frontendUrl;
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+      callback(allowed ? null : new Error('No permitido por CORS'), allowed);
+    };
     app.enableCors({
-      origin: frontendUrl,
+      origin: originFactory, //frontendUrl,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true, // para enviar cookies o cabeceras de autorización
     });
