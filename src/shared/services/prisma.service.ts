@@ -25,7 +25,6 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       logger.log(
         `Connecting to database ${DB_NAME} at ${DB_HOST}:${DB_PORT} with (SSL: ${DB_SSL_ACCEPT}) (CERT: ${DB_CERT})`
       );
-      logger.log(`Database URL: ${config.dbUrl}`);
       PrismaService.printed = true;
     }
 
