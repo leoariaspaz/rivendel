@@ -17,6 +17,9 @@ import { ValidatorsModule } from './validators/validators.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 import { appConfig } from './config/app.config';
 import { HealthModule } from './health/health.module';
+import { HttpModule } from '@nestjs/axios';
+import { BankingService } from './banking/banking.service';
+import { BankingController } from './banking/banking.controller';
 
 @Module({
   imports: [
@@ -55,14 +58,16 @@ import { HealthModule } from './health/health.module';
     }),
     GoogleCalendarModule,
     HealthModule,
+    HttpModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, BankingController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
       useClass: JwtGuard,
     },
+    BankingService,
   ],
 })
 export class AppModule {}
