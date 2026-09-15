@@ -1,14 +1,29 @@
 // qstash.guard.ts
-import { CanActivate, ExecutionContext, Injectable, RawBodyRequest, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  RawBodyRequest,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Receiver } from '@upstash/qstash';
 import { Request } from 'express';
+import { qstashConfig, QStashConfig } from 'src/config';
 
 @Injectable()
 export class QStashGuard implements CanActivate {
-  private readonly receiver = new Receiver({
-    currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY!,
-    nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY!,
-  });
+  private readonly receiver: Receiver;
+
+  constructor(
+    @Inject(qstashConfig.KEY)
+    private readonly config: QStashConfig
+  ) {
+    this.receiver = new Receiver({
+      currentSigningKey: this.config.currentKey,
+      nextSigningKey: this.config.nextKey,
+    });
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RawBodyRequest<Request>>();

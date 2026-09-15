@@ -12,7 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from './auth/jwt.guard';
 import * as Joi from 'joi';
 import { authConfig } from './config/auth.config';
-import { databaseConfig, googleConfig, jwtConfig } from './config';
+import { databaseConfig, googleConfig, jwtConfig, qstashConfig } from './config';
 import { ValidatorsModule } from './validators/validators.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 import { appConfig } from './config/app.config';
@@ -54,7 +54,7 @@ import { BankingController } from './banking/banking.controller';
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
         GOOGLE_REDIRECT_URI: Joi.string().uri().required(),
       }),
-      load: [authConfig, databaseConfig, jwtConfig, googleConfig, appConfig],
+      load: [authConfig, databaseConfig, jwtConfig, googleConfig, appConfig, qstashConfig],
     }),
     GoogleCalendarModule,
     HealthModule,
