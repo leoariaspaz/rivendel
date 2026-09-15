@@ -10,7 +10,7 @@ import { databaseConfig, appConfig } from './config';
 @Injectable()
 export class AppService {
   configureOptions(): NestApplicationOptions {
-    return { logger: this.configureLogs() };
+    return { logger: this.configureLogs(), rawBody: true };
   }
 
   private configureLogs(): LoggerService {

@@ -13,6 +13,7 @@ async function bootstrap() {
   appService.loadDBCertificate();
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, appService.configureOptions());
+  app.set('trust proxy', 1);
   const logger = new Logger();
 
   logger.debug(`Starting application in ${process.env.NODE_ENV}...`);
