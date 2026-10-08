@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { QStashGuard } from 'src/auth/qstash.guard';
 import { SkipJwt } from 'src/auth/skip-jwt.decorator';
 import { PrismaService } from 'src/shared/services/prisma.service';
 
 @SkipJwt()
+@Throttle({ default: { limit: 5, ttl: 60_000 } })
 @Controller('health')
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}

@@ -14,6 +14,7 @@ import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshResponseDto } from './dto/refresh-response.dto';
 import { LogoutResponseDto } from './dto/logout-response.dto';
 import { UserRequest } from './dto/user-request';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 @ApiTags('Autenticación')
@@ -25,6 +26,7 @@ export class AuthController {
     private readonly authConfig: AuthConfig
   ) {}
 
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post('login')
   @SkipJwt()
   @UseGuards(LocalGuard)

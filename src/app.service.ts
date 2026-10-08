@@ -6,6 +6,8 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import fs from 'node:fs';
 import path from 'node:path';
 import { databaseConfig, appConfig } from './config';
+import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 @Injectable()
 export class AppService {
@@ -140,5 +142,11 @@ export class AppService {
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
       credentials: true, // para enviar cookies o cabeceras de autorización
     });
+  }
+
+  enableTrustProxy(app: NestExpressApplication, logger: LoggerService) {
+    logger.log('Enabling trust proxy...');
+    app.set('trust proxy', 1);
+    app.use(helmet());
   }
 }

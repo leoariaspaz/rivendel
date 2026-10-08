@@ -20,6 +20,7 @@ import { HealthModule } from './health/health.module';
 import { HttpModule } from '@nestjs/axios';
 import { BankingService } from './banking/banking.service';
 import { BankingController } from './banking/banking.controller';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -59,15 +60,14 @@ import { BankingController } from './banking/banking.controller';
     GoogleCalendarModule,
     HealthModule,
     HttpModule,
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]), // 100 req/min por IP
   ],
   controllers: [AppController, BankingController],
   providers: [
     AppService,
-    {
-      provide: APP_GUARD,
-      useClass: JwtGuard,
-    },
+    { provide: APP_GUARD, useClass: JwtGuard },
     BankingService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}
