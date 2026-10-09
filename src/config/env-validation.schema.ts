@@ -1,0 +1,25 @@
+import * as Joi from 'joi';
+
+export const envValidationSchema = Joi.object({
+  NODE_ENV: Joi.string().valid('production', 'backup', 'local').default('local'),
+  PORT: Joi.number().default(3000),
+  FRONTEND_URL: Joi.string().uri().required(),
+  ALLOWED_ORIGINS: Joi.string().default('http://localhost:5173'),
+  DATABASE_URL: Joi.string().uri().required(),
+  DATABASE_CA_CERT: Joi.string().optional().allow('').default(''),
+  DATABASE_CA_TEMP_PATH: Joi.string().optional().allow('').default(''),
+  DATABASE_CA_NAME: Joi.string().optional().allow('').default(''),
+  JWT_ACCESS_SECRET: Joi.string().required(),
+  JWT_ACCESS_EXPIRES_IN: Joi.number().required(),
+  JWT_REFRESH_SECRET: Joi.string().required(),
+  JWT_REFRESH_EXPIRES_IN: Joi.number().required(),
+  SAME_SITE: Joi.string().valid('lax', 'none', 'strict').allow('').optional(),
+  USE_SECURE_COOKIES: Joi.boolean().required(),
+  PATH_REFRESH_TOKEN: Joi.string().required(),
+  REFRESH_TOKEN_COOKIE_MAX_AGE: Joi.number().required(),
+  GOOGLE_CLIENT_ID: Joi.string().required(),
+  GOOGLE_CLIENT_SECRET: Joi.string().required(),
+  GOOGLE_REDIRECT_URI: Joi.string().uri().required(),
+  QSTASH_CURRENT_SIGNING_KEY: Joi.string().required(),
+  QSTASH_NEXT_SIGNING_KEY: Joi.string().required(),
+});

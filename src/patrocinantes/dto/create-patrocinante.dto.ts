@@ -26,7 +26,7 @@ export class CreatePatrocinanteDto {
   @MinLength(4, { message: 'La localidad es demasiada corta.' })
   localidad?: string;
 
-  @ValidateIfGreaterThanZero()
+  @ValidateIfGreaterThanZero({ message: 'El número de casillero debe ser mayor a cero.' })
   @Type(() => Number)
   @IsInt({ message: 'El número de casillero es incorrecto.' })
   @IsPositive({ message: 'El número de casillero debe ser positivo.' })

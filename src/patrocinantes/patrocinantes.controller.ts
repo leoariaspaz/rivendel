@@ -29,7 +29,7 @@ export class PatrocinantesController {
   @Post()
   @ApiPatrocinanteSave('create')
   async create(@Body() createPatrocinanteDto: CreatePatrocinanteDto) {
-    if (await this.patrocinantesService.isUnique({ nroMatricula: createPatrocinanteDto.nroMatricula })) {
+    if (!(await this.patrocinantesService.isUnique({ nroMatricula: createPatrocinanteDto.nroMatricula }))) {
       throw new BadRequestException(['Ya existe un patrocinante con este número de matrícula.']);
     }
     return this.patrocinantesService.create(createPatrocinanteDto);

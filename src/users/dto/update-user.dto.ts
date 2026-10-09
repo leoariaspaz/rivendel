@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString, MinLength, ValidateIf } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, MinLength, ValidateIf } from 'class-validator';
 import { Match } from 'src/validators/MatchConstraint';
+import { ValidateIfGreaterThanZero } from '../decorators/validate-if-greather-than-zero.decorator';
 
 export class UpdateUserDTO {
   @IsNotEmpty({ message: 'Debe ingresar un nombre.' })
@@ -8,8 +9,11 @@ export class UpdateUserDTO {
   @MinLength(5, { message: 'El nombre debe tener al menos 5 caracteres' })
   nombre!: string;
 
+  @ValidateIfGreaterThanZero({ message: 'El número de habilitación debe ser mayor a cero.' })
   @IsNotEmpty({ message: 'Debe ingresar un número de habilitación.' })
   @Type(() => Number)
+  @IsInt({ message: 'El número de habilitación debe ser un entero.' })
+  @IsPositive({ message: 'El número de habilitación debe ser mayor a cero.' })
   nroHabilitacion!: number;
 
   @IsOptional()

@@ -49,7 +49,7 @@ export class PartesReclamoDTOList extends Array<PartesReclamoDTO> {
         incomparendoPatrocinante: item.incomparendoPatrocinante,
         multado: item.multado,
         nroWhatsappParte: item.nroWhatsappParte,
-        nroWhatsappPatrocinante: item.nroWhatsappParte,
+        nroWhatsappPatrocinante: item.nroWhatsappPatrocinante,
         postergo: item.postergo,
       });
     });

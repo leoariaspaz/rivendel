@@ -1,4 +1,4 @@
-import { ArrayUnique, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import { ArrayUnique, IsDate, IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { PartesReclamoDTO } from '../../partes-reclamos/dto/partes-reclamo.dto';
 import { ValidateRelation } from 'src/validators/ValidateRelationConstraint';
@@ -23,16 +23,19 @@ export class CreateReclamoDto {
 
   @Type(() => Date)
   @IsNotEmpty({ message: 'Debe ingresar la fecha y hora de inicio.' })
+  @IsDate({ message: 'La fecha y hora de inicio no es válida.' })
   fechaHoraInicio!: Date;
 
   @IsOptional()
   @Type(() => Date)
   @IsNotEmpty({ message: 'La hora de fin no es válida.' })
+  @IsDate({ message: 'La hora de fin no es válida.' })
   horaFin?: Date;
 
   @IsOptional()
   @Type(() => Date)
   @IsNotEmpty({ message: 'Debe ingresar la fecha y hora de inicio.' })
+  @IsDate({ message: 'La próxima audiencia no es válida.' })
   proximaAudiencia?: Date;
 
   @ArrayUnique((p: PartesReclamoDTO) => p.idParte, {
