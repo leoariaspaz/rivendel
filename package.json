@@ -69,6 +69,7 @@
     "@types/node": "^22.19.21",
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
+    "@types/supertest": "^7.2.1",
     "dotenv-cli": "^10.0.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
@@ -78,6 +79,7 @@
     "knip": "^6.17.1",
     "prettier": "^3.8.4",
     "prisma": "6.19.3",
+    "supertest": "^7.3.1",
     "ts-jest": "^29.4.11",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -99,11 +101,42 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/$1"
+    },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.ts",
+      "!**/*.spec.ts",
+      "!**/*.module.ts",
+      "!**/interfaces/**",
+      "!**/index.ts",
+      "!**/main.ts",
+      "!**/generated/**",
+      "!**/auth/dto/*.dto.ts",
+      "!**/partes/dto/parte.dto.ts",
+      "!**/partes/dto/find-one-parte-dto-list.dto.ts",
+      "!**/patrocinantes/dto/patrocinante.dto.ts",
+      "!**/patrocinantes/dto/patrocinantes-list.dto.ts",
+      "!**/tipdocs/dto/tipo-documento.dto.ts",
+      "!**/tipdocs/dto/tipdoc-list.dto.ts",
+      "!**/reclamos/dto/reclamo.dto.ts",
+      "!**/reclamos/dto/reclamos-list.dto.ts",
+      "!**/reclamos/dto/reclamos-list-item.dto.ts",
+      "!**/reclamos/dto/reclamos-list-parte-reclamo-item.dto.ts",
+      "!**/reclamos/dto/find-one-reclamo.dto.ts",
+      "!**/users/dto/current-user-response.dto.ts",
+      "!app.controller.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 90,
+        "branches": 90,
+        "functions": 90,
+        "lines": 90
+      }
+    }
   },
   "prettier": {
     "semi": true,
