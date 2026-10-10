@@ -1,1 +1,1 @@
-export * from './should-exist-relation-validation.interface'
+export * from './should-exist-relation-validation.interface';

@@ -4,14 +4,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { JwtGuard } from './jwt.guard';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import { SKIP_JWT_KEY } from './skip-jwt.decorator';
+import { mockDeep } from 'jest-mock-extended';
 
 jest.mock('@nestjs/passport', () => ({
-  AuthGuard: jest.fn(() =>
-    class {
-      canActivate() {
-        return 'passport-guard';
+  AuthGuard: jest.fn(
+    () =>
+      class {
+        canActivate() {
+          return 'passport-guard';
+        }
       }
-    }
   ),
 }));
 
@@ -20,7 +22,8 @@ describe('JwtGuard', () => {
   let guard: JwtGuard;
 
   beforeEach(() => {
-    reflector = { getAllAndOverride: jest.fn().mockReturnValue(false) } as any;
+    reflector = mockDeep<Reflector>();
+    reflector.getAllAndOverride.mockReturnValue(false);
     guard = new JwtGuard(reflector);
   });
 
@@ -31,7 +34,7 @@ describe('JwtGuard', () => {
   it('omite JWT para rutas públicas', () => {
     reflector.getAllAndOverride.mockImplementation((key: string) => key === IS_PUBLIC_KEY);
     expect(guard.canActivate(context)).toBe(true);
-    expect(reflector.getAllAndOverride).toHaveBeenCalledWith(IS_PUBLIC_KEY, [handler, controller]);
+    expect(reflector.getAllAndOverride.mock.calls).toContainEqual([IS_PUBLIC_KEY, [handler, controller]]);
   });
 
   it('omite JWT para rutas marcadas SkipJwt', () => {

@@ -2,11 +2,23 @@ import { RECLAMADO, RECLAMANTE } from 'src/shared/utils/constants';
 import { PartesReclamoDTO } from './partes-reclamo.dto';
 import { PartesReclamoDTOList } from './partes-reclamos-dto-list';
 import { PartesReclamosList } from '../models/partes-reclamos-list';
+import { PartesReclamos } from '@prisma/client';
 
 const dto = (idParte: number, rol: number, extras: Partial<PartesReclamoDTO> = {}) =>
   Object.assign(new PartesReclamoDTO(), { idParte, rol, ...extras });
-const existing = (id: number, idParte: number, rol: number) =>
-  ({ id, idParte, rol, nroWhatsappParte: null, nroWhatsappPatrocinante: null, postergo: false, incomparendoParte: false, incomparendoPatrocinante: false, multado: false }) as any;
+const existing = (id: number, idParte: number, rol: number): PartesReclamos =>
+  ({
+    id,
+    idParte,
+    idReclamo: 1,
+    rol,
+    nroWhatsappParte: null,
+    nroWhatsappPatrocinante: null,
+    postergo: false,
+    incomparendoParte: false,
+    incomparendoPatrocinante: false,
+    multado: false,
+  }) satisfies PartesReclamos;
 
 describe('PartesReclamoDTOList', () => {
   it('une listas presentes, vacías y omitidas', () => {
@@ -61,7 +73,12 @@ describe('PartesReclamoDTOList', () => {
     ]);
     const updated = incoming.updateReclamantes(current);
     expect(updated).toHaveLength(2);
-    expect(updated[0]).toMatchObject({ id: 11, nroWhatsappParte: '111', nroWhatsappPatrocinante: '222', postergo: true });
+    expect(updated[0]).toMatchObject({
+      id: 11,
+      nroWhatsappParte: '111',
+      nroWhatsappPatrocinante: '222',
+      postergo: true,
+    });
     expect(updated[1]).toBeUndefined();
     expect(incoming.updateReclamados(current)).toHaveLength(2);
   });

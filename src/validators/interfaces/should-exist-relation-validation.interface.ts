@@ -1,5 +1,5 @@
 export interface ShouldExistRelationValidation {
-  exists(value: any): ValidateRelationResult | Promise<ValidateRelationResult>;
+  exists(value: number): ValidateRelationResult | Promise<ValidateRelationResult>;
 }
 
 export interface ValidateRelationResult {

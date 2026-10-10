@@ -8,7 +8,10 @@ describe('assertValidTiptapDocument', () => {
         type: 'doc',
         content: [
           { type: 'paragraph' },
-          { type: 'paragraph', content: [{ type: 'text', text: 'hola', marks: [{ type: 'bold' }] }, { type: 'hardBreak' }] },
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'hola', marks: [{ type: 'bold' }] }, { type: 'hardBreak' }],
+          },
         ],
       })
     ).not.toThrow();
@@ -20,15 +23,39 @@ describe('assertValidTiptapDocument', () => {
     [{ type: 'paragraph', content: [] }, 'El nodo raíz debe tener type: "doc".'],
     [{ type: 'doc', content: {} }, 'El documento debe tener "content" como array.'],
     [{ type: 'doc', content: [{ type: 'heading' }] }, 'Párrafo #0: cada nodo debe tener type: "paragraph".'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: {} }] }, 'Párrafo #0: "content" del párrafo debe ser un array.'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [null] }] }, 'Párrafo #0: nodo inline #0: debe ser un objeto.'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'image' }] }] }, 'Párrafo #0: nodo inline #0: tipo de nodo no soportado: "image".'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] }, 'Párrafo #0: nodo inline #0: "text" debe ser un string no vacío.'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 2 }] }] }, 'Párrafo #0: nodo inline #0: "text" debe ser un string no vacío.'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ok', marks: {} }] }] }, 'Párrafo #0: nodo inline #0: "marks" debe ser un array.'],
-    [{ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ok', marks: [{ type: 'italic' }] }] }] }, 'Párrafo #0: nodo inline #0: marca no soportada: "italic". Solo se permite "bold".'],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: {} }] },
+      'Párrafo #0: "content" del párrafo debe ser un array.',
+    ],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: [null] }] },
+      'Párrafo #0: nodo inline #0: debe ser un objeto.',
+    ],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'image' }] }] },
+      'Párrafo #0: nodo inline #0: tipo de nodo no soportado: "image".',
+    ],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '' }] }] },
+      'Párrafo #0: nodo inline #0: "text" debe ser un string no vacío.',
+    ],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 2 }] }] },
+      'Párrafo #0: nodo inline #0: "text" debe ser un string no vacío.',
+    ],
+    [
+      { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ok', marks: {} }] }] },
+      'Párrafo #0: nodo inline #0: "marks" debe ser un array.',
+    ],
+    [
+      {
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'ok', marks: [{ type: 'italic' }] }] }],
+      },
+      'Párrafo #0: nodo inline #0: marca no soportada: "italic". Solo se permite "bold".',
+    ],
   ])('rechaza estructura inválida con diagnóstico: %s', (document, message) => {
-    expect(() => assertValidTiptapDocument(document)).toThrow(new TiptapDocumentValidationError(message as string));
+    expect(() => assertValidTiptapDocument(document)).toThrow(new TiptapDocumentValidationError(message));
   });
 
   it('rechaza límite excedido de párrafos y de longitud de texto', () => {

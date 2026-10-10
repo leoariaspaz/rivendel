@@ -39,7 +39,9 @@ describe('CreateReclamoDto', () => {
       reclamantes: [duplicatePart, duplicatePart],
     });
     const errors = validateSync(dto);
-    expect(errors.map((error) => error.property)).toEqual(expect.arrayContaining(['numero', 'rubros', 'fechaHoraInicio', 'clausulas', 'reclamantes']));
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['numero', 'rubros', 'fechaHoraInicio', 'clausulas', 'reclamantes'])
+    );
   });
 
   it('permite campos opcionales omitidos al actualizar pero valida campos enviados', () => {

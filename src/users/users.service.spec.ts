@@ -28,7 +28,9 @@ describe('UsersService', () => {
 
     await expect(service.create('a@test.dev', 'hashed', 'Ada')).resolves.toEqual({ id: 4 });
     expect(prisma.user.count).toHaveBeenCalledWith({ where: { OR: [{ email: 'a@test.dev' }, { nombre: 'Ada' }] } });
-    expect(prisma.user.create).toHaveBeenCalledWith({ data: { email: 'a@test.dev', password: 'hashed', nombre: 'Ada' } });
+    expect(prisma.user.create).toHaveBeenCalledWith({
+      data: { email: 'a@test.dev', password: 'hashed', nombre: 'Ada' },
+    });
   });
 
   it('rechaza la creación cuando email o nombre ya existen', async () => {
@@ -51,7 +53,10 @@ describe('UsersService', () => {
     await service.saveRefreshToken(4, 'hashed-refresh');
     await service.clearRefreshToken(4);
 
-    expect(prisma.user.update).toHaveBeenNthCalledWith(1, { where: { id: 4 }, data: { refreshToken: 'hashed-refresh' } });
+    expect(prisma.user.update).toHaveBeenNthCalledWith(1, {
+      where: { id: 4 },
+      data: { refreshToken: 'hashed-refresh' },
+    });
     expect(prisma.user.update).toHaveBeenNthCalledWith(2, { where: { id: 4 }, data: { refreshToken: null } });
   });
 

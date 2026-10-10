@@ -9,6 +9,10 @@ import {
 } from 'class-validator';
 import { ShouldExistRelationValidation } from './interfaces';
 
+function isRelationValidator(value: unknown): value is Type<ShouldExistRelationValidation> {
+  return typeof value === 'function';
+}
+
 @ValidatorConstraint({ async: true })
 @Injectable()
 export class ValidateRelationConstraint implements ValidatorConstraintInterface {
@@ -17,13 +21,12 @@ export class ValidateRelationConstraint implements ValidatorConstraintInterface 
   constructor(private moduleRef: ModuleRef) {}
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    if (value === null || value === undefined) return false;
+    if (typeof value !== 'number') return false;
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const [validator] = args.constraints;
+    const validator: unknown = args.constraints[0];
+    if (!isRelationValidator(validator)) return false;
 
     // Obtenemos la instancia del servicio desde el contenedor de Nest
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const service = this.moduleRef.get<ShouldExistRelationValidation>(validator, { strict: false });
     const result = await service.exists(value);
     if (!result.isValid) {

@@ -17,8 +17,46 @@ describe('FindOneReclamo', () => {
     const reclamo = plainToInstance(FindOneReclamo, {
       ...base,
       partes: [
-        { idParte: 1, rol: RECLAMANTE, postergo: false, incomparendoParte: false, incomparendoPatrocinante: false, multado: false, parte: { nombre: 'Reclamante', nroDocumento: '1', cuil: '2', tipoDocumento: { sintetico: 'DNI' }, domicilio: 'Calle 1', localidad: 'Ciudad', esApoderado: false } },
-        { idParte: 2, rol: RECLAMADO, postergo: true, incomparendoParte: true, incomparendoPatrocinante: false, multado: true, nroWhatsappParte: '111', parte: { nombre: 'Reclamado', nroDocumento: '3', cuil: '4', tipoDocumento: { sintetico: 'LC' }, patrocinante: { nombre: 'Abogada', nroMatricula: 9, nroCasillero: 10, domicilio: 'Calle 2', localidad: 'Otra' }, esApoderado: true } },
+        {
+          idParte: 1,
+          rol: RECLAMANTE,
+          postergo: false,
+          incomparendoParte: false,
+          incomparendoPatrocinante: false,
+          multado: false,
+          parte: {
+            nombre: 'Reclamante',
+            nroDocumento: '1',
+            cuil: '2',
+            tipoDocumento: { sintetico: 'DNI' },
+            domicilio: 'Calle 1',
+            localidad: 'Ciudad',
+            esApoderado: false,
+          },
+        },
+        {
+          idParte: 2,
+          rol: RECLAMADO,
+          postergo: true,
+          incomparendoParte: true,
+          incomparendoPatrocinante: false,
+          multado: true,
+          nroWhatsappParte: '111',
+          parte: {
+            nombre: 'Reclamado',
+            nroDocumento: '3',
+            cuil: '4',
+            tipoDocumento: { sintetico: 'LC' },
+            patrocinante: {
+              nombre: 'Abogada',
+              nroMatricula: 9,
+              nroCasillero: 10,
+              domicilio: 'Calle 2',
+              localidad: 'Otra',
+            },
+            esApoderado: true,
+          },
+        },
       ],
       clausulas: { type: 'doc', content: [] },
       googleEventId: 'event-1',
@@ -26,27 +64,40 @@ describe('FindOneReclamo', () => {
       proximaAudiencia: null,
     });
 
-    expect(reclamo.toReclamantes()).toMatchObject([{ id: 1, nombre: 'Reclamante', tipoDocumento: { sintetico: 'DNI' } }]);
-    expect(reclamo.toReclamados()).toMatchObject([
-      { id: 2, nombre: 'Reclamado', nroWhatsappParte: '111', postergo: true, patrocinante: { nombre: 'Abogada', nroMatricula: 9 } },
+    expect(reclamo.toReclamantes()).toMatchObject([
+      { id: 1, nombre: 'Reclamante', tipoDocumento: { sintetico: 'DNI' } },
     ]);
-    expect(reclamo.toFindOneReclamoDTO(3)).toMatchObject({
+    expect(reclamo.toReclamados()).toMatchObject([
+      {
+        id: 2,
+        nombre: 'Reclamado',
+        nroWhatsappParte: '111',
+        postergo: true,
+        patrocinante: { nombre: 'Abogada', nroMatricula: 9 },
+      },
+    ]);
+    const dto = reclamo.toFindOneReclamoDTO(3);
+    expect(dto).toMatchObject({
       id: 11,
       numero: 42,
       cantidad: 3,
       conciliador: { nombre: 'Ada', nroHabilitacion: 123 },
       googleEventId: 'event-1',
       clausulas: { type: 'doc', content: [] },
-      reclamantes: expect.any(Array),
-      reclamados: expect.any(Array),
     });
+    expect(Array.isArray(dto.reclamantes)).toBe(true);
+    expect(Array.isArray(dto.reclamados)).toBe(true);
   });
 
   it('devuelve listas indefinidas cuando no se proporcionan relaciones', () => {
     const reclamo = plainToInstance(FindOneReclamo, { ...base, partes: undefined });
     expect(reclamo.toReclamantes()).toBeUndefined();
     expect(reclamo.toReclamados()).toBeUndefined();
-    expect(reclamo.toFindOneReclamoDTO(0)).toMatchObject({ reclamantes: undefined, reclamados: undefined, cantidad: 0 });
+    expect(reclamo.toFindOneReclamoDTO(0)).toMatchObject({
+      reclamantes: undefined,
+      reclamados: undefined,
+      cantidad: 0,
+    });
   });
 
   it('normaliza valores nulos/ausentes de parte y patrocinante a defaults del DTO', () => {

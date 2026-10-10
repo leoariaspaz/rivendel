@@ -16,13 +16,29 @@ describe('PrismaExceptionFilter', () => {
 
   it.each([
     ['P2000', undefined, 'El valor proporcionado excede el límite de caracteres permitido para el campo o columna.'],
-    ['P2002', { target: ['email', 'nombre'] }, 'Ya existe un registro con el/los campo(s): [email, nombre] duplicado(s).'],
+    [
+      'P2002',
+      { target: ['email', 'nombre'] },
+      'Ya existe un registro con el/los campo(s): [email, nombre] duplicado(s).',
+    ],
     ['P2002', { target: 'email' }, 'Ya existe un registro con el/los campo(s): [email] duplicado(s).'],
     ['P2002', undefined, 'Conflicto: Ya existe un registro con los valores únicos proporcionados.'],
-    ['P2003', { field_name: 'parte_id_fkey' }, 'No se puede guardar el registro porque la referencia o relación (parte_id) proporcionada no existe.'],
-    ['P2003', { field_name: '_fkey' }, 'No se puede guardar el registro porque la referencia o relación (_fkey) proporcionada no existe.'],
+    [
+      'P2003',
+      { field_name: 'parte_id_fkey' },
+      'No se puede guardar el registro porque la referencia o relación (parte_id) proporcionada no existe.',
+    ],
+    [
+      'P2003',
+      { field_name: '_fkey' },
+      'No se puede guardar el registro porque la referencia o relación (_fkey) proporcionada no existe.',
+    ],
     ['P2004', undefined, 'La operación no cumple con las reglas de validación de la base de datos.'],
-    ['P2025', { modelName: 'Parte' }, 'Operación fallida: No se encontró Parte con los identificadores proporcionados.'],
+    [
+      'P2025',
+      { modelName: 'Parte' },
+      'Operación fallida: No se encontró Parte con los identificadores proporcionados.',
+    ],
     ['P2025', undefined, 'Operación fallida: No se encontró el registro con los identificadores proporcionados.'],
   ])('mapea %s a un mensaje estable', (code, meta, expected) => {
     expect(filter.mapPrismaErrorToMessage(error(code, meta))).toBe(expected);

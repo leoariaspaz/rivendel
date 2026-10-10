@@ -1,5 +1,9 @@
 import { envValidationSchema } from './env-validation.schema';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 describe('envValidationSchema', () => {
   const validEnvironment = {
     FRONTEND_URL: 'https://frontend.example.test',
@@ -19,13 +23,15 @@ describe('envValidationSchema', () => {
   };
 
   it('acepta configuración completa, convierte números y aplica defaults', () => {
-    const { error, value } = envValidationSchema.validate(validEnvironment);
-    expect(error).toBeUndefined();
-    expect(value.NODE_ENV).toBe('local');
-    expect(value.PORT).toBe(3000);
-    expect(value.USE_SECURE_COOKIES).toBe(true);
-    expect(value.JWT_ACCESS_EXPIRES_IN).toBe(900);
-    expect(value.ALLOWED_ORIGINS).toBe('http://localhost:5173');
+    const result = envValidationSchema.validate(validEnvironment);
+    const value: unknown = result.value;
+    expect(result.error).toBeUndefined();
+    if (!isRecord(value)) throw new Error('La configuración validada debe ser un objeto');
+    expect(value['NODE_ENV']).toBe('local');
+    expect(value['PORT']).toBe(3000);
+    expect(value['USE_SECURE_COOKIES']).toBe(true);
+    expect(value['JWT_ACCESS_EXPIRES_IN']).toBe(900);
+    expect(value['ALLOWED_ORIGINS']).toBe('http://localhost:5173');
   });
 
   it.each([
@@ -38,10 +44,10 @@ describe('envValidationSchema', () => {
     ['QSTASH_CURRENT_SIGNING_KEY'],
     ['QSTASH_NEXT_SIGNING_KEY'],
   ])('rechaza si falta la variable requerida %s', (name) => {
-    const config = { ...validEnvironment };
+    const config: Record<string, string> = { ...validEnvironment };
     delete config[name];
     const { error } = envValidationSchema.validate(config);
-    expect(error?.details.some((detail) => detail.context?.key === name)).toBe(true);
+    expect(error?.details.some((detail) => detail.path.includes(name))).toBe(true);
   });
 
   it('rechaza URI y valores de entorno fuera del conjunto permitido', () => {

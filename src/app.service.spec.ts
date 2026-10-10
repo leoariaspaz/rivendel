@@ -1,5 +1,8 @@
-import { LoggerService } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { CorsOptions, CustomOrigin } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { appConfig, databaseConfig } from './config';
 import { AppService } from './app.service';
 import fs from 'node:fs';
@@ -10,21 +13,42 @@ jest.mock('./config', () => ({
   databaseConfig: jest.fn(),
 }));
 jest.mock('node:fs', () => ({ writeFileSync: jest.fn() }));
-jest.mock('helmet', () => jest.fn(() => 'helmet-middleware'));
+jest.mock('helmet', () => jest.fn(() => (_request: unknown, _response: unknown, next: () => void) => next()));
+
+function hasCorsOrigin(value: unknown): value is CorsOptions & { origin: CustomOrigin } {
+  return typeof value === 'object' && value !== null && 'origin' in value && typeof value.origin === 'function';
+}
 
 describe('AppService', () => {
   let service: AppService;
-  const appConfigMock = appConfig as unknown as jest.Mock;
-  const databaseConfigMock = databaseConfig as unknown as jest.Mock;
-  const logger = { log: jest.fn() } as unknown as LoggerService;
+  let testingModule: TestingModule;
+  let app: NestExpressApplication;
+  const appConfigMock = jest.mocked(appConfig);
+  const databaseConfigMock = jest.mocked(databaseConfig);
+  const logger = new Logger('AppServiceSpec');
 
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
-    jest.spyOn(SwaggerModule, 'createDocument').mockReturnValue({} as any);
+    testingModule = await Test.createTestingModule({}).compile();
+    app = testingModule.createNestApplication<NestExpressApplication>();
+    jest.spyOn(SwaggerModule, 'createDocument').mockReturnValue({ ...new DocumentBuilder().build(), paths: {} });
     jest.spyOn(SwaggerModule, 'setup').mockImplementation(() => undefined);
     service = new AppService();
-    appConfigMock.mockReturnValue({ frontendUrl: 'https://frontend.example.test', allowedOrigins: ['https://allowed.test'] });
-    databaseConfigMock.mockReturnValue({ dbCertPath: '/tmp/certs', dbCertName: 'ca.pem', dbCertificate: undefined });
+    appConfigMock.mockReturnValue({
+      nodeEnv: 'test',
+      frontendUrl: 'https://frontend.example.test',
+      allowedOrigins: ['https://allowed.test'],
+    });
+    databaseConfigMock.mockReturnValue({
+      dbUrl: 'mysql://user:pass@database.test/app',
+      dbCertPath: '/tmp/certs',
+      dbCertName: 'ca.pem',
+      dbCertificate: undefined,
+    });
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   it('expone opciones Nest con raw body y logger configurado', () => {
@@ -34,40 +58,52 @@ describe('AppService', () => {
   });
 
   it('formatea contextos de log string/número, objeto y ausentes', () => {
-    expect((service as any).getContext('Auth')).toBe('[Auth] ');
-    expect((service as any).getContext(12)).toBe('[12] ');
-    expect((service as any).getContext({ requestId: 'r1' })).toBe('[{"requestId":"r1"}] ');
-    expect((service as any).getContext(null)).toBe('');
-    expect((service as any).getContext(undefined)).toBe('');
+    expect(service['getContext']('Auth')).toBe('[Auth] ');
+    expect(service['getContext'](12)).toBe('[12] ');
+    expect(service['getContext']({ requestId: 'r1' })).toBe('[{"requestId":"r1"}] ');
+    expect(service['getContext'](null)).toBe('');
+    expect(service['getContext'](undefined)).toBe('');
   });
 
   it('configura Swagger con esquema bearer/cookie en la raíz', () => {
-    const app = {} as any;
+    const createDocument = jest.spyOn(SwaggerModule, 'createDocument');
+    const setupSwagger = jest.spyOn(SwaggerModule, 'setup');
     service.configureSwagger(app);
-    expect(SwaggerModule.createDocument).toHaveBeenCalledWith(app, expect.any(Object));
-    expect(SwaggerModule.setup).toHaveBeenCalledWith('/', app, expect.any(Object));
+    expect(createDocument).toHaveBeenCalledWith(app, expect.any(Object));
+    expect(setupSwagger).toHaveBeenCalledWith('/', app, expect.any(Object));
     expect(DocumentBuilder).toBeDefined();
   });
 
   it('escribe certificado CA solo cuando existe y exporta su ruta para Node', () => {
-    databaseConfigMock.mockReturnValue({ dbCertPath: '/tmp/certs', dbCertName: 'ca.pem', dbCertificate: '-----BEGIN CERTIFICATE-----' });
+    databaseConfigMock.mockReturnValue({
+      dbUrl: 'mysql://user:pass@database.test/app',
+      dbCertPath: '/tmp/certs',
+      dbCertName: 'ca.pem',
+      dbCertificate: '-----BEGIN CERTIFICATE-----',
+    });
     service.loadDBCertificate();
     expect(fs.writeFileSync).toHaveBeenCalledWith('/tmp/certs/ca.pem', '-----BEGIN CERTIFICATE-----');
     expect(process.env.NODE_EXTRA_CA_CERTS).toBe('/tmp/certs/ca.pem');
 
     jest.clearAllMocks();
-    databaseConfigMock.mockReturnValue({ dbCertificate: '' });
+    databaseConfigMock.mockReturnValue({
+      dbUrl: 'mysql://user:pass@database.test/app',
+      dbCertPath: '/tmp/certs',
+      dbCertName: 'ca.pem',
+      dbCertificate: '',
+    });
     service.loadDBCertificate();
     expect(fs.writeFileSync).not.toHaveBeenCalled();
   });
 
   it('configura CORS para origen ausente, allowlist, frontend y rechazo', () => {
-    const app = { enableCors: jest.fn() } as any;
+    const enableCors = jest.spyOn(app, 'enableCors');
     service.enableCors(app, logger);
-    const options = app.enableCors.mock.calls[0][0];
+    const options = enableCors.mock.calls[0][0];
+    if (!hasCorsOrigin(options)) throw new Error('Se esperaba una configuración CORS con callback de origen');
     expect(options).toMatchObject({ methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', credentials: true });
 
-    const allowed: jest.Mock = jest.fn();
+    const allowed = jest.fn<void, [Error | null, boolean?]>();
     options.origin(undefined, allowed);
     expect(allowed).toHaveBeenCalledWith(null, true);
     options.origin('https://allowed.test', allowed);
@@ -79,17 +115,24 @@ describe('AppService', () => {
   });
 
   it('usa allowlist regex y configura trust proxy junto con Helmet', () => {
-    appConfigMock.mockReturnValue({ frontendUrl: 'https://frontend.example.test', allowedOrigins: /^https:\/\/.*\.test$/ });
-    const corsApp = { enableCors: jest.fn() } as any;
-    service.enableCors(corsApp, logger);
-    const callback = jest.fn();
-    corsApp.enableCors.mock.calls[0][0].origin('https://app.test', callback);
+    appConfigMock.mockReturnValue({
+      nodeEnv: 'test',
+      frontendUrl: 'https://frontend.example.test',
+      allowedOrigins: /^https:\/\/.*\.test$/,
+    });
+    const enableCors = jest.spyOn(app, 'enableCors');
+    service.enableCors(app, logger);
+    const options = enableCors.mock.calls[0][0];
+    if (!hasCorsOrigin(options)) throw new Error('Se esperaba una configuración CORS con callback de origen');
+    const callback = jest.fn<void, [Error | null, boolean?]>();
+    options.origin('https://app.test', callback);
     expect(callback).toHaveBeenCalledWith(null, true);
 
-    const app = { set: jest.fn(), use: jest.fn() } as any;
+    const set = jest.spyOn(app, 'set');
+    const use = jest.spyOn(app, 'use');
     service.enableTrustProxy(app, logger);
-    expect(app.set).toHaveBeenCalledWith('trust proxy', 1);
-    expect(app.use).toHaveBeenCalledWith('helmet-middleware');
+    expect(set).toHaveBeenCalledWith('trust proxy', 1);
+    expect(typeof use.mock.calls[0][0]).toBe('function');
     expect(helmet).toHaveBeenCalledTimes(1);
   });
 });

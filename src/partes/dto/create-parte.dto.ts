@@ -32,7 +32,7 @@ export class CreateParteDto {
 
   @ValidateIf((o: CreateParteDto) => o.cuil !== undefined && o.cuil !== null && o.cuil !== '')
   @IsString({ message: 'El CUIL tiene formato incorrecto.' })
-  @Matches(/^\d{11}$/, { message: 'El CUIL debe constar de exactamente 11 números.' })  
+  @Matches(/^\d{11}$/, { message: 'El CUIL debe constar de exactamente 11 números.' })
   cuil?: string;
 
   @IsOptional()

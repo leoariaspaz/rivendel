@@ -4,10 +4,17 @@ import request from 'supertest';
 import { HealthController } from '../src/health/health.controller';
 import { QStashGuard } from '../src/auth/qstash.guard';
 import { PrismaService } from '../src/shared/services/prisma.service';
+import { RequestListener } from 'node:http';
+
+function isRequestListener(value: unknown): value is RequestListener {
+  return typeof value === 'function';
+}
 
 describe('Health HTTP (e2e)', () => {
   let app: INestApplication;
-  const prisma = { $queryRaw: jest.fn().mockResolvedValue([{ value: 1 }]) };
+  let requestHandler: RequestListener;
+  const queryRaw = jest.fn<Promise<unknown>, [TemplateStringsArray, ...unknown[]]>().mockResolvedValue([{ value: 1 }]);
+  const prisma = { $queryRaw: queryRaw };
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -20,6 +27,9 @@ describe('Health HTTP (e2e)', () => {
 
     app = module.createNestApplication();
     await app.init();
+    const adapterInstance: unknown = app.getHttpAdapter().getInstance();
+    if (!isRequestListener(adapterInstance)) throw new Error('Nest no creó un handler HTTP');
+    requestHandler = adapterInstance;
   });
 
   afterAll(async () => {
@@ -29,17 +39,21 @@ describe('Health HTTP (e2e)', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('responde GET /health sin consultar Prisma', async () => {
-    await request(app.getHttpServer()).get('/health').expect(200).expect({ status: 'ok' });
-    expect(prisma.$queryRaw).not.toHaveBeenCalled();
+    await request(requestHandler).get('/health').expect(200).expect({ status: 'ok' });
+    expect(queryRaw.mock.calls).toHaveLength(0);
   });
 
   it('responde GET /health/services tras consulta mockeada', async () => {
-    await request(app.getHttpServer()).get('/health/services').expect(200).expect({ status: 'ok', db: 'connected' });
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+    await request(requestHandler).get('/health/services').expect(200).expect({ status: 'ok', db: 'connected' });
+    expect(queryRaw.mock.calls).toHaveLength(1);
   });
 
   it('responde POST /health una vez autorizado por el guard sustituido', async () => {
-    await request(app.getHttpServer()).post('/health').send({ wake: true }).expect(201).expect({ status: 'ok', db: 'connected' });
-    expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+    await request(requestHandler)
+      .post('/health')
+      .send({ wake: true })
+      .expect(201)
+      .expect({ status: 'ok', db: 'connected' });
+    expect(queryRaw.mock.calls).toHaveLength(1);
   });
 });

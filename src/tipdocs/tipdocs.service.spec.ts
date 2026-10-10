@@ -1,18 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TipdocsService } from './tipdocs.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 
 describe('TipdocsService', () => {
   let service: TipdocsService;
   const prisma = {
     tipoDocumento: {
-      create: jest.fn(),
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-      findFirst: jest.fn(),
+      create: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findMany: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findUnique: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      update: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      delete: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      count: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findFirst: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
     },
   };
 
@@ -27,13 +28,17 @@ describe('TipdocsService', () => {
 
   it('crea, lee y actualiza un tipo de documento', async () => {
     prisma.tipoDocumento.create.mockResolvedValue({ id: 1 });
-    await expect(service.create({ sintetico: 'DNI', descripcion: 'Documento' } as any)).resolves.toEqual({ id: 1 });
+    await expect(
+      service.create(Object.assign(new CreateTipdocDto(), { sintetico: 'DNI', descripcion: 'Documento' }))
+    ).resolves.toEqual({ id: 1 });
     await service.findOne(1);
-    await service.update(1, { sintetico: 'LC', descripcion: 'Libreta' } as any);
+    await service.update(1, { sintetico: 'LC', descripcion: 'Libreta' });
 
-    expect(prisma.tipoDocumento.create).toHaveBeenCalledWith({ data: { sintetico: 'DNI', descripcion: 'Documento' } });
-    expect(prisma.tipoDocumento.findUnique).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(prisma.tipoDocumento.update).toHaveBeenCalledWith({
+    expect(prisma.tipoDocumento.create.mock.calls[0][0]).toEqual({
+      data: { sintetico: 'DNI', descripcion: 'Documento' },
+    });
+    expect(prisma.tipoDocumento.findUnique.mock.calls[0][0]).toEqual({ where: { id: 1 } });
+    expect(prisma.tipoDocumento.update.mock.calls[0][0]).toEqual({
       where: { id: 1 },
       data: { sintetico: 'LC', descripcion: 'Libreta' },
     });
@@ -43,8 +48,8 @@ describe('TipdocsService', () => {
     await service.findAll();
     await service.findAllPaginated(3, 10);
 
-    expect(prisma.tipoDocumento.findMany).toHaveBeenNthCalledWith(1, { orderBy: { sintetico: 'asc' } });
-    expect(prisma.tipoDocumento.findMany).toHaveBeenNthCalledWith(2, {
+    expect(prisma.tipoDocumento.findMany.mock.calls[0][0]).toEqual({ orderBy: { sintetico: 'asc' } });
+    expect(prisma.tipoDocumento.findMany.mock.calls[1][0]).toEqual({
       skip: 20,
       take: 10,
       orderBy: { sintetico: 'asc' },
@@ -62,13 +67,13 @@ describe('TipdocsService', () => {
     await expect(service.isRelated(1)).resolves.toEqual({ hasRelations: false, message: '' });
     await expect(service.isRelated(2)).resolves.toEqual({ hasRelations: true, message: 'Hay partes relacionadas.' });
 
-    expect(prisma.tipoDocumento.count).toHaveBeenNthCalledWith(1);
-    expect(prisma.tipoDocumento.delete).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(prisma.tipoDocumento.count.mock.calls[0]).toHaveLength(0);
+    expect(prisma.tipoDocumento.delete.mock.calls[0][0]).toEqual({ where: { id: 1 } });
   });
 
   it('comprueba unicidad excluyendo el id actual al editar', async () => {
     prisma.tipoDocumento.count.mockResolvedValue(0);
     await expect(service.isUnique({ id: 1, sintetico: 'DNI' })).resolves.toBe(true);
-    expect(prisma.tipoDocumento.count).toHaveBeenCalledWith({ where: { sintetico: 'DNI', id: { not: 1 } } });
+    expect(prisma.tipoDocumento.count.mock.calls[0][0]).toEqual({ where: { sintetico: 'DNI', id: { not: 1 } } });
   });
 });

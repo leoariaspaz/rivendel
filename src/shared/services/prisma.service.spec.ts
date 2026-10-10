@@ -5,17 +5,19 @@ import { PrismaService } from './prisma.service';
 
 const mockConnect = jest.fn();
 const mockDisconnect = jest.fn();
+let prismaClientOptions: unknown;
 jest.mock('@prisma/client', () => ({
   PrismaClient: class PrismaClient {
     $connect = mockConnect;
     $disconnect = mockDisconnect;
     constructor(options: unknown) {
-      (this as any).options = options;
+      prismaClientOptions = options;
     }
   },
 }));
 
 describe('PrismaService', () => {
+  let loggerLog: jest.SpyInstance;
   const config = {
     dbUrl: 'mysql://user:pass@database.test:3307/app?sslaccept=strict',
     dbCertPath: '/tmp',
@@ -25,8 +27,8 @@ describe('PrismaService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (PrismaService as any).printed = false;
-    jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    PrismaService['printed'] = false;
+    loggerLog = jest.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
@@ -38,10 +40,10 @@ describe('PrismaService', () => {
       providers: [PrismaService, { provide: databaseConfig.KEY, useValue: config }],
     }).compile();
     const prisma = module.get<PrismaService>(PrismaService);
-    expect((prisma as any).options).toEqual({ datasourceUrl: config.dbUrl });
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.stringContaining('database app at database.test:3307'));
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.stringContaining('SSL: strict'));
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.stringContaining('CERT: -----BEGIN CERTIFIC...'));
+    expect(prismaClientOptions).toEqual({ datasourceUrl: config.dbUrl });
+    expect(loggerLog.mock.calls).toContainEqual([expect.stringContaining('database app at database.test:3307')]);
+    expect(loggerLog.mock.calls).toContainEqual([expect.stringContaining('SSL: strict')]);
+    expect(loggerLog.mock.calls).toContainEqual([expect.stringContaining('CERT: -----BEGIN CERTIFIC...')]);
     await prisma.onModuleInit();
     await prisma.onModuleDestroy();
     expect(mockConnect).toHaveBeenCalledTimes(1);
@@ -56,7 +58,7 @@ describe('PrismaService', () => {
       ],
     }).compile();
     expect(module.get(PrismaService)).toBeInstanceOf(PrismaService);
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.stringContaining('database app at database.test:3306'));
-    expect(Logger.prototype.log).toHaveBeenCalledWith(expect.stringContaining('CERT: N/A'));
+    expect(loggerLog.mock.calls).toContainEqual([expect.stringContaining('database app at database.test:3306')]);
+    expect(loggerLog.mock.calls).toContainEqual([expect.stringContaining('CERT: N/A')]);
   });
 });

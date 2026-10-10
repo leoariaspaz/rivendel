@@ -11,9 +11,7 @@ describe('HealthController', () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [HealthController],
-      providers: [
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [{ provide: PrismaService, useValue: prisma }],
     })
       .overrideGuard(QStashGuard)
       .useValue({ canActivate: () => true })

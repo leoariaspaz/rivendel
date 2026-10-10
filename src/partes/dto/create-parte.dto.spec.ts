@@ -28,11 +28,18 @@ describe('CreateParteDto', () => {
       esApoderado: 'false',
     });
     const errors = validateSync(dto);
-    expect(errors.map((error) => error.property)).toEqual(expect.arrayContaining(['nombre', 'nroDocumento', 'cuil', 'esApoderado']));
+    expect(errors.map((error) => error.property)).toEqual(
+      expect.arrayContaining(['nombre', 'nroDocumento', 'cuil', 'esApoderado'])
+    );
   });
 
   it('valida CUIL numérico con longitud exacta', () => {
-    const dto = plainToInstance(CreateParteDto, { ...valid, cuil: '20123456789', domicilio: 'Calle 123', localidad: 'Rosario' });
+    const dto = plainToInstance(CreateParteDto, {
+      ...valid,
+      cuil: '20123456789',
+      domicilio: 'Calle 123',
+      localidad: 'Rosario',
+    });
     expect(validateSync(dto)).toHaveLength(0);
     dto.cuil = '2012345678x';
     expect(validateSync(dto).some((error) => error.property === 'cuil')).toBe(true);
@@ -41,6 +48,8 @@ describe('CreateParteDto', () => {
   it('permite patch vacío y aplica reglas solo a los campos enviados', () => {
     expect(validateSync(plainToInstance(UpdateParteDto, {}))).toHaveLength(0);
     expect(validateSync(plainToInstance(UpdateParteDto, { nombre: 'Ada Lovelace' }))).toHaveLength(0);
-    expect(validateSync(plainToInstance(UpdateParteDto, { nombre: 'A' })).some((error) => error.property === 'nombre')).toBe(true);
+    expect(
+      validateSync(plainToInstance(UpdateParteDto, { nombre: 'A' })).some((error) => error.property === 'nombre')
+    ).toBe(true);
   });
 });

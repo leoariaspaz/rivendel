@@ -37,7 +37,9 @@ describe('BankingController', () => {
 
   it('usa cuil vacío si no hay titulares y no retorna datos ante error de búsqueda', async () => {
     service.getCBUFromAlias.mockResolvedValue('cbu-1');
-    service.getCuentaFromCBU.mockResolvedValueOnce({ cuenta: '123', nombreBancoDestino: 'Banco', nombreTitular: 'Ada', titulares: [] }).mockResolvedValueOnce(undefined);
+    service.getCuentaFromCBU
+      .mockResolvedValueOnce({ cuenta: '123', nombreBancoDestino: 'Banco', nombreTitular: 'Ada', titulares: [] })
+      .mockResolvedValueOnce(undefined);
     await expect(controller.bankingData('ada.alias')).resolves.toMatchObject({ cuilTitular: '' });
     await expect(controller.bankingData('missing')).resolves.toBeUndefined();
   });

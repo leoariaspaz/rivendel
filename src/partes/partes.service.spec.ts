@@ -1,18 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PartesService } from './partes.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
+import { CreateParteDto } from './dto/create-parte.dto';
+import { UpdateParteDto } from './dto/update-parte.dto';
 
 describe('PartesService', () => {
   let service: PartesService;
   const prisma = {
     parte: {
-      create: jest.fn(),
-      findUnique: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      count: jest.fn(),
-      findMany: jest.fn(),
-      findFirst: jest.fn(),
+      create: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findUnique: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      update: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      delete: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      count: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findMany: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
+      findFirst: jest.fn<Promise<unknown>, [Record<string, unknown>]>(),
     },
   };
 
@@ -27,11 +29,16 @@ describe('PartesService', () => {
 
   it('crea partes asignándolas al usuario y normaliza datos opcionales', async () => {
     prisma.parte.create.mockResolvedValue({ id: 9 });
-    const dto = { nombre: 'Ada', idTipoDocumento: 1, nroDocumento: '123', esApoderado: false } as any;
+    const dto = Object.assign(new CreateParteDto(), {
+      nombre: 'Ada',
+      idTipoDocumento: 1,
+      nroDocumento: '123',
+      esApoderado: false,
+    });
 
     await expect(service.create(22, dto)).resolves.toEqual({ id: 9 });
-    expect(prisma.parte.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ idUsuario: 22, cuil: '', idPatrocinante: null, nombre: 'Ada' }),
+    expect(prisma.parte.create.mock.calls[0][0]).toMatchObject({
+      data: { idUsuario: 22, cuil: '', idPatrocinante: null, nombre: 'Ada' },
     });
   });
 
@@ -43,14 +50,12 @@ describe('PartesService', () => {
       cuil: '20-123',
       idPatrocinante: 7,
       esApoderado: false,
-    } as any);
-    await service.update(22, 9, { idTipoDocumento: '2', idPatrocinante: 7 } as any);
-    expect(prisma.parte.create).toHaveBeenCalledWith({
-      data: expect.objectContaining({ cuil: '20-123', idPatrocinante: 7 }),
     });
-    expect(prisma.parte.update).toHaveBeenCalledWith({
+    await service.update(22, 9, Object.assign(new UpdateParteDto(), { idTipoDocumento: 2, idPatrocinante: 7 }));
+    expect(prisma.parte.create.mock.calls[0][0]).toMatchObject({ data: { cuil: '20-123', idPatrocinante: 7 } });
+    expect(prisma.parte.update.mock.calls[0][0]).toMatchObject({
       where: { idUsuario: 22, id: 9 },
-      data: expect.objectContaining({ idTipoDocumento: 2, idPatrocinante: 7 }),
+      data: { idTipoDocumento: 2, idPatrocinante: 7 },
     });
   });
 
@@ -76,9 +81,7 @@ describe('PartesService', () => {
       tipoDocumento: 'DNI',
       patrocinante: { id: 7, nombre: 'Abogada' },
     });
-    expect(prisma.parte.findUnique).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 9, idUsuario: 22 } })
-    );
+    expect(prisma.parte.findUnique.mock.calls[0][0]).toMatchObject({ where: { id: 9, idUsuario: 22 } });
   });
 
   it('devuelve null si la parte no pertenece al usuario o no existe', async () => {
@@ -101,17 +104,23 @@ describe('PartesService', () => {
       esApoderado: false,
     });
     await expect(service.findOne(22, 9)).resolves.toMatchObject({ domicilio: 'Calle', localidad: 'Ciudad' });
-    expect((await service.findOne(22, 9) as any).patrocinante).toBeUndefined();
+    const parte = await service.findOne(22, 9);
+    expect(parte?.patrocinante).toBeUndefined();
   });
 
   it('acota actualizar y eliminar al usuario dueño', async () => {
-    await service.update(22, 9, { nombre: 'Ada nueva', idTipoDocumento: '2', nroDocumento: '456' } as any);
+    await service.update(
+      22,
+      9,
+      Object.assign(new UpdateParteDto(), { nombre: 'Ada nueva', idTipoDocumento: 2, nroDocumento: '456' })
+    );
     await service.remove(22, 9);
 
-    expect(prisma.parte.update).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: 9, idUsuario: 22 }, data: expect.objectContaining({ nombre: 'Ada nueva' }) })
-    );
-    expect(prisma.parte.delete).toHaveBeenCalledWith({ where: { id: 9, idUsuario: 22 } });
+    expect(prisma.parte.update.mock.calls[0][0]).toMatchObject({
+      where: { id: 9, idUsuario: 22 },
+      data: { nombre: 'Ada nueva' },
+    });
+    expect(prisma.parte.delete.mock.calls[0][0]).toEqual({ where: { id: 9, idUsuario: 22 } });
   });
 
   it('filtra y pagina listados manteniendo el alcance por usuario', async () => {
@@ -119,15 +128,13 @@ describe('PartesService', () => {
     prisma.parte.count.mockResolvedValue(0);
 
     await expect(service.findAll(22, 'Ada', 3, 10)).resolves.toEqual([]);
-    expect(prisma.parte.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { idUsuario: 22, OR: [{ nombre: { contains: 'Ada' } }, { cuil: { contains: 'Ada' } }] },
-        skip: 20,
-        take: 10,
-      })
-    );
+    expect(prisma.parte.findMany.mock.calls[0][0]).toMatchObject({
+      where: { idUsuario: 22, OR: [{ nombre: { contains: 'Ada' } }, { cuil: { contains: 'Ada' } }] },
+      skip: 20,
+      take: 10,
+    });
     await service.getTotalCount(22, null);
-    expect(prisma.parte.count).toHaveBeenCalledWith({ where: { idUsuario: 22 } });
+    expect(prisma.parte.count.mock.calls[0][0]).toEqual({ where: { idUsuario: 22 } });
   });
 
   it('valida existencia y relaciones sin asumir que una parte faltante tiene reclamos', async () => {

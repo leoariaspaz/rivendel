@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiBody, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { UpdateParteDto } from '../dto/update-parte.dto';
 import { CreateParteDto } from '../dto/create-parte.dto';
 import { ParteDto } from '../dto/parte.dto';

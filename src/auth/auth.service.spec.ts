@@ -4,16 +4,19 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { jwtConfig } from 'src/config';
 import * as bcrypt from 'bcryptjs';
+import { JwtSignOptions } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
   const usersService = {
-    create: jest.fn(),
-    saveRefreshToken: jest.fn(),
-    clearRefreshToken: jest.fn(),
-    findById: jest.fn(),
+    create: jest.fn<Promise<{ id: number }>, [string, string, string]>(),
+    saveRefreshToken: jest.fn<Promise<void>, [number, string]>(),
+    clearRefreshToken: jest.fn<Promise<void>, [number]>(),
+    findById: jest.fn<Promise<{ id: number; email?: string; refreshToken: string | null } | null>, [number]>(),
   };
-  const jwtService = { signAsync: jest.fn() };
+  const jwtService = {
+    signAsync: jest.fn<Promise<string>, [object, JwtSignOptions?]>(),
+  };
   const config = { access: { secret: 'access', expiresIn: 900 }, refresh: { secret: 'refresh', expiresIn: 3600 } };
 
   beforeEach(async () => {
@@ -49,11 +52,14 @@ describe('AuthService', () => {
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
     });
-    expect(jwtService.signAsync).toHaveBeenNthCalledWith(1, { email: 'user@test.dev', sub: 12 });
-    expect(jwtService.signAsync).toHaveBeenNthCalledWith(2, { email: 'user@test.dev', sub: 12 }, {
-      secret: 'refresh',
-      expiresIn: 3600,
-    });
+    expect(jwtService.signAsync.mock.calls[0]).toEqual([{ email: 'user@test.dev', sub: 12 }]);
+    expect(jwtService.signAsync.mock.calls[1]).toEqual([
+      { email: 'user@test.dev', sub: 12 },
+      {
+        secret: 'refresh',
+        expiresIn: 3600,
+      },
+    ]);
     const [userId, storedHash] = usersService.saveRefreshToken.mock.calls[0];
     expect(userId).toBe(12);
     expect(storedHash).not.toBe('refresh-token');
@@ -63,15 +69,15 @@ describe('AuthService', () => {
   it('cierra sesión limpiando el refresh token', async () => {
     usersService.clearRefreshToken.mockResolvedValue(undefined);
     await expect(service.logout(12)).resolves.toBeUndefined();
-    expect(usersService.clearRefreshToken).toHaveBeenCalledWith(12);
+    expect(usersService.clearRefreshToken.mock.calls).toContainEqual([12]);
   });
 
   it('rechaza un refresh inválido y revoca el hash guardado', async () => {
     usersService.findById.mockResolvedValue({ id: 12, refreshToken: await bcrypt.hash('other-token', 4) });
 
     await expect(service.refreshTokens(12, 'bad-token')).rejects.toThrow('Token inválido');
-    expect(usersService.clearRefreshToken).toHaveBeenCalledWith(12);
-    expect(jwtService.signAsync).not.toHaveBeenCalled();
+    expect(usersService.clearRefreshToken.mock.calls).toContainEqual([12]);
+    expect(jwtService.signAsync.mock.calls).toHaveLength(0);
   });
 
   it('rota tokens para un refresh válido', async () => {
@@ -86,14 +92,16 @@ describe('AuthService', () => {
       accessToken: 'next-access',
       refreshToken: 'next-refresh',
     });
-    expect(usersService.saveRefreshToken).toHaveBeenCalledTimes(1);
+    expect(usersService.saveRefreshToken.mock.calls).toHaveLength(1);
   });
 
   it('rechaza una cuenta inexistente sin emitir tokens', async () => {
-    usersService.findById.mockResolvedValueOnce({ id: 12, refreshToken: await bcrypt.hash('refresh-token', 4) }).mockResolvedValueOnce(null);
+    usersService.findById
+      .mockResolvedValueOnce({ id: 12, refreshToken: await bcrypt.hash('refresh-token', 4) })
+      .mockResolvedValueOnce(null);
 
     await expect(service.refreshTokens(12, 'refresh-token')).rejects.toThrow('El usuario no existe.');
-    expect(jwtService.signAsync).not.toHaveBeenCalled();
+    expect(jwtService.signAsync.mock.calls).toHaveLength(0);
   });
 
   it('compara y genera hashes de contraseña', async () => {
