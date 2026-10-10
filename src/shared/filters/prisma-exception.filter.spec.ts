@@ -1,4 +1,4 @@
-import { ArgumentsHost, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, HttpStatus, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaExceptionFilter } from './prisma-exception.filter';
 
@@ -52,6 +52,7 @@ describe('PrismaExceptionFilter', () => {
   });
 
   it('responde HTTP 400 con el mensaje mapeado', () => {
+    jest.spyOn(Logger.prototype, 'error').mockImplementation(() => undefined);
     const host = {
       switchToHttp: () => ({ getResponse: () => response }),
     } as unknown as ArgumentsHost;
