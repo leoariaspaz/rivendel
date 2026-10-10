@@ -61,19 +61,19 @@ export class BankingService implements OnModuleInit {
     const hasSession = cookies.some((c) => c.key.startsWith('TS'));
     if (hasSession) return;
 
-    await this.client.get('/', { headers: BUHOBANK_HEADERS });
+    await this.client.get<unknown>('/', { headers: BUHOBANK_HEADERS });
   }
 
   async getCuentaFromCBU(cbu: string): Promise<BankingData | undefined> {
     try {
       await this.ensureSession();
 
-      const response = await this.client.get('/api/plazoFijo/verificarCBU', {
+      const response = await this.client.get<BankingData>('/api/plazoFijo/verificarCBU', {
         params: { cbu },
         headers: BUHOBANK_HEADERS,
       });
 
-      return response.data as BankingData;
+      return response.data;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error al consultar el CBU en Buho Bank: ${message}`);

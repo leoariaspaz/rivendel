@@ -15,15 +15,7 @@ import { TipdocsService } from './tipdocs.service';
 import { CreateTipdocDto } from './dto/create-tipdoc.dto';
 import { UpdateTipdocDto } from './dto/update-tipdoc.dto';
 import { ValidateIntRelationPipe } from 'src/pipes/RelationshipValidationPipe';
-import {
-  ApiBearerAuth,
-  ApiExtraModels,
-  ApiOperation,
-  ApiParam,
-  ApiQuery,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TipoDocumentoDto } from './dto/tipo-documento.dto';
 import { TipDocListDto } from './dto/tipdoc-list.dto';
 import { ApiTipdocSave } from './decorators/tipdocs-swagger.decorator';
@@ -38,7 +30,7 @@ export class TipdocsController {
   @Post()
   @ApiTipdocSave('create')
   async create(@Body() createTipdocDto: CreateTipdocDto) {
-    if (await this.tipdocsService.isUnique({ sintetico: createTipdocDto.sintetico })) {
+    if (!(await this.tipdocsService.isUnique({ sintetico: createTipdocDto.sintetico }))) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
     }
     return this.tipdocsService.create(createTipdocDto);
@@ -82,7 +74,7 @@ export class TipdocsController {
   @Patch(':id')
   @ApiTipdocSave('update')
   async update(@Param('id') id: number, @Body() updateTipdocDto: UpdateTipdocDto) {
-    if (await this.tipdocsService.isUnique({ id, sintetico: updateTipdocDto.sintetico })) {
+    if (!(await this.tipdocsService.isUnique({ id, sintetico: updateTipdocDto.sintetico }))) {
       throw new BadRequestException(['Ya existe un tipo de documento con este sintético.']);
     }
     return this.tipdocsService.update(id, updateTipdocDto);

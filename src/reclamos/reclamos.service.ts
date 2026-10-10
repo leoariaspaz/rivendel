@@ -117,8 +117,8 @@ export class ReclamosService {
     const cantidad = await this.count(idUsuario, nroReclamo, start);
     let title = `Audiencia - Reclamo Nº ${nroReclamo}`;
     if (cantidad > 0) {
-      const unidades = ['', '', 'Segunda ', 'Tercera', 'Cuarta', 'Quinta', 'Sexta', 'Séptima', 'Octava', 'Novena'];
-      title = `${unidades[cantidad]} Audiencia - Reclamo Nº ${nroReclamo}`.trim();
+      const unidades = ['', '', 'Segunda', 'Tercera', 'Cuarta', 'Quinta', 'Sexta', 'Séptima', 'Octava', 'Novena'];
+      title = `${unidades[cantidad] || ''} Audiencia - Reclamo Nº ${nroReclamo}`.trim();
     }
 
     const data = {
@@ -349,7 +349,7 @@ export class ReclamosService {
     }
 
     const createOrDelete = this.prisma.reclamos.update({
-      where: { id },
+      where: { id, idUsuario },
       data: {
         numero: updateReclamoDto.numero,
         rubros: updateReclamoDto.rubros,

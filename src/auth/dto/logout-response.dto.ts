@@ -1,9 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class LogoutResponseDto {
-	constructor(ok: boolean) {
-		this.ok = ok;
-	}
+  constructor(ok: boolean) {
+    this.ok = ok;
+  }
 
   @ApiProperty({ example: true })
   ok!: boolean;

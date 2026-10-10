@@ -23,7 +23,8 @@
     "esModuleInterop": true,
     "allowUnreachableCode": false,
     "noUnusedParameters": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["node", "jest"]
   },
   "exclude": ["src/generated/**", "generated/**", "dist/**", "scripts/**"]
 }

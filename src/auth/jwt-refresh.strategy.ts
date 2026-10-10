@@ -11,12 +11,17 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     private config: JwtConfig
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => req.cookies?.refresh_token]),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (req: Request) => {
+          const refreshToken: unknown = req.cookies?.refresh_token;
+          return typeof refreshToken === 'string' ? refreshToken : null;
+        },
+      ]),
       secretOrKey: config.refresh.secret,
     });
   }
 
-  validate(payload: any) {
+  validate(payload: { sub: number }) {
     return { userId: payload.sub };
   }
 }

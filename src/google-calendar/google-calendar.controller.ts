@@ -37,7 +37,7 @@ export class GoogleCalendarController {
   async disconnect(@Req() req: UserRequest) {
     const result = await this.googleCalendarService.disconnect(req.user.userId);
     if (!result) {
-      return new BadRequestException();
+      throw new BadRequestException();
     }
   }
 }

@@ -7,7 +7,7 @@ import { jwtConfig, type JwtConfig } from 'src/config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(jwtConfig.KEY)
-    private config: JwtConfig,
+    private config: JwtConfig
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: any) {
+  validate(payload: { sub: number }) {
     return { userId: payload.sub };
   }
 }

@@ -8,6 +8,7 @@ import path from 'node:path';
 import { databaseConfig, appConfig } from './config';
 import helmet from 'helmet';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { CustomOrigin } from '@nestjs/common/interfaces/external/cors-options.interface';
 
 @Injectable()
 export class AppService {
@@ -131,10 +132,9 @@ export class AppService {
   enableCors(app: INestApplication, logger: LoggerService) {
     const frontendUrl = appConfig().frontendUrl;
     logger.log(`Configuring CORS for frontend URL: ${frontendUrl}`);
-    const originFactory = (origin: string, callback) => {
+    const originFactory: CustomOrigin = (origin, callback) => {
       const allowed = !origin || this.testAllowedOrigins(origin) || origin === frontendUrl;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       callback(allowed ? null : new Error('No permitido por CORS'), allowed);
     };
     app.enableCors({

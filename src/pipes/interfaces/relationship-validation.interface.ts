@@ -1,5 +1,5 @@
 export interface RelationshipValidation {
-  isRelated(value: any): RelationshipValidationResult | Promise<RelationshipValidationResult>;
+  isRelated(value: number): RelationshipValidationResult | Promise<RelationshipValidationResult>;
 }
 
 export interface RelationshipValidationResult {

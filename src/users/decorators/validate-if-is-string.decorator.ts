@@ -9,12 +9,12 @@ export function ValidateIfIsString(validationOptions?: ValidationOptions) {
     if (value === undefined || value === null) {
       return false;
     }
-    
+
     // Si es un número, solo se valida si es estrictamente > 0
     if (typeof value === 'string') {
       return value !== '';
     }
-    
+
     return true;
   }, validationOptions);
 }
