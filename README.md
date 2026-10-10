@@ -21,7 +21,7 @@ This backend serves the Rivendel frontend, exposing a REST API for managing labo
 
 ```mermaid
 flowchart LR
-  subgraph frontend["<div style='font-size:20px; font-weight:bold; margin-top:10px;'>Frontend</div>"]
+  subgraph frontend["<div style='font-size:20px; margin-top:10px;'>Frontend</div>"]
       web["🌐 Website"]
   end
 
@@ -39,17 +39,18 @@ flowchart LR
   api --> db
   api --> google
 
-%% Estilos de alto contraste
-    style frontend fill:#dcdcdc,stroke:#000,stroke-width:1px
-    style backend fill:#d8ebdd,stroke:green,stroke-width:2px
-    style services fill:#f5f5d5,stroke:#b3a352,stroke-width:2px
-    style web fill:#d0d0d0,stroke:#333,stroke-width:2px
-    style api fill:#ffffff,stroke:#333,stroke-width:2px
-    style bank fill:#ffffff,stroke:#333,stroke-width:2px
-    style db fill:#ffffff,stroke:#333,stroke-width:2px
-    style google fill:#ffffff,stroke:#333,stroke-width:2px
+%% Estilos de alto contraste optimizados
+    style frontend fill:#f1f5f9,stroke:#64748b,stroke-width:1px
+    style backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style services fill:#fffde7,stroke:#fbc02d,stroke-width:2px
+    
+    style web fill:#ffffff,stroke:#64748b,stroke-width:1px
+    style api fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
+    style bank fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style db fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style google fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
 
-    linkStyle default stroke:#2b6cb0,stroke-width:2px;
+    linkStyle default stroke:#0288d1,stroke-width:2px;
 ```
 
 The backend and frontend run on different domains, which required secure, partitioned, cross-domain session cookies (`httpOnly`, `sameSite: 'none'`, `secure: true`, `partitioned: true`) instead of relying on same-origin defaults.
