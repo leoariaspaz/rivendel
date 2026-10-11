@@ -15,6 +15,7 @@ This backend serves the Rivendel frontend, exposing a REST API for managing labo
 - **Database:** MySQL (hosted on Aiven)
 - **Auth:** JWT with refresh tokens, cross-domain session cookies
 - **Validation:** Joi (environment config), class-validator (DTOs)
+- **Security:** `@nestjs/throttler` (rate limiting), `helmet`, JWT with refresh tokens
 - **Deployment:** Render
 
 ## Architecture
@@ -63,7 +64,9 @@ The backend and frontend run on different domains, which required secure, partit
 
 **OAuth2 over a service account for Google Calendar integration.** Scheduling conciliation hearings required syncing events to each conciliator's own Google Calendar, not a shared service account calendar. This meant implementing a full OAuth2 flow — `access_type: 'offline'` and `prompt: 'consent'` to obtain refresh tokens, and passing `userId` through the OAuth `state` parameter — with refresh tokens stored in MySQL via Prisma, so each user authorizes and syncs to their own calendar.
 
-**Keeping a free-tier backend awake.** Render's free tier spins down the service after inactivity, which is unacceptable for a production tool conciliators rely on during working hours. A dedicated `/health` endpoint is pinged every 10 minutes between 8am and 10pm (GMT-3) via a free external cron service, keeping cold-start latency out of the conciliators' workflow.
+**Keeping a free-tier backend awake.** Render's free tier spins down the service after about 15 minutes of inactivity, which is unacceptable for a production tool conciliators rely on during working hours. Instead of a plain cron job, the backend is kept warm with Upstash QStash: scheduled messages are queued every 14 minutes, just under Render's inactivity threshold, and delivered to a dedicated endpoint on the backend. That endpoint is protected by a guard that verifies the `Upstash-Signature` header, so only requests actually signed by QStash are accepted. The global rate limiter runs before that guard, which means forged requests are cut off before any signature verification is attempted.
+
+**Layered application-level protection for a free-tier deployment.** The production and demo environments run on free tiers (Render, Aiven), so the real risk is not volumetric network attacks, which the platform and Vercel's CDN already filter, but application-level abuse of expensive endpoints and exhaustion of the database connection limit. The API registers `@nestjs/throttler` as a global guard with a default limit of 100 requests per minute per IP, and stricter limits on the endpoints that are unauthenticated or costly: 5 requests per minute on login, and a tight limit on the endpoint that queries the third-party bank API. Because Render sits behind a reverse proxy, the app sets `trust proxy` so the limiter sees the client's real IP instead of the proxy's. `helmet` adds standard security headers, request validation uses a `ValidationPipe` with `whitelist: true`, listings are paginated with a hard cap on page size, and the Prisma connection pool is limited through the connection string so a traffic spike can't exhaust the managed database's connections. Cloudflare with Turnstile in front of the API was evaluated and deliberately deferred, since it requires a custom domain and the current measures cover the observed risk.
 
 *(Full technical detail for other decisions — such as third-party API integration behind anti-bot protection — is covered below or in the [case study](<url>).)*
 
@@ -85,3 +88,55 @@ pnpm install
 ```
 
 ### Environment Variables
+```bash
+DATABASE_URL=
+NODE_EXTRA_CA_CERTS=
+JWT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+...
+```
+
+
+### Running locally
+```bash
+npx prisma migrate deploy
+pnpm start:dev
+```
+
+## Testing
+
+The test suite runs on **Jest** with `ts-jest`, `@nestjs/testing`, `supertest` and `jest-mock-extended`, and consists of 41 suites and 211 tests. Coverage sits at 97.6% of statements, 91.2% of branches, 93.5% of functions and 97.7% of lines, against a global threshold of 90% enforced on every metric, so the run fails if coverage drops below it. Tests are fully isolated: Prisma, `ConfigService`, the Google client and `axios` are replaced with strictly typed mocks, so no test touches a real database or the network. The suite covers authentication and session handling, per-user data isolation by `userId` (including the intentionally shared sponsoring counsels), CRUD operations and DTO validation, the Google Calendar OAuth2 flow, CBU verification against the third-party bank API, the signature guard that protects the QStash keep-alive endpoint, the Joi environment validation and the custom validation pipes. A small end-to-end suite exercises the `/health` endpoint over HTTP. Linting reports zero errors and zero warnings and the project type-checks cleanly, tests included, with no `eslint-disable`, `@ts-ignore` or rule overrides.
+
+```bash
+pnpm test        # run once
+pnpm test:cov    # run with coverage report and threshold check
+pnpm test:e2e    # end-to-end tests with supertest
+```
+
+## Related Repository
+
+This is the backend half of a full-stack project. Frontend (React + Vite): [link]
+
+## Roadmap
+
+These items are out of scope for the current MVP but represent natural next steps for the product:
+
+- **ARCA invoicing for settlement agreements processed in a given period**
+  - Requires linking the user's account to their ARCA account (ARCA is Argentina's federal tax collection agency)
+  - Each conciliation, whether settled or failed, has an associated amount based on its resolution type
+  - Each claim included in an invoice should be marked as processed, with the related invoice number attached
+  - Generated invoices should be stored, including invoice number, date, total amount, and description
+
+- **Document management for conciliation-related files**
+  - Sponsoring counsels and their parties submit documentation related to the conciliation, such as powers of attorney, salary settlement statements, and formal notices (telegrams)
+  - This documentation could be stored in Google Drive folders linked to the corresponding claim
+  - This would require linking the user's account to their Google Drive, following the same OAuth2 pattern already used for Google Calendar
+
+- **Add caching (e.g. Redis) for database queries**
+
+- **Broaden end-to-end test coverage beyond the health endpoint**, exercising the authentication flow and the claims lifecycle against a test database
+
+## License
+
+MIT © <Your Name>
