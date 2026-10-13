@@ -68,6 +68,8 @@ The backend and frontend run on different domains, which required secure, partit
 
 **Layered application-level protection for a free-tier deployment.** The production and demo environments run on free tiers (Render, Aiven), so the real risk is not volumetric network attacks, which the platform and Vercel's CDN already filter, but application-level abuse of expensive endpoints and exhaustion of the database connection limit. The API registers `@nestjs/throttler` as a global guard with a default limit of 100 requests per minute per IP, and stricter limits on the endpoints that are unauthenticated or costly: 5 requests per minute on login, and a tight limit on the endpoint that queries the third-party bank API. Because Render sits behind a reverse proxy, the app sets `trust proxy` so the limiter sees the client's real IP instead of the proxy's. `helmet` adds standard security headers, request validation uses a `ValidationPipe` with `whitelist: true`, listings are paginated with a hard cap on page size, and the Prisma connection pool is limited through the connection string so a traffic spike can't exhaust the managed database's connections. Cloudflare with Turnstile in front of the API was evaluated and deliberately deferred, since it requires a custom domain and the current measures cover the observed risk.
 
+**Short-lived access tokens with rotating, revocable refresh tokens.** Authentication uses two JWTs signed with different secrets. The access token is short-lived and held only in the frontend's memory, so it is never exposed to persistent storage. The refresh token is long-lived and travels exclusively in an `httpOnly` cookie whose `Path` is restricted to the refresh endpoint, which keeps it out of reach of client-side scripts and prevents the browser from sending it on any other request. On every refresh the server issues a new refresh token and invalidates the previous one (rotation), and the current token is persisted against the user record, so a token that has already been used or replaced no longer matches and is rejected. Logout clears that stored value, which revokes the session on the server instead of merely deleting the cookie in the browser. Since the access token lives in memory, a page reload loses it, and the frontend recovers it transparently by calling the refresh endpoint with the cookie.
+
 *(Full technical detail for other decisions — such as third-party API integration behind anti-bot protection — is covered below or in the [case study](<url>).)*
 
 ## Other Technical Notes
@@ -89,12 +91,35 @@ pnpm install
 
 ### Environment Variables
 ```bash
-DATABASE_URL=
-NODE_EXTRA_CA_CERTS=
-JWT_SECRET=
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-...
+# database
+DATABASE_URL=                  # MySQL connection string (include pool params such as connection_limit and pool_timeout)
+DATABASE_CA_CERT=              # database CA certificate, in plain text (PEM)
+DATABASE_CA_TEMP_PATH=         # directory where the CA certificate file is written at startup
+DATABASE_CA_NAME=              # file name used to store the CA certificate
+
+# app
+NODE_ENV=                      # runtime environment (e.g. local, production)
+FRONTEND_URL=                  # base URL of the frontend (optional)
+ALLOWED_ORIGINS=               # regex matching the origins allowed by CORS
+
+# auth
+JWT_ACCESS_SECRET=             # secret used to sign and verify access tokens
+JWT_ACCESS_EXPIRES_IN=         # access token lifetime, in seconds
+JWT_REFRESH_SECRET=            # secret used to sign and verify refresh tokens
+JWT_REFRESH_EXPIRES_IN=        # refresh token lifetime, in seconds
+SAME_SITE=                     # cookie SameSite policy: lax, none or strict (none requires secure cookies)
+USE_SECURE_COOKIES=            # boolean, whether cookies are flagged as Secure
+PATH_REFRESH_TOKEN=            # route of the token refresh endpoint; also the Path of the refresh_token cookie, so it is only sent to that route
+REFRESH_TOKEN_COOKIE_MAX_AGE=  # refresh token cookie lifetime, in milliseconds
+
+# Google Calendar (OAuth 2.0)
+GOOGLE_CLIENT_ID=              # OAuth 2.0 client ID from Google Cloud
+GOOGLE_CLIENT_SECRET=          # OAuth 2.0 client secret from Google Cloud
+GOOGLE_REDIRECT_URI=           # URL Google redirects to after the user grants consent (must match the one registered in Google Cloud)
+
+# Upstash QStash
+QSTASH_CURRENT_SIGNING_KEY=    # current signing key, used to verify the Upstash-Signature header
+QSTASH_NEXT_SIGNING_KEY=       # next signing key, used during key rotation
 ```
 
 
