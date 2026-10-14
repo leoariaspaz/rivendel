@@ -1,0 +1,89 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table TipoDocumento {
+  id int [pk, increment]
+  sintetico varchar(191) [not null, unique]
+  descripcion varchar(191) [not null]
+}
+
+Table Patrocinante {
+  id int [pk, increment]
+  nombre varchar(191) [not null]
+  nroMatricula int [not null, unique]
+  domicilio varchar(191)
+  localidad varchar(191)
+  nroCasillero int
+}
+
+Table User {
+  id int [pk, increment]
+  email varchar(191) [not null, unique]
+  nombre varchar(191)
+  nroHabilitacion int
+  password varchar(191) [not null]
+  refreshToken varchar(191)
+  createdAt datetime(3) [not null, default: `now()`]
+  updatedAt datetime(3) [not null, note: 'Updated automatically by Prisma']
+  googleRefreshToken text
+  googleCalendarConnected boolean [not null, default: false]
+}
+
+Table Parte {
+  id int [pk, increment]
+  nombre varchar(191) [not null]
+  idTipoDocumento int [not null]
+  nroDocumento varchar(191) [not null]
+  cuil varchar(191) [not null]
+  idPatrocinante int
+  localidad varchar(191)
+  domicilio varchar(191)
+  esApoderado boolean [not null, default: false]
+  idUsuario int
+
+  indexes {
+    idPatrocinante [name: 'Parte_idPatrocinante_fkey']
+  }
+}
+
+Table Reclamos {
+  id int [pk, increment]
+  rubros text [not null]
+  idResolucion int [not null, note: 'Resolution type; defined as constants in the application, not as a table']
+  fechaHoraInicio datetime(3) [not null]
+  horaFin datetime(3)
+  numero int [not null]
+  proximaAudiencia datetime(3)
+  idUsuario int
+  clausulas json
+  googleEventId varchar(191)
+
+  indexes {
+    (numero, fechaHoraInicio) [unique]
+  }
+}
+
+Table PartesReclamos {
+  id int [pk, increment]
+  idParte int [not null]
+  idReclamo int [not null]
+  rol int [not null, note: '1 = claimant, 2 = respondent']
+  nroWhatsappParte varchar(191)
+  nroWhatsappPatrocinante varchar(191)
+  postergo boolean [not null, default: false]
+  incomparendoParte boolean [not null, default: false]
+  incomparendoPatrocinante boolean [not null, default: false]
+  multado boolean [not null, default: false]
+
+  indexes {
+    (idParte, idReclamo) [unique]
+    idReclamo [name: 'PartesReclamos_idReclamo_fkey']
+  }
+}
+
+Ref: Parte.idTipoDocumento > TipoDocumento.id [delete: restrict, update: cascade]
+Ref: Parte.idPatrocinante > Patrocinante.id [delete: restrict, update: cascade]
+Ref: Parte.idUsuario > User.id [delete: restrict, update: cascade]
+Ref: Reclamos.idUsuario > User.id [delete: restrict, update: cascade]
+Ref: PartesReclamos.idParte > Parte.id [delete: restrict, update: cascade]
+Ref: PartesReclamos.idReclamo > Reclamos.id [delete: cascade, update: cascade]
