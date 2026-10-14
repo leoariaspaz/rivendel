@@ -2,7 +2,7 @@
 
 API server for Rivendel, a case management platform for labor conciliators designated under DICLO (Dirección de Conciliación Laboral Obligatoria) in Santiago del Estero, Argentina.
 
-[Live API](<url>) · [Frontend repo](<url>) · [Case study](<url>)
+[Live API](<url>) · [Frontend repo](https://github.com/leoariaspaz/rivendel-client) · [Case study](<url>)
 
 ## Overview
 
@@ -56,11 +56,22 @@ flowchart LR
 
 The backend and frontend run on different domains, which required secure, partitioned, cross-domain session cookies (`httpOnly`, `sameSite: 'none'`, `secure: true`, `partitioned: true`) instead of relying on same-origin defaults.
 
+## Data Model
+
+![Entity-relationship diagram](/doc/images/er-diagram.svg)
+
+The data model is built around claims (`Reclamos`) and the parties involved in them (`Parte`), linked through `PartesReclamos`, which also stores the per-claim role (claimant or respondent), the contact numbers and the attendance flags of both the party and its sponsoring counsel. Claims and parties belong to a user and are isolated per account, while sponsoring counsels (`Patrocinante`) and document types (`TipoDocumento`) are reference data shared across all users. Resolution types are defined as constants in the application rather than as a table.
+
+
+## API Documentation
+
+The API is documented with OpenAPI (Swagger), and the interactive documentation is available at <url>/<ruta>, where every endpoint, DTO and response can be explored and tried out. Access requires authentication: sign in with a user account to try the endpoints (demo credentials available on request, as for the live demo).
+
 ## Key Technical Decisions
 
 **Selective multi-user data isolation.** User isolation is implemented at the data layer via a `userId` foreign key on user-owned tables, validated against a dedicated users table. Claims and parties are scoped per user and never visible across accounts. Sponsoring counsels, however, are deliberately shared across all users rather than duplicated per account, since they represent the actual pool of local-jurisdiction lawyers — a real-world entity that exists independently of which conciliator is using the system, making per-user duplication both incorrect and wasteful.
 
-**Diagnosing TLS and driver-level database connectivity issues with Aiven.** Connecting to a managed MySQL instance on Aiven surfaced a chain of infrastructure-level problems that don't show up in local development: DNS resolution failures, TLS/SSL handshake errors with the MariaDB client, and IP allowlist restrictions that had to be configured against Render's dynamic outbound IPs. Resolving this required working through certificate handling via `NODE_EXTRA_CA_CERTS`, careful staged testing of IP filtering rules to avoid locking out the production database, and debugging shadow-database permission errors and migration checksum drift along the way.
+**Diagnosing TLS and driver-level database connectivity issues with Aiven.** Connecting to a managed MySQL instance on Aiven surfaced a chain of infrastructure-level problems that don't show up in local development: DNS resolution failures, TLS/SSL handshake errors with the MariaDB client, and IP allowlist restrictions that had to be configured against Render's outbound IPs. Resolving this required working through certificate handling (the CA certificate is injected through an environment variable, written to disk at startup and loaded with `NODE_EXTRA_CA_CERTS`), careful staged testing of IP filtering rules to avoid locking out the production database, and debugging shadow-database permission errors and migration checksum drift along the way.
 
 **OAuth2 over a service account for Google Calendar integration.** Scheduling conciliation hearings required syncing events to each conciliator's own Google Calendar, not a shared service account calendar. This meant implementing a full OAuth2 flow — `access_type: 'offline'` and `prompt: 'consent'` to obtain refresh tokens, and passing `userId` through the OAuth `state` parameter — with refresh tokens stored in MySQL via Prisma, so each user authorizes and syncs to their own calendar.
 
@@ -77,10 +88,68 @@ The backend and frontend run on different domains, which required secure, partit
 - **Bank verification integration:** Verifying CBU (bank account) data for settlement payments requires querying a third-party banking API protected by F5 BIG-IP anti-bot measures and a Java session (`JSESSIONID`). This is handled with a dedicated axios client using a cookie jar (`axios-cookiejar-support` + `tough-cookie`) that performs a warm-up request before hitting the real endpoint.
 - **Environment configuration:** Multi-environment config via NestJS `ConfigModule` with Joi schema validation and dynamic `envFilePath` resolution; secrets are injected directly in production via Render's Secret Files feature.
 
+## Project Structure
+
+```text
+rivendel/
+├─ doc/db/
+│  └─ diagram.db                          # Database diagram
+├─ prisma/
+│  ├─ migrations/                         # Prisma migrations
+│  └─ schema.prisma                       # Data model
+├─ scripts/                               # Maintenance scripts
+│  ├─ create-user.ts                      # Create a user
+│  ├─ update-password.ts                  # Update a user's password
+│  ├─ export-patrocinantes.ts             # Export sponsoring counsels
+│  ├─ import-patrocinantes.ts             # Import sponsoring counsels
+│  ├─ jwt-secret-generator.sh             # Generate JWT secrets
+│  └─ prisma.service.ts                   # Prisma client used by the scripts
+├─ src/
+│  ├─ auth/                               # Authentication and session
+│  │  ├─ dto/                             # Login, refresh and logout DTOs
+│  │  ├─ local.strategy.ts / local.guard.ts          # Credentials login
+│  │  ├─ jwt.strategy.ts / jwt.guard.ts              # Access token validation
+│  │  ├─ jwt-refresh.strategy.ts / jwt-refresh.guard.ts  # Refresh token validation and rotation
+│  │  ├─ qstash.guard.ts                  # Upstash-Signature verification
+│  │  ├─ public.decorator.ts              # Marks routes as public
+│  │  └─ skip-jwt.decorator.ts            # Skips the JWT guard on a route
+│  ├─ banking/                            # CBU verification against the third-party bank API
+│  ├─ config/                             # Typed configuration and Joi environment validation
+│  ├─ google-calendar/                    # Google Calendar OAuth 2.0 and event sync
+│  ├─ health/                             # Health endpoint
+│  ├─ partes/                             # Claim parties (claimants and respondents)
+│  ├─ partes-reclamos/                    # Relationship between parties and claims
+│  ├─ patrocinantes/                      # Sponsoring counsels (shared across users)
+│  ├─ reclamos/                           # Labor claims
+│  ├─ resoluciones/                       # Resolution types and their constants
+│  ├─ tipdocs/                            # Document types
+│  ├─ tiptap/                             # Tiptap document types
+│  ├─ users/                              # User profile and account settings
+│  ├─ validators/                         # Custom validators (relations, Tiptap documents, field matching)
+│  ├─ pipes/                              # Relationship validation pipe
+│  ├─ shared/                             # Prisma module and service, exception filter, constants
+│  ├─ app.module.ts                       # Root module
+│  └─ main.ts                             # Bootstrap: CORS, helmet, trust proxy, global pipes
+├─ test/
+│  ├─ health.e2e-spec.ts                  # End-to-end test of the health endpoint
+│  └─ jest-e2e.json                       # E2E Jest configuration
+├─ eslint.config.mjs                      # ESLint
+├─ knip.json                              # Unused code and dependency detection
+├─ nest-cli.json                          # Nest CLI configuration
+├─ package.json                           # Scripts and dependencies
+├─ pnpm-lock.yaml                         # Lockfile
+├─ pnpm-workspace.yaml                    # pnpm configuration
+├─ tsconfig.json / tsconfig.build.json    # TypeScript configuration
+└─ README.md                              # Project documentation (this file)
+```
+
+Each feature module follows the same layout: controller, service, module, DTOs, Swagger decorators and colocated `*.spec.ts` tests.
+
 ## Getting Started
 
 ### Prerequisites
-- Node version, package manager, MySQL instance
+
+- Node.js 24.11.1 (see `engines` in `package.json`), pnpm, a MySQL instance
 
 ### Installation
 ```bash
@@ -162,6 +231,9 @@ These items are out of scope for the current MVP but represent natural next step
 
 - **Broaden end-to-end test coverage beyond the health endpoint**, exercising the authentication flow and the claims lifecycle against a test database
 
+- **Encrypt third-party credentials at rest**, such as the stored Google OAuth refresh tokens, using an application-level key kept outside the database
+
 ## License
 
-MIT © <Your Name>
+This project is publicly available for viewing and educational purposes only.
+No permission is granted to use, modify, or distribute this code without explicit authorization.
