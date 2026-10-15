@@ -1,10 +1,11 @@
 # Rivendel — Backend
 
+[![CI](https://github.com/leoariaspaz/rivendel/actions/workflows/ci.yml/badge.svg)](https://github.com/leoariaspaz/rivendel/actions/workflows/ci.yml)<sup> Latest CI run (lint, type check, tests with coverage threshold and end-to-end tests).</sup>
+
 API server for Rivendel, a case management platform for labor conciliators designated under DICLO (Dirección de Conciliación Laboral Obligatoria) in Santiago del Estero, Argentina.
 
 [Frontend repo](https://github.com/leoariaspaz/rivendel-client) · [Case study](https://github.com/leoariaspaz/leoariaspaz/blob/main/doc/case-studies/conciliaciones.md)
 
-[![CI](https://github.com/leoariaspaz/rivendel/actions/workflows/ci.yml/badge.svg)](https://github.com/leoariaspaz/rivendel/actions/workflows/ci.yml)<sup>The badge reflects the latest CI run on `main`: lint, type check, tests with coverage threshold and end-to-end tests.</sup>
 
 ## Live Demo
 [Try the live API](https://rivendel-h23y.onrender.com/) — demo credentials available on request (reach out via [LinkedIn](https://www.linkedin.com/in/leonardo-arias-paz)).
