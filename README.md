@@ -61,7 +61,7 @@ The backend and frontend run on different domains, which required secure, partit
 
 ## Data Model
 
-![Entity-relationship diagram](/doc/images/er-diagram.svg)
+![Entity-relationship diagram](/doc/images/er-diagram.png)
 
 The data model is built around claims (`Reclamos`) and the parties involved in them (`Parte`), linked through `PartesReclamos`, which also stores the per-claim role (claimant or respondent), the contact numbers and the attendance flags of both the party and its sponsoring counsel. Claims and parties belong to a user and are isolated per account, while sponsoring counsels (`Patrocinante`) and document types (`TipoDocumento`) are reference data shared across all users. Resolution types are defined as constants in the application rather than as a table.
 
