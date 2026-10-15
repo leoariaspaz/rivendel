@@ -2,7 +2,7 @@
 
 API server for Rivendel, a case management platform for labor conciliators designated under DICLO (Dirección de Conciliación Laboral Obligatoria) in Santiago del Estero, Argentina.
 
-[Frontend repo](https://github.com/leoariaspaz/rivendel-client) · [Case study](<url>)
+[Frontend repo](https://github.com/leoariaspaz/rivendel-client) · [Case study](https://github.com/leoariaspaz/leoariaspaz/blob/main/doc/case-studies/conciliaciones.md)
 
 ## Live Demo
 [Try the live API](https://rivendel-h23y.onrender.com/) — demo credentials available on request (reach out via [LinkedIn](https://www.linkedin.com/in/leonardo-arias-paz)).
@@ -101,7 +101,7 @@ Authentication uses two JWTs signed with different secrets. The access token is 
 - **Environment configuration:** Multi-environment config via NestJS `ConfigModule` with Joi schema validation and dynamic `envFilePath` resolution; secrets are injected directly in production via Render's Secret Files feature.
 - **Composed read model for document generation:** `GET /reclamos/:id` does not return a bare claim record. It returns a composed view of the claim together with its parties, their sponsoring counsels and the conciliator who owns it, resolved in a single database request and scoped to the authenticated user. That is everything the frontend needs to generate the conciliation record as a PDF in one round trip, without assembling it from several calls and without any risk of reading another conciliator's data.
 
-*For the end-to-end story of the project and the frontend decisions (form state, rich-text documents and PDF generation, onboarding tour), see the [case study](<url>) and the [frontend repository](https://github.com/leoariaspaz/rivendel-client).*
+*For the end-to-end story of the project and the frontend decisions (form state, rich-text documents and PDF generation, onboarding tour), see the [case study](https://github.com/leoariaspaz/leoariaspaz/blob/main/doc/case-studies/conciliaciones.md) and the [frontend repository](https://github.com/leoariaspaz/rivendel-client).*
 
 ## Features
 
