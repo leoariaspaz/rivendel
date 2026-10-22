@@ -3,8 +3,11 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { stdin, stdout } from 'node:process';
+import { createInterface } from 'node:readline/promises';
 import dotenv from 'dotenv';
 import { client } from './prisma.service';
+import { parseExportArguments, ReclamoSelectionOption, selectReclamoCandidate } from './reclamo-selection';
 
 dotenv.config();
 
@@ -19,35 +22,54 @@ interface ExportedReclamoFile {
   partesReclamos: Array<Record<string, unknown>>;
 }
 
-function ensureInteger(value: unknown, label: string): number {
-  const num = Number(value);
-  if (!Number.isInteger(num)) {
-    throw new Error(`El valor de ${label} debe ser un entero.`);
+async function promptReclamoSelection(options: ReclamoSelectionOption[]): Promise<number> {
+  console.log('Hay varios reclamos con ese número:');
+  options.forEach((option, index) => console.log(`${index + 1}. ${option.label}`));
+
+  const input = createInterface({ input: stdin, output: stdout });
+  try {
+    while (true) {
+      const answer = await input.question(`Elegí un reclamo (1-${options.length}): `);
+      const selection = Number(answer);
+      if (Number.isInteger(selection) && selection >= 1 && selection <= options.length) {
+        return selection - 1;
+      }
+      console.log(`Ingresá un número entre 1 y ${options.length}.`);
+    }
+  } finally {
+    input.close();
   }
-  return num;
 }
 
 async function main() {
   const args = process.argv.slice(2);
-  if (args.length === 0 || !args[0]) {
-    console.error('Uso: pnpm exec dotenv -e .env.production -- npx tsx scripts/export-reclamo.ts <idReclamo> [outputPath]');
+  if (args.length === 0) {
+    console.error(
+      'Uso: pnpm exec dotenv -e .env.production -- npx tsx scripts/export-reclamo.ts [--id <id> | --numero <numero>] [outputPath]'
+    );
     process.exit(1);
   }
 
-  const reclamoId = ensureInteger(args[0], 'idReclamo');
-  const outputPath = args[1]
-    ? path.resolve(process.cwd(), args[1])
-    : path.resolve(__dirname, `reclamo-${reclamoId}.json`);
+  let parsedArgs;
+  try {
+    parsedArgs = parseExportArguments(args);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+
+  const outputPath = parsedArgs.outputPath
+    ? path.resolve(process.cwd(), parsedArgs.outputPath)
+    : path.resolve(__dirname, `reclamo-${parsedArgs.valor}.json`);
 
   const prisma = client();
 
   try {
-    const reclamo = await prisma.reclamos.findUnique({
-      where: { id: reclamoId },
+    const query = {
       include: {
         usuario: true,
         partes: {
-          orderBy: { id: 'asc' },
+          orderBy: { id: 'asc' as const },
           include: {
             parte: {
               include: {
@@ -59,10 +81,18 @@ async function main() {
           },
         },
       },
-    });
+    };
+
+    const reclamo =
+      parsedArgs.tipo === 'id'
+        ? await prisma.reclamos.findUnique({ where: { id: parsedArgs.valor }, ...query })
+        : await selectReclamoCandidate(
+            await prisma.reclamos.findMany({ where: { numero: parsedArgs.valor }, orderBy: { id: 'asc' }, ...query }),
+            promptReclamoSelection
+          ).then(({ id }) => prisma.reclamos.findUnique({ where: { id }, ...query }));
 
     if (!reclamo) {
-      throw new Error(`No existe un reclamo con id ${reclamoId}.`);
+      throw new Error(`No existe un reclamo con ${parsedArgs.tipo} ${parsedArgs.valor}.`);
     }
 
     const usuarios = new Map<number, Record<string, unknown>>();
