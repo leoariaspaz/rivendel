@@ -102,6 +102,7 @@ Authentication uses two JWTs signed with different secrets. The access token is 
 - **Bank verification integration:** Verifying CBU (bank account) data for settlement payments requires querying a third-party banking API protected by F5 BIG-IP anti-bot measures and a Java session (`JSESSIONID`). This is handled with a dedicated axios client using a cookie jar (`axios-cookiejar-support` + `tough-cookie`) that performs a warm-up request before hitting the real endpoint.
 - **Environment configuration:** Multi-environment config via NestJS `ConfigModule` with Joi schema validation and dynamic `envFilePath` resolution; secrets are injected directly in production via Render's Secret Files feature.
 - **Composed read model for document generation:** `GET /reclamos/:id` does not return a bare claim record. It returns a composed view of the claim together with its parties, their sponsoring counsels and the conciliator who owns it, resolved in a single database request and scoped to the authenticated user. That is everything the frontend needs to generate the conciliation record as a PDF in one round trip, without assembling it from several calls and without any risk of reading another conciliator's data.
+- **Bulk import of sponsoring counsels:** the license number (`nroMatricula`) is unique in the `Patrocinante` table, which lets the companion tool [download-abogados](https://github.com/leoariaspaz/download-abogados) load the directory with `INSERT IGNORE` and be run again at any time without creating duplicates. It only fills the name, license number and legal address, and leaves `localidad` and `nroCasillero` empty.
 
 *For the end-to-end story of the project and the frontend decisions (form state, rich-text documents and PDF generation, onboarding tour), see the [case study](https://github.com/leoariaspaz/leoariaspaz/blob/main/doc/case-studies/conciliaciones.md) and the [frontend repository](https://github.com/leoariaspaz/rivendel-client).*
 
@@ -117,6 +118,7 @@ Authentication uses two JWTs signed with different secrets. The access token is 
 - Health endpoint and a signature-verified endpoint for the QStash keep-alive
 - Rate limiting, security headers, request validation and paginated listings
 - Maintenance scripts for creating users, updating passwords and bulk import/export of sponsoring counsels
+- Sponsoring counsels catalog that can be populated in bulk from the bar association's public directory with the companion tool [download-abogados](https://github.com/leoariaspaz/download-abogados).
 
 ## Project Structure
 
@@ -244,9 +246,12 @@ pnpm test:cov    # run with coverage report and threshold check
 pnpm test:e2e    # end-to-end tests with supertest
 ```
 
-## Related Repository
+## Related Repositories
 
-This is the backend half of a full-stack project. :link: [Frontend](https://github.com/leoariaspaz/rivendel-client) (React + Vite)
+This is the backend half of a full-stack project, and it has a companion tool that feeds its data.
+
+- :link: [Frontend](https://github.com/leoariaspaz/rivendel-client) (React + Vite)
+- :link: [download-abogados](https://github.com/leoariaspaz/download-abogados) (.NET console tool): downloads the bar association's public directory of registered lawyers and loads it into the `Patrocinante` table, so the shared catalog of sponsoring counsels can be populated from the official source instead of being typed in by hand.
 
 ## Roadmap
 
