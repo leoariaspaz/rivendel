@@ -33,28 +33,40 @@ flowchart LR
 
   subgraph backend["<div style='font-size:20px; font-weight:bold; margin-top:10px;'>Backend</div>"]
       api["⚙️ API Server"]
-      subgraph services["<div style='font-size:14px; font-weight:bold; margin-top:10px;'>Servicios / Integraciones</div>"]
+      subgraph services["<div style='font-size:14px; font-weight:bold; margin-top:10px;'>Services / Integrations</div>"]
           bank["🏦 Bank"]
-          db[("🛢️️ Database")]
-          google["📅 Google Calendar"]        
+          db[("🛢️ Database")]
+          google["📅 Google Calendar"]
       end
   end
+
+  subgraph tool["<div style='font-size:14px; margin-top:10px;'>Companion tool (occasional)</div>"]
+      importer["📥 download-abogados"]
+  end
+
+  directory["📚 Bar association<br/>public directory"]
 
   web --> api
   api --> bank
   api --> db
   api --> google
 
+  directory -.-> importer
+  importer -. "bulk import of<br/>sponsoring counsels" .-> db
+
 %% Estilos de alto contraste optimizados
     style frontend fill:#f1f5f9,stroke:#64748b,stroke-width:1px
     style backend fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style services fill:#fffde7,stroke:#fbc02d,stroke-width:2px
-    
+    style tool fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,stroke-dasharray:4 3
+
     style web fill:#ffffff,stroke:#64748b,stroke-width:1px
     style api fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
     style bank fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
     style db fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
     style google fill:#fff9c4,stroke:#fbc02d,stroke-width:2px
+    style importer fill:#ffffff,stroke:#64748b,stroke-width:1px
+    style directory fill:#ffffff,stroke:#64748b,stroke-width:1px
 
     linkStyle default stroke:#0288d1,stroke-width:2px;
 ```
